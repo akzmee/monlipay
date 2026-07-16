@@ -10,6 +10,7 @@ interface ClaimFormProps {
   address: Address | undefined;
   recipientOverride: string;
   setRecipientOverride: (v: string) => void;
+  recipientError: string | null;
   onClaim: () => void;
 }
 
@@ -21,16 +22,17 @@ export function ClaimForm({
   address,
   recipientOverride,
   setRecipientOverride,
+  recipientError,
   onClaim,
 }: ClaimFormProps) {
-  const canClaim = isConnected && !isWrongChain && !isBusy;
+  const canClaim = isConnected && !isWrongChain && !isBusy && !recipientError;
 
   if (!isConnected) {
     return (
-      <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="mb-3 flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50">
+      <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center dark:border-stone-800 dark:bg-stone-900">
+        <div className="mb-3 flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
           <svg
-            className="h-6 w-6 text-violet-600 dark:text-violet-400"
+            className="h-6 w-6 text-red-600 dark:text-red-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -44,7 +46,7 @@ export function ClaimForm({
           </svg>
         </div>
         <h3 className="text-sm font-semibold">Connect wallet to claim</h3>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-stone-500">
           Click <strong>Connect Wallet</strong> at the top right to receive your funds.
         </p>
       </div>
@@ -54,8 +56,8 @@ export function ClaimForm({
   return (
     <div className="space-y-4">
       {/* Recipient display */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
           Receiving wallet
         </label>
         {address && !recipientOverride && (
@@ -69,8 +71,15 @@ export function ClaimForm({
           value={recipientOverride}
           onChange={(e) => setRecipientOverride(e.target.value)}
           disabled={isBusy}
-          className="mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-violet-400 dark:border-neutral-700 dark:bg-neutral-800 dark:focus:border-violet-500"
+          className={`mt-2 w-full rounded-lg border bg-stone-50 px-3 py-2 text-sm outline-none focus:border-red-400 dark:bg-stone-800 dark:focus:border-orange-500 ${
+            recipientError
+              ? "border-red-400 dark:border-red-500"
+              : "border-stone-200 dark:border-stone-700"
+          }`}
         />
+        {recipientError && (
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{recipientError}</p>
+        )}
       </div>
 
       {/* Error */}
@@ -85,7 +94,7 @@ export function ClaimForm({
         type="button"
         onClick={onClaim}
         disabled={!canClaim}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-500 active:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-red-500 hover:to-orange-400 active:from-red-700 active:to-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isBusy ? (
           <>
@@ -104,7 +113,7 @@ export function ClaimForm({
         )}
       </button>
 
-      <p className="text-center text-xs text-neutral-400">
+      <p className="text-center text-xs text-stone-400">
         Claiming requires a small gas fee in MON for the transaction.
       </p>
     </div>

@@ -33,11 +33,14 @@ export const monadChain = defineChain({
 });
 
 /**
- * Contract addresses — populated after deployment.
- * Read from environment variables so we don't hardcode.
+ * Contract address — set in .env.local after deploying LinkVault.sol.
+ * The zero address means the contract is not deployed yet.
  */
 export const LINK_VAULT_ADDRESS = (process.env.NEXT_PUBLIC_LINK_VAULT_ADDRESS ??
   "0x0000000000000000000000000000000000000000") as `0x${string}`;
+
+/** Check if the contract has been deployed. */
+export const isContractDeployed = LINK_VAULT_ADDRESS !== "0x0000000000000000000000000000000000000000";
 
 /** Supported tokens for the create page (testnet). */
 export const SUPPORTED_TOKENS = [

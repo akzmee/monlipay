@@ -4,7 +4,6 @@ import {
   useAccount,
   useReadContract,
   useSendTransaction,
-  useWaitForTransactionReceipt,
 } from "wagmi";
 import { useState, useCallback } from "react";
 import { parseEther, type Hex } from "viem";

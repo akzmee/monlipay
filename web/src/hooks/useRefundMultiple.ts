@@ -18,9 +18,6 @@ export function useRefundMultiple() {
 
       try {
         await refund(depositId);
-        // The useRefundLink hook is async but we need to wait for the result.
-        // Since it manages its own state, we add a small delay to let the state settle.
-        await new Promise((resolve) => setTimeout(resolve, 500));
         onSuccess?.();
       } finally {
         setBusyDepositIds((prev) => {

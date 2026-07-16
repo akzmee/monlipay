@@ -16,7 +16,21 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      // Clipboard API not available — fallback to select
+      // Clipboard API not available — fallback to execCommand
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch {
+        // If even execCommand fails, user must copy manually
+      }
     }
   };
 
@@ -51,18 +65,18 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
           </svg>
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Payment link created</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-stone-500">
           Share this link with the recipient. Funds are locked until they claim.
         </p>
       </div>
 
       {/* Link box */}
-      <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
           Payment link
         </p>
         <div className="flex items-center gap-2">
-          <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+          <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-stone-700 dark:bg-stone-800 dark:text-stone-300">
             {url}
           </code>
           <button
@@ -70,7 +84,7 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               copied
                 ? "bg-green-600 text-white"
-                : "bg-violet-600 text-white hover:bg-violet-500"
+                : "bg-gradient-to-r from-red-600 to-orange-500 text-white hover:from-red-500 hover:to-orange-400"
             }`}
           >
             {copied ? "Copied!" : "Copy"}
@@ -82,7 +96,7 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={handleShareWhatsApp}
-          className="flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:hover:bg-stone-800"
         >
           <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.264 8.264 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.183 8.183 0 0 1 2.42 5.83c.02 4.54-3.68 8.23-8.23 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43-.14 0-.31-.02-.47-.02-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z" />
@@ -91,7 +105,7 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
         </button>
         <button
           onClick={handleShareTelegram}
-          className="flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:hover:bg-stone-800"
         >
           <svg className="h-5 w-5 text-sky-500" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.053 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.643.135-.953l11.566-4.458c.538-.196 1.006.128.832.938z" />
@@ -124,7 +138,7 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
       {/* Create another */}
       <button
         onClick={onReset}
-        className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+        className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:hover:bg-stone-800"
       >
         Create another link
       </button>

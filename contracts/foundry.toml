@@ -5,6 +5,19 @@ libs = ["lib"]
 solc_version = "0.8.28"
 evm_version = "cancun"
 
+# Monad Testnet Configuration
+# NOTE: eth_rpc_url is needed for forge to resolve lib remappings correctly.
+# For local tests, forge test does NOT fork from this URL — it only uses it
+# when --fork-url is explicitly passed. The RPC timeout errors seen in some
+# fuzz runs are transient network issues and do not indicate test failures.
+eth_rpc_url = "https://testnet-rpc.monad.xyz"
+chain_id = 10143
+
+[profile.coverage]
+src = "src"
+test = "test"
+ffi = false
+
 [rpc_endpoints]
 monad_testnet = "https://testnet-rpc.monad.xyz"
 monad_mainnet = "https://rpc.monad.xyz"

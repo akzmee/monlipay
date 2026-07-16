@@ -499,7 +499,16 @@ contract LinkVaultTest is Test {
     }
 
     function testFuzz_ClaimWithRandomRecipients(address randomRecipient) public {
+        // Exclude zero address, known contracts, precompiles, and
+        // addresses with code (can't guarantee they accept ETH).
         vm.assume(randomRecipient != address(0));
+        vm.assume(randomRecipient != address(vault));
+        vm.assume(randomRecipient != address(token));
+        vm.assume(randomRecipient != sender);
+        vm.assume(randomRecipient != attacker);
+        vm.assume(uint160(randomRecipient) > 10000); // Exclude precompiles
+        vm.assume(randomRecipient.code.length == 0); // Only EOAs
+        vm.assume(randomRecipient.balance == 0); // Start from clean balance
 
         uint256 amount = 1 ether;
         vm.deal(sender, amount);

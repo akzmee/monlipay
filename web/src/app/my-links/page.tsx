@@ -2,31 +2,74 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAccount } from "wagmi";
-import { formatEther } from "viem";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { getStoredLinks, removeStoredLink, type StoredLink } from "@/lib/storage";
-import { useDeposit, useRefundLink } from "@/hooks/useLinkVault";
+import { useDeposit } from "@/hooks/useLinkVault";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";
 import { LinkCard } from "@/components/LinkCard";
+import { monadChain } from "@/config/chain";
 
 export default function MyLinksPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [links, setLinks] = useState<StoredLink[]>([]);
 
   useEffect(() => {
     setLinks(getStoredLinks());
   }, []);
 
-  const { refundMultiple, busyDepositIds } = useRefundMultiple();
+  const { refundMultiple, busyDepositIds, error: refundError } = useRefundMultiple();
+  const isWrongChain = isConnected && chainId !== monadChain.id;
 
   if (!isConnected) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-xl font-semibold">Connect your wallet</h1>
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-stone-500">
             Connect to view your payment links.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isWrongChain) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="text-center">
+          <div className="mb-4 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40">
+            <svg
+              className="h-7 w-7 text-amber-600 dark:text-amber-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+              />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold">Wrong network</h1>
+          <p className="mt-2 text-sm text-stone-500">
+            Switch to Monad Testnet to manage your links.
+          </p>
+          <button
+            onClick={async () => {
+              try {
+                await switchChainAsync({ chainId: monadChain.id });
+              } catch {
+                // User rejected
+              }
+            }}
+            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400"
+          >
+            Switch to Monad Testnet
+          </button>
         </div>
       </div>
     );
@@ -36,9 +79,9 @@ export default function MyLinksPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
-          <div className="mb-4 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
+          <div className="mb-4 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
             <svg
-              className="h-7 w-7 text-neutral-400"
+              className="h-7 w-7 text-stone-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -52,12 +95,12 @@ export default function MyLinksPage() {
             </svg>
           </div>
           <h1 className="text-xl font-semibold">No links yet</h1>
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-stone-500">
             Create your first payment link to see it here.
           </p>
           <Link
             href="/"
-            className="mt-4 inline-block rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-500"
+            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400"
           >
             Create link
           </Link>
@@ -70,12 +113,17 @@ export default function MyLinksPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-stone-500">
           Track and manage your payment links. Refund expired unclaimed links anytime.
         </p>
       </div>
 
       <div className="space-y-3">
+        {refundError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+            {refundError}
+          </div>
+        )}
         {links.map((link) => (
           <LinkRow
             key={link.depositId}
@@ -83,10 +131,14 @@ export default function MyLinksPage() {
             currentAddress={address}
             isBusy={busyDepositIds.has(link.depositId)}
             onRefund={async (depositId) => {
-              await refundMultiple(depositId, () => {
-                removeStoredLink(link.depositId);
-                setLinks(getStoredLinks());
-              });
+              try {
+                await refundMultiple(depositId, () => {
+                  removeStoredLink(link.depositId);
+                  setLinks(getStoredLinks());
+                });
+              } catch {
+                // Error is surfaced via useRefundMultiple.error state
+              }
             }}
           />
         ))}
@@ -106,15 +158,21 @@ function LinkRow({
   isBusy: boolean;
   onRefund: (depositId: bigint) => Promise<void>;
 }) {
-  const depositId = BigInt(link.depositId);
+  // Guard against corrupted localStorage entries
+  let depositId: bigint;
+  try {
+    depositId = BigInt(link.depositId);
+  } catch {
+    return null;
+  }
   const { data: deposit, isLoading } = useDeposit(depositId);
 
   if (isLoading || !deposit) {
     return (
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
         <div className="animate-pulse space-y-2">
-          <div className="h-4 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="h-6 w-1/3 rounded bg-neutral-200 dark:bg-neutral-700" />
+          <div className="h-4 w-1/4 rounded bg-stone-200 dark:bg-stone-700" />
+          <div className="h-6 w-1/3 rounded bg-stone-200 dark:bg-stone-700" />
         </div>
       </div>
     );

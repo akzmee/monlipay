@@ -31,10 +31,10 @@ export function CreateForm({
   })();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Token selector */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
           Token
         </label>
         <div className="flex gap-2">
@@ -45,8 +45,8 @@ export function CreateForm({
               onClick={() => setSelectedToken(token)}
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all ${
                 selectedToken.address === token.address
-                  ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300"
-                  : "border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600"
+                  ? "border-red-400 bg-red-50 text-red-700 dark:border-red-500 dark:bg-red-950/40 dark:text-red-300"
+                  : "border-stone-200 text-stone-600 hover:border-stone-300 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-600"
               }`}
             >
               {token.symbol}
@@ -59,7 +59,7 @@ export function CreateForm({
       <div>
         <label
           htmlFor="amount"
-          className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500"
         >
           Amount
         </label>
@@ -72,9 +72,9 @@ export function CreateForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isBusy}
-            className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-lg font-medium outline-none transition-colors placeholder:text-neutral-400 focus:border-violet-400 dark:border-neutral-700 dark:bg-neutral-800 dark:focus:border-violet-500"
+            className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-lg font-semibold outline-none transition-colors placeholder:font-normal placeholder:text-stone-400 focus:border-red-400 dark:border-stone-700 dark:bg-stone-800 dark:focus:border-red-500"
           />
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-neutral-400">
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400">
             {selectedToken.symbol}
           </span>
         </div>
@@ -82,7 +82,7 @@ export function CreateForm({
 
       {/* Expiry */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
           Expires in
         </label>
         <div className="flex flex-wrap gap-2">
@@ -94,8 +94,8 @@ export function CreateForm({
               disabled={isBusy}
               className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
                 expirySeconds === preset.value
-                  ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300"
-                  : "border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600"
+                  ? "border-red-400 bg-red-50 text-red-700 dark:border-red-500 dark:bg-red-950/40 dark:text-red-300"
+                  : "border-stone-200 text-stone-600 hover:border-stone-300 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-600"
               }`}
             >
               {preset.label}
@@ -106,7 +106,7 @@ export function CreateForm({
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       )}
@@ -116,7 +116,7 @@ export function CreateForm({
         type="button"
         onClick={onCreate}
         disabled={!isAmountValid || isBusy}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-500 active:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:from-red-500 hover:to-orange-400 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none"
       >
         {isBusy ? (
           <>
@@ -135,7 +135,7 @@ export function CreateForm({
                 d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            {isConfirmingMessage(isBusy)}
+            Confirming...
           </>
         ) : (
           <>Create Payment Link</>
@@ -143,8 +143,4 @@ export function CreateForm({
       </button>
     </div>
   );
-}
-
-function isConfirmingMessage(_isBusy: boolean): string {
-  return "Confirming...";
 }

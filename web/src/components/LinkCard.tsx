@@ -28,13 +28,13 @@ export function LinkCard({
   const tokenSymbol = token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
 
   const status: { label: string; color: string } = isClaimed
-    ? { label: "Claimed", color: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400" }
+    ? { label: "Claimed", color: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400" }
     : isExpired
       ? { label: "Expired — refundable", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" }
       : { label: "Active", color: "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300" };
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 transition-shadow hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="rounded-xl border border-stone-200 bg-white p-4 transition-shadow hover:shadow-sm dark:border-stone-800 dark:bg-stone-900">
       <div className="flex items-center justify-between gap-4">
         {/* Left: amount and ID */}
         <div className="min-w-0">
@@ -46,7 +46,7 @@ export function LinkCard({
               {status.label}
             </span>
           </div>
-          <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
+          <div className="mt-1 flex items-center gap-3 text-xs text-stone-500">
             <span className="font-mono">#{depositId}</span>
             {!isClaimed && !isExpired && (
               <span className="flex items-center gap-1">
@@ -65,7 +65,7 @@ export function LinkCard({
             <button
               onClick={onRefund}
               disabled={isBusy}
-              className="flex items-center gap-1.5 rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100 disabled:opacity-40 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/60"
+              className="flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-40 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
             >
               {isBusy ? (
                 <>

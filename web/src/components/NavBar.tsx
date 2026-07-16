@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "./ConnectButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Create" },
@@ -13,12 +14,28 @@ export function NavBar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-950/80">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-stone-50/80 backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/80">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-violet-600">Ngat</span>
-            <span className="text-neutral-900 dark:text-neutral-100">MON</span>
+          {/* Logo mark: red packet icon */}
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-orange-500 shadow-sm">
+            <svg
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+              />
+            </svg>
+          </div>
+          <span className="text-lg font-bold tracking-tight">
+            <span className="logo-mark">Ngat</span>
+            <span className="text-stone-900 dark:text-stone-100">MON</span>
           </span>
         </Link>
 
@@ -29,10 +46,10 @@ export function NavBar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"
-                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                    ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
                 }`}
               >
                 {link.label}
@@ -41,7 +58,10 @@ export function NavBar() {
           })}
         </nav>
 
-        <ConnectButton />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <ConnectButton />
+        </div>
       </div>
     </header>
   );

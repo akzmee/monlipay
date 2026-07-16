@@ -19,12 +19,12 @@ pragma solidity 0.8.28;
  *      EIP-712 domain separation prevents signature replay across chains and contracts.
  */
 
-interface IERC20 {
-    function transfer(address to, uint256 amount) external returns (bool);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
-contract LinkVault {
+contract LinkVault is ReentrancyGuardTransient {
+    using SafeERC20 for IERC20;
     // ---------------------------------------------------------------------
     // Errors (custom errors save gas vs require strings)
     // ---------------------------------------------------------------------
@@ -99,6 +99,12 @@ contract LinkVault {
     bytes32 private constant _CLAIM_TYPEHASH =
         keccak256("Claim(uint256 depositId,address recipient)");
 
+    /// @dev Upper half of secp256k1 curve order — s-values above this are
+    ///      considered malleable (EIP-2). Rejecting them prevents signature
+    ///      replay via the `(s, -s)` transformation.
+    uint256 private constant _SECP256K1_HALF_N =
+        0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0;
+
     /// @notice Cached domain separator (computed once in constructor).
     bytes32 private immutable _CACHED_DOMAIN_SEPARATOR;
 
@@ -140,9 +146,10 @@ contract LinkVault {
             if (msg.value != amount) revert NativeValueMismatch();
         } else {
             if (msg.value > 0) revert NonNativeValueSent();
-            // Pull ERC-20 tokens from sender (requires prior approval)
-            bool ok = IERC20(token).transferFrom(msg.sender, address(this), amount);
-            if (!ok) revert TransferFailed();
+            // Pull ERC-20 tokens from sender (requires prior approval).
+            // SafeERC20 handles non-standard tokens (e.g. USDT) that don't
+            // return a bool, and bubbles up revert reasons from standard tokens.
+            IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
         }
 
         depositId = nextDepositId++;
@@ -169,12 +176,21 @@ contract LinkVault {
      */
     function claim(uint256 depositId, address recipient, uint8 v, bytes32 r, bytes32 s)
         external
+        nonReentrant
     {
         Deposit storage d = deposits[depositId];
         if (d.sender == address(0)) revert DepositNotFound();
         if (d.claimed) revert AlreadyClaimed();
         if (block.timestamp >= d.expiry) revert NotExpired();
         if (recipient == address(0)) revert ZeroRecipient();
+
+        // EIP-2: Reject high-order s-values and invalid v to prevent
+        // signature malleability. Without this, an attacker who observes a
+        // valid (v, r, s) can compute an alternative (v', r, s') that
+        // recovers the same address, potentially bypassing naive replay
+        // checks in downstream integrations.
+        if (v != 27 && v != 28) revert InvalidSignature();
+        if (uint256(s) > _SECP256K1_HALF_N) revert InvalidSignature();
 
         // Verify the signature. The signer must be the claimKey.
         bytes32 digest = _hashClaim(depositId, recipient);
@@ -194,7 +210,7 @@ contract LinkVault {
      *         Only the original sender can call this.
      * @param depositId  The deposit to refund.
      */
-    function refund(uint256 depositId) external {
+    function refund(uint256 depositId) external nonReentrant {
         Deposit storage d = deposits[depositId];
         if (d.sender == address(0)) revert DepositNotFound();
         if (d.claimed) revert AlreadyClaimed();
@@ -272,8 +288,8 @@ contract LinkVault {
             (bool ok,) = payable(to).call{value: amount}("");
             if (!ok) revert TransferFailed();
         } else {
-            bool ok = IERC20(token).transfer(to, amount);
-            if (!ok) revert TransferFailed();
+            // SafeERC20 handles tokens that don't return a bool on success
+            IERC20(token).safeTransfer(to, amount);
         }
     }
 }

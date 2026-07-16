@@ -12,6 +12,11 @@ lib/
 # Skills (installed via npx skills add)
 .agents/
 .claude/
+.monskills
+skills-lock.json
+
+# Planning / brief (internal, not for public repo)
+rencana-hackathon-paymentlink-monad.md
 
 # Next.js
 .next/

@@ -2,16 +2,23 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAccount, useBalance, useChainId } from "wagmi";
-import { formatEther, type Hex } from "viem";
+import { useAccount, useChainId } from "wagmi";
+import { formatEther, isAddress, type Hex } from "viem";
 import { useDeposit, useClaimLink } from "@/hooks/useLinkVault";
 import { parseClaimUrl } from "@/lib/crypto";
-import { monadChain, LINK_VAULT_ADDRESS } from "@/config/chain";
+import { monadChain } from "@/config/chain";
 import { ClaimForm } from "@/components/ClaimForm";
 
 function ClaimPageContent() {
   const searchParams = useSearchParams();
-  const hash = typeof window !== "undefined" ? window.location.hash : "";
+
+  // FIX F1: Use state + effect so the page re-renders when the hash becomes
+  // available after SSR hydration or when the URL changes.
+  const [hash, setHash] = useState("");
+  useEffect(() => {
+    setHash(window.location.hash);
+  }, []);
+
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
 
@@ -19,18 +26,34 @@ function ClaimPageContent() {
   const depositId = parsed?.depositId ?? null;
   const secretKey = parsed?.secretKey ?? null;
 
-  const { data: deposit, isLoading: depositLoading, refetch } = useDeposit(depositId);
+  const { data: deposit, isLoading: depositLoading } = useDeposit(depositId);
   const { claim, error, isSending, isConfirming, isSuccess, reset } = useClaimLink();
   const [recipientOverride, setRecipientOverride] = useState("");
 
-  // Determine the effective recipient
-  const effectiveRecipient = (recipientOverride || address || "0x0000000000000000000000000000000000000000") as `0x${string}`;
+  // FIX S1: Validate the override address before using it.
+  // Fall back to the connected wallet, or zero-address sentinel (contract will reject).
+  const trimmedOverride = recipientOverride.trim();
+  const isOverrideValid =
+    trimmedOverride.length > 0 && isAddress(trimmedOverride);
+  const effectiveRecipient = (
+    isOverrideValid
+      ? (trimmedOverride as `0x${string}`)
+      : (address ?? "0x0000000000000000000000000000000000000000" as `0x${string}`)
+  );
 
-  // If the deposit is loaded, check validity
+  // While hash hasn't been read yet (SSR first paint), show loading
+  if (!hash && typeof window !== "undefined") {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-sm text-stone-500">Loading payment link...</div>
+      </div>
+    );
+  }
+
   if (depositLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-sm text-neutral-500">Loading payment link...</div>
+        <div className="text-sm text-stone-500">Loading payment link...</div>
       </div>
     );
   }
@@ -51,7 +74,7 @@ function ClaimPageContent() {
           </svg>
         </div>
         <h1 className="text-xl font-bold">Invalid link</h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-stone-500">
           This payment link is malformed. Ask the sender to share the full link again.
         </p>
       </div>
@@ -78,7 +101,7 @@ function ClaimPageContent() {
           </svg>
         </div>
         <h1 className="text-xl font-bold">Link not found</h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-stone-500">
           This payment link doesn&apos;t exist or may have been removed.
         </p>
       </div>
@@ -89,9 +112,9 @@ function ClaimPageContent() {
   if (deposit?.claimed) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
+        <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
           <svg
-            className="h-7 w-7 text-neutral-500"
+            className="h-7 w-7 text-stone-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -101,7 +124,7 @@ function ClaimPageContent() {
           </svg>
         </div>
         <h1 className="text-xl font-bold">Already claimed</h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-stone-500">
           This payment link has already been claimed or refunded.
         </p>
       </div>
@@ -127,7 +150,7 @@ function ClaimPageContent() {
           </svg>
         </div>
         <h1 className="text-xl font-bold">Link expired</h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-stone-500">
           This payment link has expired. The sender can now refund the funds.
         </p>
       </div>
@@ -151,7 +174,7 @@ function ClaimPageContent() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold">Funds claimed!</h1>
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-stone-500">
             {deposit && formatEther(deposit.amount)} MON has been sent to your wallet.
           </p>
         </div>
@@ -168,31 +191,31 @@ function ClaimPageContent() {
     <div className="hero-gradient">
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-600 text-3xl">
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-orange-500 text-3xl shadow-lg shadow-red-500/20">
             <span className="text-white">{"\u{1F389}"}</span>
           </div>
           <h1 className="text-2xl font-bold">You&apos;ve received MON!</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-stone-500">
             Claim your payment before it expires.
           </p>
         </div>
 
         {/* Payment details */}
-        <div className="mb-6 rounded-2xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="mb-6 rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-neutral-500">Amount</span>
+            <span className="text-sm text-stone-500">Amount</span>
             <span className="text-xl font-bold">
               {deposit && formatEther(deposit.amount)} {tokenSymbol}
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
-            <span className="text-sm text-neutral-500">From</span>
+          <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
+            <span className="text-sm text-stone-500">From</span>
             <span className="font-mono text-sm">
               {deposit?.sender.slice(0, 6)}...{deposit?.sender.slice(-4)}
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
-            <span className="text-sm text-neutral-500">Expires in</span>
+          <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
+            <span className="text-sm text-stone-500">Expires in</span>
             <CountdownTimer expiry={Number(deposit?.expiry ?? 0)} />
           </div>
         </div>
@@ -213,6 +236,11 @@ function ClaimPageContent() {
           address={address}
           recipientOverride={recipientOverride}
           setRecipientOverride={setRecipientOverride}
+          recipientError={
+            trimmedOverride.length > 0 && !isOverrideValid
+              ? "Invalid Ethereum address"
+              : null
+          }
           onClaim={() => {
             if (!secretKey || !depositId) return;
             claim({
@@ -257,7 +285,7 @@ export default function ClaimPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="text-sm text-neutral-500">Loading...</div>
+          <div className="text-sm text-stone-500">Loading...</div>
         </div>
       }
     >
