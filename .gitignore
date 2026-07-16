@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Foundry
+cache/
+out/
+broadcast/
+lib/
+
+# Skills (installed via npx skills add)
+.agents/
+.claude/
+
+# Next.js
+.next/
+out/
+build/
+.vercel
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Production
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store
+*.pem
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
