@@ -44,7 +44,7 @@ export function CreateForm({
   return (
     <div className="space-y-5">
       {/* Amount + Token selector — DeFi style */}
-      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-red-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-red-500 dark:focus-within:bg-stone-800">
+      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-violet-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-violet-500 dark:focus-within:bg-stone-800">
         <label
           htmlFor="amount"
           className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400"
@@ -73,8 +73,8 @@ export function CreateForm({
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${
                 selectedToken.isNative
-                  ? "from-red-500 to-orange-500"
-                  : "from-blue-500 to-cyan-600"
+                  ? "from-violet-500 to-indigo-600"
+                  : "from-cyan-500 to-blue-600"
               } text-xs font-bold text-white`}
             >
               {selectedToken.symbol.charAt(0)}
@@ -113,7 +113,7 @@ export function CreateForm({
               disabled={isBusy}
               className={`rounded-xl border px-3.5 py-2 text-xs font-medium transition-all active:scale-95 ${
                 expirySeconds === preset.value
-                  ? "border-red-400 bg-red-50 text-red-700 dark:border-red-500 dark:bg-red-950/40 dark:text-red-300"
+                  ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300"
                   : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-700/50"
               }`}
             >
@@ -135,7 +135,7 @@ export function CreateForm({
         type="button"
         onClick={onCreate}
         disabled={!isAmountValid || isBusy}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-red-500/25 transition-all hover:shadow-xl hover:shadow-red-500/40 hover:from-red-500 hover:to-orange-400 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none disabled:hover:from-stone-400 disabled:hover:to-stone-400"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none disabled:hover:from-stone-400 disabled:hover:to-stone-400"
       >
         {isBusy ? (
           <>

@@ -5,8 +5,11 @@
 
 /*
  * MonliPay Design System
- * Identity: Digital red packet (angpau) meets Monad crypto.
- * Bold, warm, distinctive — not another generic violet SaaS clone.
+ * Identity: Monad-native. Uses the official Monad brand palette:
+ *   - Primary electric violet: #6E54FF
+ *   - Lavender: #DDD7FE
+ *   - Deep indigo background: #0E091C
+ *   - Secondary cyan: #85E6FF
  */
 
 :root {
@@ -15,11 +18,19 @@
   --surface: #ffffff;
   --surface-elevated: #ffffff;
   --border: #e7e5e4;
-  --primary: #dc2626;
-  --primary-hover: #b91c1c;
-  --primary-light: #fef2f2;
-  --accent: #f59e0b;
-  --accent-light: #fffbeb;
+
+  /* Monad brand palette */
+  --monad-primary: #6E54FF;
+  --monad-primary-hover: #5a3fe0;
+  --monad-lavender: #DDD7FE;
+  --monad-indigo: #0E091C;
+  --monad-cyan: #85E6FF;
+
+  --primary: #6E54FF;
+  --primary-hover: #5a3fe0;
+  --primary-light: #f1ecff;
+  --accent: #85E6FF;
+  --accent-light: #ecfdff;
   --success: #16a34a;
   --success-light: #f0fdf4;
   --warning: #d97706;
@@ -60,11 +71,11 @@
     --surface: #1c1917;
     --surface-elevated: #292524;
     --border: #44403c;
-    --primary: #ef4444;
-    --primary-hover: #dc2626;
-    --primary-light: #2a1212;
-    --accent: #fbbf24;
-    --accent-light: #2a1f08;
+    --primary: #8b73ff;
+    --primary-hover: #6E54FF;
+    --primary-light: #1a1530;
+    --accent: #85E6FF;
+    --accent-light: #0a1f25;
     --success: #22c55e;
     --success-light: #0a1f10;
     --warning: #f59e0b;
@@ -82,11 +93,11 @@
   --surface: #1c1917;
   --surface-elevated: #292524;
   --border: #44403c;
-  --primary: #ef4444;
-  --primary-hover: #dc2626;
-  --primary-light: #2a1212;
-  --accent: #fbbf24;
-  --accent-light: #2a1f08;
+  --primary: #8b73ff;
+  --primary-hover: #6E54FF;
+  --primary-light: #1a1530;
+  --accent: #85E6FF;
+  --accent-light: #0a1f25;
   --success: #22c55e;
   --success-light: #0a1f10;
   --warning: #f59e0b;
@@ -142,24 +153,30 @@ textarea {
   background: var(--text-muted);
 }
 
-/* Signature hero gradient — warm red glow, not generic violet */
+/* Signature hero gradient — Monad violet glow */
 .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(220, 38, 38, 0.06), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(245, 158, 11, 0.04), transparent 60%);
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.08), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.05), transparent 60%);
 }
 
 @media (prefers-color-scheme: dark) {
   .hero-gradient {
     background:
-      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(239, 68, 68, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 80% 20%, rgba(251, 191, 36, 0.04), transparent 60%);
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.12), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.06), transparent 60%);
   }
 }
 
-/* Logo mark — stylized link + envelope hybrid */
+.dark .hero-gradient {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.06), transparent 60%);
+}
+
+/* Logo mark — Monad violet gradient */
 .logo-mark {
-  background: linear-gradient(135deg, var(--primary), #f97316);
+  background: linear-gradient(135deg, #6E54FF 0%, #a78bfa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

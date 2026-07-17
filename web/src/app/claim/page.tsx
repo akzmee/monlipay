@@ -191,7 +191,7 @@ function ClaimPageContent() {
     <div className="hero-gradient">
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-orange-500 text-3xl shadow-lg shadow-red-500/20">
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-3xl shadow-lg shadow-violet-500/20">
             <span className="text-white">{"\u{1F389}"}</span>
           </div>
           <h1 className="text-2xl font-bold">You&apos;ve received MON!</h1>

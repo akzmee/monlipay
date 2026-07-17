@@ -30,9 +30,9 @@ export function ClaimForm({
   if (!isConnected) {
     return (
       <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center dark:border-stone-800 dark:bg-stone-900">
-        <div className="mb-3 flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
+        <div className="mb-3 flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50">
           <svg
-            className="h-6 w-6 text-red-600 dark:text-red-400"
+            className="h-6 w-6 text-violet-600 dark:text-violet-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -71,7 +71,7 @@ export function ClaimForm({
           value={recipientOverride}
           onChange={(e) => setRecipientOverride(e.target.value)}
           disabled={isBusy}
-          className={`mt-2 w-full rounded-lg border bg-stone-50 px-3 py-2 text-sm outline-none focus:border-red-400 dark:bg-stone-800 dark:focus:border-orange-500 ${
+          className={`mt-2 w-full rounded-lg border bg-stone-50 px-3 py-2 text-sm outline-none focus:border-violet-400 dark:bg-stone-800 dark:focus:border-violet-500 ${
             recipientError
               ? "border-red-400 dark:border-red-500"
               : "border-stone-200 dark:border-stone-700"
@@ -94,7 +94,7 @@ export function ClaimForm({
         type="button"
         onClick={onClaim}
         disabled={!canClaim}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-red-500 hover:to-orange-400 active:from-red-700 active:to-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-indigo-500 active:from-violet-700 active:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isBusy ? (
           <>

@@ -66,7 +66,7 @@ export default function MyLinksPage() {
                 // User rejected
               }
             }}
-            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400"
+            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500"
           >
             Switch to Monad Testnet
           </button>
@@ -99,8 +99,8 @@ export default function MyLinksPage() {
             Create your first payment link to see it here.
           </p>
           <Link
-            href="/"
-            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400"
+            href="/create"
+            className="mt-4 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500"
           >
             Create link
           </Link>

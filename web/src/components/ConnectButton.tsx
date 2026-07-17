@@ -37,7 +37,7 @@ export function ConnectButton() {
               <button
                 onClick={openConnectModal}
                 type="button"
-                className="rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-red-500 hover:to-orange-400 active:scale-95"
+                className="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
               >
                 Connect Wallet
               </button>

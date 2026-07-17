@@ -240,7 +240,7 @@ export default function BridgePage() {
             {/* Intent Form — web3 native */}
             <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-5">
               {/* Source: Amount + Token */}
-              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-red-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-red-500 dark:focus-within:bg-stone-800">
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-violet-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-violet-500 dark:focus-within:bg-stone-800">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
                     From
@@ -336,7 +336,7 @@ export default function BridgePage() {
                   quoteLoading ||
                   tokenListLoading
                 }
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-red-500/25 transition-all hover:shadow-xl hover:shadow-red-500/40 hover:from-red-500 hover:to-orange-400 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none"
               >
                 {quoteLoading ? (
                   <>
@@ -497,8 +497,8 @@ function NotConnectedState() {
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-5">
       <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
-          <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50">
+          <svg className="h-6 w-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
           </svg>
         </div>
@@ -701,7 +701,7 @@ function RouteCard({ route, expired }: { route: BridgeRoute; expired: boolean })
         className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all ${
           expired
             ? "cursor-not-allowed bg-stone-400"
-            : "bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/40 hover:from-red-500 hover:to-orange-400"
+            : "bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500"
         }`}
         aria-disabled={expired}
       >
@@ -783,7 +783,7 @@ function ChainSelectModal({
                     }}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
                       isSelected
-                        ? "bg-red-50 dark:bg-red-950/30"
+                        ? "bg-violet-50 dark:bg-violet-950/30"
                         : "hover:bg-stone-100 dark:hover:bg-stone-800"
                     }`}
                   >
@@ -797,7 +797,7 @@ function ChainSelectModal({
                       </div>
                     </div>
                     {isSelected && (
-                      <svg className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
                     )}
@@ -870,7 +870,7 @@ function TokenAvatarMini({
     );
   }
   return (
-    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-[10px] font-bold text-white">
+    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[10px] font-bold text-white">
       {token.symbol.charAt(0)}
     </div>
   );

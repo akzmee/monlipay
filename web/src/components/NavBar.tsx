@@ -18,8 +18,8 @@ export function NavBar() {
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-stone-50/80 backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/80">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          {/* Logo mark: red packet icon */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-orange-500 shadow-sm">
+          {/* Logo mark: violet gradient */}
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm">
             <svg
               className="h-5 w-5 text-white"
               fill="none"
@@ -49,7 +49,7 @@ export function NavBar() {
                 href={link.href}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                    ? "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
                 }`}
               >

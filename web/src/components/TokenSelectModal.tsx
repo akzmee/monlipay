@@ -38,14 +38,14 @@ interface TokenSelectModalProps {
  * not random, so the same token always looks the same.
  */
 const AVATAR_GRADIENTS = [
-  "from-red-500 to-orange-500",
-  "from-orange-500 to-amber-500",
-  "from-amber-500 to-yellow-500",
-  "from-rose-500 to-red-500",
-  "from-violet-500 to-fuchsia-500",
+  "from-violet-500 to-indigo-500",
+  "from-indigo-500 to-blue-500",
   "from-blue-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-  "from-indigo-500 to-violet-500",
+  "from-purple-500 to-violet-500",
+  "from-fuchsia-500 to-purple-500",
+  "from-cyan-500 to-teal-500",
+  "from-emerald-500 to-cyan-500",
+  "from-violet-500 to-fuchsia-500",
 ];
 
 function hashString(str: string): number {
@@ -256,7 +256,7 @@ export function TokenSelectModal({
                   placeholder="0x… contract address"
                   value={importAddress}
                   onChange={(e) => setImportAddress(e.target.value)}
-                  className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-sm font-mono outline-none transition-colors placeholder:font-sans placeholder:text-stone-400 focus:border-red-400 focus:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:focus:border-red-500"
+                  className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-sm font-mono outline-none transition-colors placeholder:font-sans placeholder:text-stone-400 focus:border-violet-400 focus:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:focus:border-violet-500"
                   spellCheck={false}
                   autoComplete="off"
                 />
@@ -264,7 +264,7 @@ export function TokenSelectModal({
                 {/* Loading */}
                 {isLoadingToken && (
                   <div className="mt-3 flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
-                    <svg className="h-4 w-4 animate-spin text-red-500" viewBox="0 0 24 24" fill="none">
+                    <svg className="h-4 w-4 animate-spin text-violet-500" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
@@ -299,7 +299,7 @@ export function TokenSelectModal({
                 <button
                   onClick={handleImportToken}
                   disabled={!metadata}
-                  className="mt-4 w-full rounded-xl bg-gradient-to-r from-red-600 to-orange-500 py-3 text-sm font-semibold text-white transition-all hover:from-red-500 hover:to-orange-400 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400"
+                  className="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400"
                 >
                   {metadata ? `Import ${metadata.symbol}` : "Import Token"}
                 </button>
@@ -319,7 +319,7 @@ export function TokenSelectModal({
                       placeholder="Search name or paste address"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-stone-400 focus:border-red-400 focus:bg-white dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:focus:border-red-500 dark:focus:bg-stone-800"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-stone-400 focus:border-violet-400 focus:bg-white dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:focus:border-violet-500 dark:focus:bg-stone-800"
                     />
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export function TokenSelectModal({
                           setShowImport(true);
                           setImportAddress(search);
                         }}
-                        className="mt-2 text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                        className="mt-2 text-xs font-medium text-violet-600 hover:underline dark:text-violet-400"
                       >
                         Import &ldquo;{search}&rdquo; as custom token
                       </button>
@@ -366,7 +366,7 @@ export function TokenSelectModal({
                               }}
                               className={`flex flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
                                 isSelected
-                                  ? "bg-red-50 dark:bg-red-950/30"
+                                  ? "bg-violet-50 dark:bg-violet-950/30"
                                   : "hover:bg-stone-100 dark:hover:bg-stone-800"
                               }`}
                             >
@@ -377,7 +377,7 @@ export function TokenSelectModal({
                                     {token.symbol}
                                   </span>
                                   {isCustom && (
-                                    <span className="rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                    <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
                                       Custom
                                     </span>
                                   )}
@@ -394,7 +394,7 @@ export function TokenSelectModal({
                                 </div>
                               </div>
                               {isSelected && (
-                                <svg className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <svg className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                 </svg>
                               )}
@@ -402,7 +402,7 @@ export function TokenSelectModal({
                             {isCustom && onRemoveCustomToken && (
                               <button
                                 onClick={() => onRemoveCustomToken(token.address)}
-                                className="mr-2 hidden h-7 w-7 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-red-50 hover:text-red-500 group-hover:flex dark:hover:bg-red-950/30"
+                                className="mr-2 hidden h-7 w-7 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-violet-50 hover:text-violet-500 group-hover:flex dark:hover:bg-violet-950/30"
                                 aria-label={`Remove ${token.symbol}`}
                               >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

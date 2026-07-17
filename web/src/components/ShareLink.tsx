@@ -84,7 +84,7 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               copied
                 ? "bg-green-600 text-white"
-                : "bg-gradient-to-r from-red-600 to-orange-500 text-white hover:from-red-500 hover:to-orange-400"
+                : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500"
             }`}
           >
             {copied ? "Copied!" : "Copy"}

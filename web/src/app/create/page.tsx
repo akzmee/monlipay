@@ -136,7 +136,7 @@ export default function CreatePage() {
                     // User rejected
                   }
                 }}
-                className="mt-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400 active:scale-95"
+                className="mt-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
               >
                 Switch to {monadChain.name}
               </button>

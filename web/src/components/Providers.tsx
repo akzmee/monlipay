@@ -21,7 +21,7 @@ import "@rainbow-me/rainbowkit/styles.css";
  * resolved theme after `useEffect` runs (post-hydration).
  */
 const SSR_THEME = lightTheme({
-  accentColor: "#dc2626",
+  accentColor: "#6E54FF",
   accentColorForeground: "#fafaf9",
   borderRadius: "medium",
   overlayBlur: "small",
@@ -29,7 +29,7 @@ const SSR_THEME = lightTheme({
 
 /**
  * Custom RainbowKit theme that matches the MonliPay brand colors.
- * Uses red-to-orange gradient accents instead of RainbowKit's default blue.
+ * Uses Monad's official electric violet (#6E54FF) brand color.
  */
 function useRainbowKitTheme() {
   const { resolvedTheme } = useTheme();
@@ -45,7 +45,7 @@ function useRainbowKitTheme() {
     () =>
       isDark
         ? darkTheme({
-            accentColor: "#ef4444",
+            accentColor: "#8b73ff",
             accentColorForeground: "#fafaf9",
             borderRadius: "medium",
             overlayBlur: "small",
