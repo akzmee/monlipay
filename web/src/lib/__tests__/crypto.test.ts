@@ -327,17 +327,69 @@ describe("crypto", () => {
       expect(url).toMatch(/^https:\/\/example\.com\/claim#42-/);
     });
 
-    it("should handle base URL with trailing slash", () => {
+    it("should handle base URL with trailing slash (MEDIUM-7: stripped)", () => {
       const key = generateSecretKey();
       const url = buildShareableUrl("https://example.com/", 42n, key);
-      // The function doesn't strip trailing slashes, just appends /claim
-      expect(url).toMatch(/^https:\/\/example\.com\/\/claim#42-/);
+      // MEDIUM-7: sanitizeBaseUrl normalizes to origin (no trailing slash),
+      // so the result has a single slash before "claim"
+      expect(url).toMatch(/^https:\/\/example\.com\/claim#42-/);
     });
 
-    it("should handle empty base URL", () => {
+    it("should reject empty base URL (MEDIUM-7)", () => {
       const key = generateSecretKey();
-      const url = buildShareableUrl("", 42n, key);
-      expect(url).toMatch(/^\/claim#42-/);
+      // MEDIUM-7: empty baseUrl is now rejected — previously it silently
+      // produced an invalid relative URL that wouldn't work as a shareable link.
+      expect(() => buildShareableUrl("", 42n, key)).toThrow(/empty baseUrl/);
+    });
+
+    it("should reject javascript: scheme (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      expect(() => buildShareableUrl("javascript:alert(1)", 42n, key)).toThrow(
+        /disallowed scheme/,
+      );
+    });
+
+    it("should reject data: scheme (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      expect(() => buildShareableUrl("data:text/html,evil", 42n, key)).toThrow(
+        /disallowed scheme/,
+      );
+    });
+
+    it("should reject URLs with embedded credentials (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      // `https://user:pass@host` would confuse URL parsing
+      expect(() =>
+        buildShareableUrl("https://user:pass@example.com", 42n, key),
+      ).toThrow(/credentials in URL/);
+    });
+
+    it("should reject non-localhost http in production (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      expect(() => buildShareableUrl("http://monlipay.xyz", 42n, key)).toThrow(
+        /http not allowed for non-localhost/,
+      );
+    });
+
+    it("should allow localhost http for dev (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      const url = buildShareableUrl("http://localhost:3000", 42n, key);
+      expect(url).toMatch(/^http:\/\/localhost:3000\/claim#42-/);
+    });
+
+    it("should strip path/query/hash from baseUrl (MEDIUM-7)", () => {
+      const key = generateSecretKey();
+      // An attacker who controls part of the baseUrl shouldn't be able to
+      // inject a malicious path or open-redirect via query.
+      const url = buildShareableUrl(
+        "https://monlipay.xyz/some/path?redirect=evil#fragment",
+        42n,
+        key,
+      );
+      expect(url).toMatch(/^https:\/\/monlipay\.xyz\/claim#42-/);
+      expect(url).not.toContain("evil");
+      expect(url).not.toContain("fragment");
+      expect(url).not.toContain("some/path");
     });
   });
 

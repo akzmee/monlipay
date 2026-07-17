@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   getStoredLinks,
   addStoredLink,
   removeStoredLink,
   updateStoredLinkStatus,
+  subscribeToLinkChanges,
   type StoredLink,
 } from "@/lib/storage";
 
@@ -343,6 +344,94 @@ describe("storage", () => {
       removeStoredLink("1");
       expect(getStoredLinks()).toHaveLength(0);
       updateStoredLinkStatus("1", "refunded"); // no crash
+    });
+  });
+
+  // -----------------------------------------------------------------
+  // subscribeToLinkChanges (HIGH-4: cross-tab localStorage guard)
+  // -----------------------------------------------------------------
+  describe("subscribeToLinkChanges", () => {
+    it("should call callback when storage event fires for our key", () => {
+      const cb = vi.fn();
+      const unsub = subscribeToLinkChanges(cb);
+
+      // Dispatch a storage event for our key
+      const event = new StorageEvent("storage", {
+        key: "monlipay_links",
+        newValue: "[]",
+      });
+      window.dispatchEvent(event);
+
+      expect(cb).toHaveBeenCalledTimes(1);
+      unsub();
+    });
+
+    it("should NOT call callback for unrelated keys", () => {
+      const cb = vi.fn();
+      const unsub = subscribeToLinkChanges(cb);
+
+      const event = new StorageEvent("storage", {
+        key: "unrelated_key",
+        newValue: "[]",
+      });
+      window.dispatchEvent(event);
+
+      expect(cb).not.toHaveBeenCalled();
+      unsub();
+    });
+
+    it("should NOT call callback after unsubscribe", () => {
+      const cb = vi.fn();
+      const unsub = subscribeToLinkChanges(cb);
+      unsub();
+
+      const event = new StorageEvent("storage", {
+        key: "monlipay_links",
+        newValue: "[]",
+      });
+      window.dispatchEvent(event);
+
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it("should support multiple subscribers independently", () => {
+      const cb1 = vi.fn();
+      const cb2 = vi.fn();
+      const unsub1 = subscribeToLinkChanges(cb1);
+      const unsub2 = subscribeToLinkChanges(cb2);
+
+      const event = new StorageEvent("storage", {
+        key: "monlipay_links",
+        newValue: "[]",
+      });
+      window.dispatchEvent(event);
+
+      expect(cb1).toHaveBeenCalledTimes(1);
+      expect(cb2).toHaveBeenCalledTimes(1);
+
+      unsub1();
+      // After unsub1, cb2 should still fire
+      window.dispatchEvent(event);
+      expect(cb1).toHaveBeenCalledTimes(1);
+      expect(cb2).toHaveBeenCalledTimes(2);
+
+      unsub2();
+    });
+
+    it("should handle storage event with null key (clear)", () => {
+      // localStorage.clear() fires storage with key=null in some browsers.
+      // We don't trigger callback in that case (we only care about our key).
+      const cb = vi.fn();
+      const unsub = subscribeToLinkChanges(cb);
+
+      const event = new StorageEvent("storage", {
+        key: null,
+        newValue: null,
+      });
+      window.dispatchEvent(event);
+
+      expect(cb).not.toHaveBeenCalled();
+      unsub();
     });
   });
 });

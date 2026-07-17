@@ -11,6 +11,12 @@ interface LinkCardProps {
   isExpired: boolean;
   canRefund: boolean;
   isBusy: boolean;
+  /**
+   * HIGH-5: True when this link failed during the autoRefund batch (e.g.
+   * race with another caller, or the wallet rejected the tx). Surfaces
+   * a per-link warning so the user knows which link needs manual action.
+   */
+  autoRefundFailed?: boolean;
   onRefund: () => void;
 }
 
@@ -23,6 +29,7 @@ export function LinkCard({
   isExpired,
   canRefund,
   isBusy,
+  autoRefundFailed = false,
   onRefund,
 }: LinkCardProps) {
   const tokenSymbol = token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
@@ -34,7 +41,11 @@ export function LinkCard({
       : { label: "Active", color: "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300" };
 
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-4 transition-shadow hover:shadow-sm dark:border-stone-800 dark:bg-stone-900">
+    <div className={`rounded-xl border p-4 transition-shadow hover:shadow-sm dark:bg-stone-900 ${
+      autoRefundFailed
+        ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20"
+        : "border-stone-200 bg-white dark:border-stone-800"
+    }`}>
       <div className="flex items-center justify-between gap-4">
         {/* Left: amount and ID */}
         <div className="min-w-0">
@@ -57,6 +68,11 @@ export function LinkCard({
               </span>
             )}
           </div>
+          {autoRefundFailed && (
+            <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+              ⚠ Auto-refund skipped for this link — try a manual refund below.
+            </p>
+          )}
         </div>
 
         {/* Right: action */}

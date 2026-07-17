@@ -541,9 +541,21 @@ contract LinkVaultTest is Test {
 
         vm.warp(block.timestamp + 1 hours);
 
+        // F1 (HIGH-1 fix): autoRefund requires `> expiry` (strictly after).
+        // At exactly expiry, only claim() is allowed.
+        vm.expectRevert(LinkVault.NotExpired.selector);
         vm.prank(attacker);
         vault.autoRefund(id);
-        // Should succeed at exact expiry (>= check)
+    }
+
+    function test_AutoRefundAfterExpiry() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        vm.prank(attacker);
+        vault.autoRefund(id);
+        // Should succeed — strictly after expiry
     }
 
     function test_AutoRefundBatch() public {
@@ -602,10 +614,20 @@ contract LinkVaultTest is Test {
         // Warp to exactly expiry
         vm.warp(block.timestamp + 1 hours);
 
+        // F1 (HIGH-1 fix): refund requires `> expiry` (strictly after).
+        vm.expectRevert(LinkVault.NotExpired.selector);
         vm.prank(sender);
         vault.refund(id);
+    }
 
-        // Should succeed — at exact expiry, refund is allowed (>= used in claim check)
+    function test_RefundAfterExpiry() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        vm.prank(sender);
+        vault.refund(id);
+        // Should succeed — strictly after expiry
     }
 
     // -----------------------------------------------------------------

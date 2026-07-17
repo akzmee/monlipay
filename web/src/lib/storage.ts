@@ -71,6 +71,11 @@ export function getStoredLinks(): StoredLink[] {
 
 export function addStoredLink(link: StoredLink): void {
   if (typeof window === "undefined") return;
+  // HIGH-4: Re-read localStorage immediately before writing. This narrows
+  // (but does not eliminate) the cross-tab race window: if another tab wrote
+  // between our read and our setItem, that write would be lost. The storage
+  // event listener in the consumer (e.g. my-links page) is the authoritative
+  // reconciliation mechanism — it triggers a re-read on every external change.
   const links = getStoredLinks();
   // Prevent duplicates
   if (links.some((l) => l.depositId === link.depositId)) return;
@@ -98,4 +103,29 @@ export function updateStoredLinkStatus(
     l.depositId === depositId ? { ...l, status } : l,
   );
   localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+}
+
+/**
+ * HIGH-4: Subscribe to cross-tab localStorage changes.
+ *
+ * The browser's `storage` event fires in ALL OTHER tabs/windows when
+ * localStorage is modified — but NOT in the tab that made the change.
+ * This is the canonical mechanism for cross-tab synchronization.
+ *
+ * Use this in React components via useEffect to refresh local state
+ * when another tab modifies the links array. Without this, two tabs
+ * with concurrent writes would silently lose data (last write wins).
+ *
+ * @example
+ * useEffect(() => subscribeToLinkChanges(() => setLinks(getStoredLinks())), []);
+ *
+ * @returns An unsubscribe function (call it from useEffect cleanup).
+ */
+export function subscribeToLinkChanges(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) callback();
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
 }

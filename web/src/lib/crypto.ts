@@ -237,11 +237,64 @@ export function buildClaimHash(depositId: bigint, secretKey: Hex): string {
 /**
  * Encode a claim URL for sharing (e.g., WhatsApp, Telegram).
  * Uses the compact base58 format for shorter URLs.
+ *
+ * MEDIUM-7: The baseUrl is validated to be an http(s) URL. This prevents
+ * `javascript:` or `data:` URLs from being embedded in the shareable link
+ * (which would execute in the recipient's browser if they click the link
+ * from certain messengers that don't sanitize URL schemes). In production
+ * only https is allowed; localhost over http is allowed for dev.
  */
 export function buildShareableUrl(
   baseUrl: string,
   depositId: bigint,
   secretKey: Hex,
 ): string {
-  return `${baseUrl}/claim${buildClaimHash(depositId, secretKey)}`;
+  const safeBase = sanitizeBaseUrl(baseUrl);
+  return `${safeBase}/claim${buildClaimHash(depositId, secretKey)}`;
+}
+
+/**
+ * Validate and normalize a base URL for embedding in shareable links.
+ * Returns the origin only (strips path/query/hash) to prevent open-redirect
+ * and exfiltration tricks like `https://monlipay.xyz@evil.com/`.
+ *
+ * Rejects:
+ *   - non-http(s) schemes (javascript:, data:, blob:, file:, etc.)
+ *   - URLs with embedded credentials (`https://user:pass@host`)
+ *   - URLs where the host contains `@` (user-info separator)
+ *
+ * In production, restricts to https only. Allows http for localhost/dev.
+ */
+export function sanitizeBaseUrl(baseUrl: string): string {
+  if (typeof baseUrl !== "string" || baseUrl.length === 0) {
+    throw new Error("sanitizeBaseUrl: empty baseUrl");
+  }
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    throw new Error(`sanitizeBaseUrl: invalid URL "${baseUrl}"`);
+  }
+  const proto = url.protocol.toLowerCase();
+  if (proto !== "https:" && proto !== "http:") {
+    throw new Error(`sanitizeBaseUrl: disallowed scheme "${url.protocol}"`);
+  }
+  // Reject user-info in URL (prevents `https://x@evil.com` tricks)
+  if (url.username || url.password) {
+    throw new Error("sanitizeBaseUrl: credentials in URL not allowed");
+  }
+  if (url.hostname.includes("@")) {
+    throw new Error("sanitizeBaseUrl: '@' in hostname not allowed");
+  }
+  // In production (non-localhost), require https
+  const isLocalhost =
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1" ||
+    url.hostname === "[::1]" ||
+    url.hostname.endsWith(".localhost");
+  if (!isLocalhost && proto !== "https:") {
+    throw new Error(`sanitizeBaseUrl: http not allowed for non-localhost host "${url.hostname}"`);
+  }
+  // Return origin only — strip any path/query/hash to prevent injection
+  return url.origin;
 }

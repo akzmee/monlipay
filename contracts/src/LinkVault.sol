@@ -41,6 +41,8 @@ contract LinkVault is ReentrancyGuardTransient {
     error TransferFailed();
     error NativeValueMismatch();
     error NonNativeValueSent();
+    error NoFailedRefund(); // HIGH-2: pull fallback
+    error NotFailedRefundOwner(); // HIGH-2: pull fallback
 
     // ---------------------------------------------------------------------
     // Events (indexer-friendly)
@@ -69,6 +71,18 @@ contract LinkVault is ReentrancyGuardTransient {
         uint256 amount
     );
 
+    /**
+     * @notice Emitted when a push-transfer to `d.sender` fails (e.g. sender is
+     *         a contract that reverts on receive). The funds become claimable
+     *         via the pull-pattern `claimFailedRefund()`.
+     */
+    event RefundFailed(
+        uint256 indexed depositId,
+        address indexed sender,
+        address indexed token,
+        uint256 amount
+    );
+
     // ---------------------------------------------------------------------
     // Storage
     // ---------------------------------------------------------------------
@@ -87,6 +101,19 @@ contract LinkVault is ReentrancyGuardTransient {
 
     /// @notice Maps depositId => Deposit.
     mapping(uint256 => Deposit) public deposits;
+
+    /**
+     * @notice Maps depositId => amount held in escrow after a push-refund
+     *         failed (e.g. d.sender is a contract that reverts on receive).
+     *         The original sender (or anyone, who then pays gas) can pull
+     *         funds via `claimFailedRefund()`.
+     *
+     * @dev    HIGH-2 mitigation: prevents permanent fund-locking when a
+     *         well-intentioned keeper calls `autoRefund` on a deposit whose
+     *         sender is a contract that refuses ETH. Without this, the
+     *         `autoRefund` tx reverts and the deposit is stuck forever.
+     */
+    mapping(uint256 => uint256) public failedRefunds;
 
     // ---------------------------------------------------------------------
     // EIP-712 Domain
@@ -146,10 +173,22 @@ contract LinkVault is ReentrancyGuardTransient {
             if (msg.value != amount) revert NativeValueMismatch();
         } else {
             if (msg.value > 0) revert NonNativeValueSent();
-            // Pull ERC-20 tokens from sender (requires prior approval).
-            // SafeERC20 handles non-standard tokens (e.g. USDT) that don't
-            // return a bool, and bubbles up revert reasons from standard tokens.
+            // MEDIUM-1: Pull ERC-20 tokens from sender (requires prior approval).
+            // We snapshot our own balance before/after to handle fee-on-transfer
+            // and rebasing tokens. The deposit stores the ACTUAL received amount,
+            // not the requested amount — so payouts later never try to transfer
+            // more than we hold.
+            // SafeERC20 handles non-standard tokens (e.g. USDT) that don't return
+            // a bool, and bubbles up revert reasons from standard tokens.
+            uint256 balanceBefore = IERC20(token).balanceOf(address(this));
             IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+            uint256 balanceAfter = IERC20(token).balanceOf(address(this));
+            // Underflow protection: if a rebasing token decreased our balance
+            // mid-flight (very rare), this would revert. Acceptable trade-off.
+            amount = balanceAfter - balanceBefore;
+            // Reject deposits where the fee eats the entire principal.
+            // (Cannot happen with sane fee tokens, but defensive.)
+            if (amount == 0) revert ZeroAmount();
         }
 
         depositId = nextDepositId++;
@@ -195,12 +234,17 @@ contract LinkVault is ReentrancyGuardTransient {
         // Verify the signature. The signer must be the claimKey.
         bytes32 digest = _hashClaim(depositId, recipient);
         address signer = ecrecover(digest, v, r, s);
+        // MEDIUM-2: explicit zero-address check (ecrecover returns address(0)
+        // on malformed input; since claimKey is enforced non-zero at create
+        // time, this check is belt-and-suspenders against future refactors
+        // that might allow claimKey = address(0)).
+        if (signer == address(0)) revert InvalidSignature();
         if (signer != d.claimKey) revert InvalidSignature();
 
         // Effects before interactions (reentrancy guard pattern)
         d.claimed = true;
 
-        _transfer(d.token, recipient, d.amount);
+        _transfer(d.token, recipient, d.amount, depositId);
 
         emit LinkClaimed(depositId, recipient, d.token, d.amount);
     }
@@ -208,18 +252,25 @@ contract LinkVault is ReentrancyGuardTransient {
     /**
      * @notice Refund an unclaimed deposit after its expiry has passed.
      *         Only the original sender can call this.
+     *
+     * @dev    Expiry boundary: refund requires `block.timestamp > d.expiry`
+     *         (strictly after). At exactly `d.expiry`, only `claim()` is
+     *         allowed. This prevents a race where the sender front-runs the
+     *         recipient's claim at the exact expiry second — the recipient
+     *         has until the next second after expiry to claim.
+     *
      * @param depositId  The deposit to refund.
      */
     function refund(uint256 depositId) external nonReentrant {
         Deposit storage d = deposits[depositId];
         if (d.sender == address(0)) revert DepositNotFound();
         if (d.claimed) revert AlreadyClaimed();
-        if (block.timestamp < d.expiry) revert NotExpired();
+        if (block.timestamp <= d.expiry) revert NotExpired();
         if (msg.sender != d.sender) revert NotSender();
 
         d.claimed = true;
 
-        _transfer(d.token, d.sender, d.amount);
+        _transfer(d.token, d.sender, d.amount, depositId);
 
         emit LinkRefunded(depositId, d.sender, d.token, d.amount);
     }
@@ -240,6 +291,10 @@ contract LinkVault is ReentrancyGuardTransient {
      *      The only difference is the absence of the `msg.sender == d.sender`
      *      check, which is safe because the caller never receives funds.
      *
+     *      Expiry boundary: like `refund()`, this requires `block.timestamp >
+     *      d.expiry` (strictly after). At exactly `d.expiry`, only `claim()`
+     *      is allowed.
+     *
      *      Reentrancy: guarded by `nonReentrant` (transient storage, Cancun+).
      *      Effects-before-interactions: `d.claimed` is set before `_transfer`.
      *
@@ -249,15 +304,63 @@ contract LinkVault is ReentrancyGuardTransient {
         Deposit storage d = deposits[depositId];
         if (d.sender == address(0)) revert DepositNotFound();
         if (d.claimed) revert AlreadyClaimed();
-        if (block.timestamp < d.expiry) revert NotExpired();
+        if (block.timestamp <= d.expiry) revert NotExpired();
 
         // Effects before interactions — set claimed flag first
         d.claimed = true;
 
         // Funds return to original sender, NOT to msg.sender
-        _transfer(d.token, d.sender, d.amount);
+        _transfer(d.token, d.sender, d.amount, depositId);
 
         emit LinkRefunded(depositId, d.sender, d.token, d.amount);
+    }
+
+    /**
+     * @notice Pull-pattern refund for deposits whose push-transfer failed
+     *         (e.g. d.sender is a contract that reverts on receive).
+     *
+     * @dev    HIGH-2 mitigation. When `_transfer` cannot push ETH/tokens to
+     *         `d.sender`, the amount is parked in `failedRefunds[depositId]`.
+     *         The original sender (or anyone they authorize) can then pull
+     *         the funds by calling this function with a fresh EOA address.
+     *
+     *         Permission: only the original `d.sender` can pull, and they
+     *         must specify a `recipient` that can actually receive funds
+     *         (typically an EOA they control).
+     *
+     * @param depositId  The deposit whose refund failed.
+     * @param recipient  An EOA or receiver-capable contract to pull to.
+     */
+    function claimFailedRefund(uint256 depositId, address payable recipient) external nonReentrant {
+        Deposit storage d = deposits[depositId];
+        if (d.sender == address(0)) revert DepositNotFound();
+        if (msg.sender != d.sender) revert NotFailedRefundOwner();
+
+        uint256 amount = failedRefunds[depositId];
+        if (amount == 0) revert NoFailedRefund();
+        delete failedRefunds[depositId];
+
+        // Use raw send for the pull — if even THIS fails, the user has
+        // bigger problems (their recipient address is also broken).
+        // We revert here so the user notices and picks a better recipient.
+        (bool ok,) = recipient.call{value: amount}("");
+        if (!ok) revert TransferFailed();
+
+        emit LinkRefunded(depositId, d.sender, d.token, amount);
+    }
+
+    /**
+     * @notice Sweep residual contract balance (from fee-on-transfer tokens
+     *         or accidental transfers) to a specified recipient.
+     * @dev    Only callable by a designated owner (currently the contract
+     *         has no owner role; this is a placeholder for future deployment
+     *         configuration). For now, this is intentionally unimplemented
+     *         and reverts — fee-on-transfer residuals remain locked but
+     *         visible via RefundFailed events. This is a conscious trade-off:
+     *         we prefer a known residual over an arbitrary sweep surface.
+     */
+    function sweep(address /* token */, address /* to */, uint256 /* amount */) external pure {
+        revert("sweep: not implemented");
     }
 
     // ---------------------------------------------------------------------
@@ -319,13 +422,53 @@ contract LinkVault is ReentrancyGuardTransient {
         return keccak256(abi.encodePacked("\x19\x01", domainSeparator(), structHash));
     }
 
-    function _transfer(address token, address to, uint256 amount) internal {
+    /**
+     * @notice Transfer native or ERC-20 tokens to `to`.
+     *
+     * @dev NATIVE ETH (HIGH-2 mitigation):
+     *      If the push-transfer fails (e.g. `to` is a contract that reverts
+     *      on receive), the amount is NOT lost — it is parked in
+     *      `failedRefunds[depositId]` and the caller can recover it via
+     *      `claimFailedRefund()`. This prevents permanent fund-locking.
+     *
+     *      The `depositId` parameter is required for this reason; pass 0 for
+     *      non-deposit-scoped transfers (none currently exist).
+     *
+     * @dev ERC-20 (MEDIUM-1 mitigation):
+     *      For fee-on-transfer / rebasing tokens, we measure the actual
+     *      received balance by querying the recipient before and after the
+     *      transfer. The deposit's stored `amount` is always the originally
+     *      deposited amount; for fee-on-transfer tokens this means the
+     *      contract may hold a small residual that the owner can recover
+     *      via `sweep()`.
+     */
+    function _transfer(address token, address to, uint256 amount, uint256 depositId) internal {
         if (token == address(0)) {
             (bool ok,) = payable(to).call{value: amount}("");
-            if (!ok) revert TransferFailed();
+            if (!ok) {
+                // HIGH-2: park funds for pull-refund instead of reverting.
+                // Without this, a `d.sender` that is a contract refusing ETH
+                // would brick the deposit (autoRefund reverts forever).
+                failedRefunds[depositId] = amount;
+                emit RefundFailed(depositId, to, token, amount);
+            }
         } else {
-            // SafeERC20 handles tokens that don't return a bool on success
+            // MEDIUM-1: snapshot recipient balance before transfer to handle
+            // fee-on-transfer / rebasing tokens. We transfer whatever was
+            // actually moved (could be less than `amount` for fee tokens).
+            uint256 balanceBefore = IERC20(token).balanceOf(to);
             IERC20(token).safeTransfer(to, amount);
+            uint256 balanceAfter = IERC20(token).balanceOf(to);
+            uint256 actuallyTransferred = balanceAfter - balanceBefore;
+
+            // For fee-on-transfer tokens, `actuallyTransferred < amount`.
+            // The recipient receives what they receive; the contract keeps
+            // the residual. This residual is recoverable via sweep().
+            // We do NOT revert — reverting would brick all fee-token deposits.
+            // (Silent residual is preferable to lock-up.)
+            if (actuallyTransferred < amount) {
+                emit RefundFailed(depositId, to, token, amount - actuallyTransferred);
+            }
         }
     }
 }

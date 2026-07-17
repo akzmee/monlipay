@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { getStoredLinks, removeStoredLink, type StoredLink } from "@/lib/storage";
+import { getStoredLinks, removeStoredLink, subscribeToLinkChanges, type StoredLink } from "@/lib/storage";
 import { useDeposit, useAutoRefundExpiredLinks } from "@/hooks/useLinkVault";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";
 import { LinkCard } from "@/components/LinkCard";
@@ -25,6 +25,7 @@ export default function MyLinksPage() {
     isProcessing: isAutoRefunding,
     refundedCount,
     error: autoRefundError,
+    failedDepositIds,
     reset: resetAutoRefund,
   } = useAutoRefundExpiredLinks();
 
@@ -49,6 +50,26 @@ export default function MyLinksPage() {
   useEffect(() => {
     setLinks(getStoredLinks());
   }, []);
+
+  // HIGH-4: Cross-tab localStorage guard. When another tab modifies the
+  // links array (e.g. creates a new link, marks one as refunded), refresh
+  // our local state. The `storage` event fires only in OTHER tabs, so
+  // there's no risk of an infinite loop.
+  useEffect(() => {
+    return subscribeToLinkChanges(() => {
+      setLinks(getStoredLinks());
+    });
+  }, []);
+
+  // LOW-5: Auto-dismiss the success/error toasts after 10 seconds so
+  // they don't linger forever after the user has seen them. The user
+  // can also dismiss manually via the × button.
+  useEffect(() => {
+    if (refundedCount > 0 || autoRefundError) {
+      const t = setTimeout(() => resetAutoRefund(), 10_000);
+      return () => clearTimeout(t);
+    }
+  }, [refundedCount, autoRefundError, resetAutoRefund]);
 
   const { refundMultiple, busyDepositIds, error: refundError } = useRefundMultiple();
 
@@ -201,6 +222,7 @@ export default function MyLinksPage() {
             link={link}
             currentAddress={address}
             isBusy={busyDepositIds.has(link.depositId)}
+            autoRefundFailed={failedDepositIds.has(link.depositId)}
             onRefund={async (depositId) => {
               try {
                 await refundMultiple(depositId, () => {
@@ -222,11 +244,13 @@ function LinkRow({
   link,
   currentAddress,
   isBusy,
+  autoRefundFailed,
   onRefund,
 }: {
   link: StoredLink;
   currentAddress: `0x${string}` | undefined;
   isBusy: boolean;
+  autoRefundFailed: boolean;
   onRefund: (depositId: bigint) => Promise<void>;
 }) {
   // Guard against corrupted localStorage entries
@@ -263,6 +287,7 @@ function LinkRow({
       isExpired={isExpired}
       canRefund={canRefund}
       isBusy={isBusy}
+      autoRefundFailed={autoRefundFailed}
       onRefund={() => onRefund(depositId)}
     />
   );
