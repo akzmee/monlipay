@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { EXPIRY_PRESETS, type TokenInfo } from "@/config/chain";
 import { useTokenRegistry } from "@/hooks/useTokenRegistry";
+import { TokenAvatar } from "./TokenAvatar";
 import { TokenSelectModal } from "./TokenSelectModal";
 
 interface CreateFormProps {
@@ -69,16 +70,8 @@ export function CreateForm({
             disabled={isBusy}
             className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100"
           >
-            {/* Token avatar */}
-            <div
-              className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${
-                selectedToken.isNative
-                  ? "from-violet-500 to-indigo-600"
-                  : "from-cyan-500 to-blue-600"
-              } text-xs font-bold text-white`}
-            >
-              {selectedToken.symbol.charAt(0)}
-            </div>
+            {/* Token avatar — uses logoURI when available, gradient fallback otherwise */}
+            <TokenAvatar token={selectedToken} size={28} />
             <span className="text-stone-900 dark:text-stone-100">
               {selectedToken.symbol}
             </span>

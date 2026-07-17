@@ -7,6 +7,7 @@ import { useBridgeQuote, useBridgeBalance } from "@/hooks/useBridge";
 import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
 import { SOURCE_CHAINS, MONAD_DESTINATION_CHAIN_ID } from "@/lib/bridge-client";
 import { TokenSelectModal, type ModalToken } from "@/components/TokenSelectModal";
+import { TokenAvatar } from "@/components/TokenAvatar";
 import { MonadLogo } from "@/components/MonadLogo";
 import type { BridgeRoute, BridgeToken, TokenBalance } from "@/lib/bridge-types";
 
@@ -246,9 +247,19 @@ export default function BridgePage() {
                   <span className="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
                     From
                   </span>
-                  {tokenListLoading && (
-                    <span className="text-xs text-stone-400">Loading…</span>
-                  )}
+                  {/* Source chain selector — top-right of the From panel.
+                      Renders as a compact pill with chain logo + name. */}
+                  <button
+                    type="button"
+                    onClick={() => setShowChainModal(true)}
+                    disabled={tokenListLoading}
+                    className="flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-100 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-200 dark:hover:bg-stone-600/50"
+                    aria-label={`Source chain: ${selectedChain.name}. Click to change.`}
+                  >
+                    <ChainAvatar chain={selectedChain} size={16} />
+                    <span>{selectedChain.name}</span>
+                    <ChevronDownIcon />
+                  </button>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -264,29 +275,16 @@ export default function BridgePage() {
                     onClick={() => setShowFromTokenModal(true)}
                     className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100"
                   >
-                    <TokenAvatarMini token={selectedFromToken} />
+                    <TokenAvatar token={selectedFromToken} size={24} />
                     <span>{selectedFromToken.symbol}</span>
                     <ChevronDownIcon />
                   </button>
                 </div>
-              </div>
-
-              {/* Chain selector (replaces <select>) */}
-              <div className="mt-3">
-                <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  Source chain
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowChainModal(true)}
-                  className="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-900 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700/50"
-                >
-                  <span className="flex items-center gap-2">
-                    <ChainAvatar chain={selectedChain} />
-                    {selectedChain.name}
-                  </span>
-                  <ChevronDownIcon />
-                </button>
+                {tokenListLoading && (
+                  <p className="mt-1.5 text-right text-[10px] text-stone-400">
+                    Loading tokens…
+                  </p>
+                )}
               </div>
 
               {/* Arrow divider */}
@@ -320,7 +318,7 @@ export default function BridgePage() {
                     onClick={() => setShowToTokenModal(true)}
                     className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100"
                   >
-                    <TokenAvatarMini token={selectedToToken} />
+                    <TokenAvatar token={selectedToToken} size={24} />
                     <span>{selectedToToken.symbol}</span>
                     <ChevronDownIcon />
                   </button>
@@ -547,7 +545,7 @@ function BalanceCard({
             className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-stone-100 dark:hover:bg-stone-800"
           >
             <div className="flex items-center gap-2">
-              <TokenAvatarMini token={b.token} />
+              <TokenAvatar token={b.token} size={24} />
               <div>
                 <div className="text-sm font-medium text-stone-900 dark:text-stone-100">
                   {b.balanceFormatted} {b.token.symbol}
@@ -849,30 +847,6 @@ function ChainAvatar({
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {chain.shortName.charAt(0).toUpperCase()}
-    </div>
-  );
-}
-
-function TokenAvatarMini({
-  token,
-}: {
-  token: { symbol: string; logoURI?: string };
-}) {
-  const [imgError, setImgError] = useState(false);
-  if (token.logoURI && !imgError) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={token.logoURI}
-        alt={token.symbol}
-        className="h-6 w-6 rounded-full"
-        onError={() => setImgError(true)}
-      />
-    );
-  }
-  return (
-    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[10px] font-bold text-white">
-      {token.symbol.charAt(0)}
     </div>
   );
 }

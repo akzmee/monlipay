@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTokenMetadata } from "@/hooks/useTokenMetadata";
+import { TokenAvatar } from "./TokenAvatar";
 
 /**
  * Minimal token shape that both TokenInfo (create page) and BridgeToken
@@ -28,61 +29,6 @@ interface TokenSelectModalProps {
   customTokenAddresses?: Set<string>;
   /** Hide the "Import Custom Token" footer (e.g. on bridge page). */
   hideImport?: boolean;
-}
-
-/**
- * Token avatar with logo image or deterministic gradient fallback.
- *
- * Web3-native: tries token logoURI first, falls back to a gradient circle
- * with the token's first letter. Gradient is deterministic (hash-based),
- * not random, so the same token always looks the same.
- */
-const AVATAR_GRADIENTS = [
-  "from-violet-500 to-indigo-500",
-  "from-indigo-500 to-blue-500",
-  "from-blue-500 to-cyan-500",
-  "from-purple-500 to-violet-500",
-  "from-fuchsia-500 to-purple-500",
-  "from-cyan-500 to-teal-500",
-  "from-emerald-500 to-cyan-500",
-  "from-violet-500 to-fuchsia-500",
-];
-
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash);
-}
-
-function gradientFor(symbol: string): string {
-  return AVATAR_GRADIENTS[hashString(symbol) % AVATAR_GRADIENTS.length];
-}
-
-function TokenAvatar({ token, size = 36 }: { token: ModalToken; size?: number }) {
-  const [imgError, setImgError] = useState(false);
-
-  if (token.logoURI && !imgError) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={token.logoURI}
-        alt={token.symbol}
-        className="rounded-full"
-        style={{ width: size, height: size }}
-        onError={() => setImgError(true)}
-      />
-    );
-  }
-  return (
-    <div
-      className={`flex items-center justify-center rounded-full bg-gradient-to-br ${gradientFor(token.symbol)} font-bold text-white`}
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-    >
-      {token.symbol.charAt(0)}
-    </div>
-  );
 }
 
 /**

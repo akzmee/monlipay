@@ -5,15 +5,22 @@
  * For server-only config, see bridge-server.ts.
  */
 
-/** Source chains supported for bridging TO Monad. */
+/**
+ * Source chains supported for bridging TO Monad.
+ *
+ * `logoURI` uses trustwallet/assets chain-level logos
+ * (blockchains/<slug>/info/logo.png, 200 OK verified 2025-07-17).
+ * Slugs differ from chain IDs and shortNames — see
+ * https://github.com/trustwallet/assets/tree/master/blockchains.
+ */
 export const SOURCE_CHAINS = [
-  { id: 1, name: "Ethereum", shortName: "eth" },
-  { id: 10, name: "Optimism", shortName: "op" },
-  { id: 8453, name: "Base", shortName: "base" },
-  { id: 42161, name: "Arbitrum One", shortName: "arb" },
-  { id: 137, name: "Polygon", shortName: "polygon" },
-  { id: 56, name: "BNB Chain", shortName: "bnb" },
-  { id: 43114, name: "Avalanche", shortName: "avax" },
+  { id: 1, name: "Ethereum", shortName: "eth", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
+  { id: 10, name: "Optimism", shortName: "op", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/info/logo.png" },
+  { id: 8453, name: "Base", shortName: "base", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/info/logo.png" },
+  { id: 42161, name: "Arbitrum One", shortName: "arb", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/info/logo.png" },
+  { id: 137, name: "Polygon", shortName: "polygon", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png" },
+  { id: 56, name: "BNB Chain", shortName: "bnb", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png" },
+  { id: 43114, name: "Avalanche", shortName: "avax", logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchex/info/logo.png" },
 ] as const;
 
 /**
