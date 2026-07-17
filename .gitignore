@@ -8,6 +8,7 @@ cache/
 out/
 broadcast/
 lib/
+contracts/lcov.info
 
 # Skills (installed via npx skills add)
 .agents/
