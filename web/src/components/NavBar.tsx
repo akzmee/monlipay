@@ -6,7 +6,7 @@ import { ConnectButton } from "./ConnectButton";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
-  { href: "/", label: "Create" },
+  { href: "/create", label: "Create" },
   { href: "/bridge", label: "Bridge" },
   { href: "/my-links", label: "My Links" },
 ];
@@ -35,8 +35,8 @@ export function NavBar() {
             </svg>
           </div>
           <span className="text-lg font-bold tracking-tight">
-            <span className="logo-mark">Ngat</span>
-            <span className="text-stone-900 dark:text-stone-100">MON</span>
+            <span className="logo-mark">Monli</span>
+            <span className="text-stone-900 dark:text-stone-100">Pay</span>
           </span>
         </Link>
 

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NgatMON — Send MON via link",
+  title: "MonliPay — Send any token via link on Monad",
   description:
     "Send tokens on Monad as easily as sharing a WhatsApp link. Recipient clicks, funds arrive. Unclaimed? Refund anytime.",
 };

@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ShareLink } from "@/components/ShareLink";
 
 describe("ShareLink", () => {
-  const mockUrl = "https://ngatmon.app/claim#42/0xabc123";
+  const mockUrl = "https://monlipay.app/claim#42/0xabc123";
   const mockReset = vi.fn();
 
   beforeEach(() => {

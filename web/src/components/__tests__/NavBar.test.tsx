@@ -35,10 +35,10 @@ vi.mock("next/link", () => ({
 }));
 
 describe("NavBar", () => {
-  it("should render the logo with 'NgatMON' text", () => {
+  it("should render the logo with 'MonliPay' text", () => {
     render(<NavBar />);
-    expect(screen.getByText("Ngat")).toBeInTheDocument();
-    expect(screen.getByText("MON")).toBeInTheDocument();
+    expect(screen.getByText("Monli")).toBeInTheDocument();
+    expect(screen.getByText("Pay")).toBeInTheDocument();
   });
 
   it("should render the Create nav link", () => {
@@ -61,10 +61,10 @@ describe("NavBar", () => {
     expect(screen.getByTestId("theme-toggle")).toBeInTheDocument();
   });
 
-  it("should link Create to /", () => {
+  it("should link Create to /create", () => {
     render(<NavBar />);
     const link = screen.getByText("Create").closest("a");
-    expect(link?.getAttribute("href")).toBe("/");
+    expect(link?.getAttribute("href")).toBe("/create");
   });
 
   it("should link My Links to /my-links", () => {
@@ -75,7 +75,7 @@ describe("NavBar", () => {
 
   it("should link logo to /", () => {
     render(<NavBar />);
-    const logoLink = screen.getByText("Ngat").closest("a");
+    const logoLink = screen.getByText("Monli").closest("a");
     expect(logoLink?.getAttribute("href")).toBe("/");
   });
 });

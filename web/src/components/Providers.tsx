@@ -9,7 +9,7 @@ import { useState, type ReactNode, useMemo } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 
 /**
- * Custom RainbowKit theme that matches the NgatMON brand colors.
+ * Custom RainbowKit theme that matches the MonliPay brand colors.
  * Uses red-to-orange gradient accents instead of RainbowKit's default blue.
  */
 function useRainbowKitTheme() {
