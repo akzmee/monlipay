@@ -7,7 +7,7 @@ import { SUPPORTED_TOKENS, EXPIRY_PRESETS, isContractDeployed, LINK_VAULT_ADDRES
 import { CreateForm } from "@/components/CreateForm";
 import { ShareLink } from "@/components/ShareLink";
 
-export default function HomePage() {
+export default function CreatePage() {
   const { isConnected } = useAccount();
   const { create, result, error, isSending, isConfirming, reset } = useCreateLink();
   const chainId = useChainId();
@@ -23,7 +23,7 @@ export default function HomePage() {
   if (result) {
     return (
       <div className="hero-gradient">
-        <div className="mx-auto max-w-2xl px-4 py-16">
+        <div className="mx-auto max-w-md px-4 py-8 pb-24 sm:py-12 sm:pb-12">
           <ShareLink url={result.shareableUrl} onReset={reset} />
         </div>
       </div>
@@ -31,11 +31,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="hero-gradient min-h-[calc(100vh-4rem)]">
-      <div className="mx-auto max-w-md px-4 py-8 sm:py-10">
+    <div className="hero-gradient min-h-[calc(100vh-3.5rem)]">
+      <div className="mx-auto max-w-md px-4 py-6 pb-24 sm:py-8 sm:pb-8">
         {/* Contract not deployed warning */}
         {!isContractDeployed && (
-          <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
+          <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
             <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
               Contract not deployed yet. Set{" "}
               <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/50">
@@ -49,23 +49,23 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Hero — compact, fits viewport */}
-        <div className="mb-6 text-center">
-          <h1 className="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            Send MON via link
+        {/* Hero */}
+        <div className="mb-5 text-center sm:mb-6">
+          <h1 className="mb-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            Create a payment link
           </h1>
           <p className="text-sm text-stone-600 dark:text-stone-400">
-            Share via WhatsApp. Recipient claims with one tap.
+            Any token on Monad. Share via chat. Recipient claims with one tap.
           </p>
         </div>
 
         {/* Create form */}
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-6">
+        <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-5">
           {!isConnected ? (
-            <div className="flex flex-col items-center gap-3 py-10 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
+            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50">
                 <svg
-                  className="h-6 w-6 text-red-600 dark:text-red-400"
+                  className="h-6 w-6 text-violet-600 dark:text-violet-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -79,17 +79,17 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-base font-semibold">Connect your wallet</h2>
+                <h2 className="text-sm font-semibold">Connect your wallet</h2>
                 <p className="mt-1 text-xs text-stone-500">
-                  Connect MetaMask to create a payment link
+                  Tap Connect at the top to create a payment link
                 </p>
               </div>
             </div>
           ) : !isContractDeployed ? (
-            <div className="flex flex-col items-center gap-3 py-10 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/40">
+            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/40">
                 <svg
-                  className="h-6 w-6 text-red-600 dark:text-red-400"
+                  className="h-6 w-6 text-violet-600 dark:text-violet-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -99,14 +99,14 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-base font-semibold">Contract not deployed</h2>
+                <h2 className="text-sm font-semibold">Contract not deployed</h2>
                 <p className="mt-1 text-xs text-stone-500">
                   Deploy LinkVault.sol and set the address in .env.local
                 </p>
               </div>
             </div>
           ) : isWrongChain ? (
-            <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40">
                 <svg
                   className="h-6 w-6 text-amber-600 dark:text-amber-400"
@@ -123,9 +123,9 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-base font-semibold">Wrong network</h2>
+                <h2 className="text-sm font-semibold">Wrong network</h2>
                 <p className="mt-1 text-xs text-stone-500">
-                  You&apos;re connected to the wrong chain. Switch to Monad Testnet to create payment links.
+                  Switch to Monad Testnet to create payment links.
                 </p>
               </div>
               <button
@@ -136,7 +136,7 @@ export default function HomePage() {
                     // User rejected
                   }
                 }}
-                className="mt-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400"
+                className="mt-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 active:scale-95"
               >
                 Switch to Monad Testnet
               </button>

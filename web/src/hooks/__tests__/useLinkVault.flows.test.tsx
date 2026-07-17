@@ -45,6 +45,8 @@ vi.mock("@/config/wagmi", () => ({
 
 vi.mock("viem", () => ({
   parseEther: (v: string) => BigInt(Math.floor(parseFloat(v) * 1e18)),
+  parseUnits: (v: string, decimals: number) =>
+    BigInt(Math.floor(parseFloat(v) * 10 ** decimals)),
   encodeFunctionData: () => "0xencoded",
   decodeEventLog: vi.fn((args: { topics: string[] }) => {
     // Return different event based on topic[0]

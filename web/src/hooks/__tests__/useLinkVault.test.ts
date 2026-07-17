@@ -33,9 +33,14 @@ vi.mock("@/config/wagmi", () => ({
 const mockEncodeFunctionData = vi.fn(() => "0xencoded");
 const mockDecodeEventLog = vi.fn();
 const mockParseEther = vi.fn((v: string) => BigInt(Math.floor(parseFloat(v) * 1e18)));
+const mockParseUnits = vi.fn(
+  (v: string, decimals: number) =>
+    BigInt(Math.floor(parseFloat(v) * 10 ** decimals)),
+);
 
 vi.mock("viem", () => ({
   parseEther: mockParseEther,
+  parseUnits: mockParseUnits,
   encodeFunctionData: mockEncodeFunctionData,
   decodeEventLog: mockDecodeEventLog,
 }));

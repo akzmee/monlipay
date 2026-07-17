@@ -6,7 +6,7 @@ import {
   useSendTransaction,
 } from "wagmi";
 import { useState, useCallback } from "react";
-import { parseEther, type Hex } from "viem";
+import { parseUnits, type Hex } from "viem";
 import { linkVaultAbi } from "@/lib/abi";
 import { LINK_VAULT_ADDRESS } from "@/config/chain";
 import { generateSecretKey, privateKeyToClaimKey, buildShareableUrl } from "@/lib/crypto";
@@ -78,6 +78,7 @@ export function useCreateLink() {
       amount: string; // in ether units, will be parsed
       expirySeconds: number;
       isNative: boolean;
+      decimals?: number; // defaults to 18 (native MON)
       baseUrl: string;
     }) => {
       setError(null);
@@ -95,7 +96,8 @@ export function useCreateLink() {
 
         // 2. Prepare the transaction
         const expiryTimestamp = Math.floor(Date.now() / 1000) + params.expirySeconds;
-        const amountWei = parseEther(params.amount);
+        const decimals = params.decimals ?? 18;
+        const amountWei = parseUnits(params.amount, decimals);
 
         // Encode the createLink call
         const { encodeFunctionData } = await import("viem");

@@ -17,20 +17,27 @@ const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || "dummy-project-id
  * The connectors are passed to wagmi's createConfig.
  */
 const { connectors } = getDefaultWallets({
-  appName: "NgatMON",
+  appName: "MonliPay",
   projectId: WC_PROJECT_ID,
 });
 
 /**
  * Wagmi configuration for the Monad chain with RainbowKit connectors.
+ *
+ * Only the active chain (testnet or mainnet) is registered. Switching
+ * between networks requires setting NEXT_PUBLIC_NETWORK and rebuilding.
  */
 export const wagmiConfig = createConfig({
   chains: [monadChain],
   connectors,
-  storage: createStorage({ storage: typeof window !== "undefined" ? localStorage : undefined }),
+  storage: createStorage({
+    storage: typeof window !== "undefined" ? localStorage : undefined,
+  }),
   ssr: true,
   multiInjectedProviderDiscovery: true,
   transports: {
-    [monadChain.id]: http("https://testnet-rpc.monad.xyz"),
-  },
+    // Use the chain's built-in RPC URL (defined in chain.ts)
+    [monadChain.id]: http(),
+  } as Record<typeof monadChain.id, ReturnType<typeof http>>,
 });
+
