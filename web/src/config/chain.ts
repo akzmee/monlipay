@@ -2,12 +2,19 @@ import { defineChain } from "viem";
 import tokenList from "./tokens.json";
 
 /**
- * NOTE: We intentionally do NOT set `iconUrl` on either chain definition.
- * RainbowKit ships its own Monad logo in its built-in chain registry, which
- * is higher quality than anything we could inline. Overriding with a custom
- * iconUrl replaces that logo — so we leave it unset and let RainbowKit's
- * default logo render.
+ * NOTE: We intentionally do NOT set `iconUrl` on monadTestnetChain.
+ * RainbowKit ships its own Monad logo in its built-in chain registry
+ * (mapped to chain ID 10143), which renders automatically.
+ *
+ * However, RainbowKit does NOT ship a logo for Monad Mainnet (chain ID
+ * 143) since mainnet isn't listed in its registry yet. We reuse the
+ * exact same Monad logo asset that RainbowKit uses for testnet, so both
+ * chains display the identical official logo.
+ *
+ * Source: @rainbow-me/rainbowkit chainIcons/monad.svg
  */
+const MONAD_MAINNET_ICON_URL =
+  "data:image/svg+xml,%3Csvg%20width%3D%2233%22%20height%3D%2232%22%20viewBox%3D%220%200%2033%2032%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20d%3D%22M16.8163%200C12.1959%200%200.816406%2011.3792%200.816406%2015.9999C0.816406%2020.6206%2012.1959%2032%2016.8163%2032C21.4367%2032%2032.8164%2020.6204%2032.8164%2015.9999C32.8164%2011.3794%2021.4369%200%2016.8163%200ZM14.323%2025.1492C12.3746%2024.6183%207.13621%2015.455%207.66723%2013.5066C8.19825%2011.5581%2017.3614%206.31979%2019.3097%206.8508C21.2582%207.38173%2026.4966%2016.5449%2025.9656%2018.4934C25.4346%2020.4418%2016.2714%2025.6802%2014.323%2025.1492Z%22%20fill%3D%22%23836EF9%22%2F%3E%0A%3C%2Fsvg%3E%0A";
 
 /**
  * Monad Testnet configuration.
@@ -66,6 +73,8 @@ export const monadMainnetChain = defineChain({
     },
   },
   testnet: false,
+  // Reuse RainbowKit's built-in Monad logo (see MONAD_MAINNET_ICON_URL above)
+  iconUrl: MONAD_MAINNET_ICON_URL,
 });
 
 /**
