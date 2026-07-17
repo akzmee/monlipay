@@ -6,14 +6,21 @@ import { monadChain } from "@/config/chain";
 /**
  * Wrapper around RainbowKit's ConnectButton with custom branding.
  *
- * When connected to the correct chain, layout (left → right) is:
- *   [ThemeToggle] [Account address] [Green dot]
- * The green dot chain indicator is on the far right with a fixed
- * 36×36 px size (h-9 w-9) so it renders identically in light and
- * dark mode. Click it to open RainbowKit's chain modal where users
- * can switch between Monad Testnet and Mainnet.
+ * Layout (left → right) is always `[primary action][chain pill]` so the
+ * navbar never shifts when the user transitions between states:
  *
- * When on the wrong network, shows an amber pulsing "Wrong Network" badge.
+ *   Disconnected:        [Connect Wallet] [green dot — "Monad online"]
+ *   Connected + correct: [account address] [green dot — click = chain modal]
+ *   Connected + wrong:   [account address] [amber Wrong Network]
+ *
+ * The chain pill is always present and always 36×36 px (h-9 w-9) so it
+ * renders identically in light and dark mode. The green dot doubles as a
+ * "Monad network is reachable" signal even before the user connects, so
+ * the page doesn't feel empty.
+ *
+ * Click behavior of the chain pill depends on state:
+ *   - Disconnected → openConnectModal (can't switch chain without wallet)
+ *   - Connected    → openChainModal (switch between Monad Testnet/Mainnet)
  */
 export function ConnectButton() {
   return (
@@ -31,19 +38,34 @@ export function ConnectButton() {
 
         return (
           <div
+            className="flex items-center gap-2"
             {...(!mounted && {
               "aria-hidden": true,
               style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
             })}
           >
             {!connected ? (
-              <button
-                onClick={openConnectModal}
-                type="button"
-                className="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
-              >
-                Connect Wallet
-              </button>
+              <>
+                <button
+                  onClick={openConnectModal}
+                  type="button"
+                  className="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
+                >
+                  Connect Wallet
+                </button>
+                {/* Online indicator — signals "Monad network is reachable"
+                    before the user connects. Click falls through to the
+                    connect modal because switching chains requires a wallet. */}
+                <button
+                  onClick={openConnectModal}
+                  type="button"
+                  aria-label={`${monadChain.name} online. Click to connect wallet.`}
+                  title={`${monadChain.name} online`}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                </button>
+              </>
             ) : isWrongChain ? (
               <button
                 onClick={openChainModal}
@@ -55,7 +77,7 @@ export function ConnectButton() {
                 <span className="hidden sm:inline">Wrong Network</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2">
+              <>
                 {/* Account button */}
                 <button
                   onClick={openAccountModal}
@@ -75,7 +97,7 @@ export function ConnectButton() {
                 >
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 </button>
-              </div>
+              </>
             )}
           </div>
         );

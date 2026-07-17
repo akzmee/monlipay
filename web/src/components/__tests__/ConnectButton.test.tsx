@@ -93,6 +93,26 @@ describe("ConnectButton", () => {
       expect(mockOpenConnectModal).toHaveBeenCalledTimes(1);
     });
 
+    it("should render green dot online indicator (chain pill stays visible)", () => {
+      const { container } = render(<ConnectButton />);
+      const indicator = container.querySelector(".bg-emerald-500");
+      expect(indicator).toBeInTheDocument();
+    });
+
+    it("should call openConnectModal when the online indicator is clicked", () => {
+      const { container } = render(<ConnectButton />);
+      const indicator = container.querySelector(".bg-emerald-500");
+      fireEvent.click(indicator!.closest("button")!);
+      expect(mockOpenConnectModal).toHaveBeenCalledTimes(1);
+    });
+
+    it("should expose 'online' aria-label on the indicator", () => {
+      const { container } = render(<ConnectButton />);
+      const indicator = container.querySelector(".bg-emerald-500");
+      const btn = indicator!.closest("button");
+      expect(btn?.getAttribute("aria-label")).toMatch(/online/i);
+    });
+
     it("should not be aria-hidden when mounted", () => {
       render(<ConnectButton />);
       const container = screen.getByText("Connect Wallet").parentElement!;
