@@ -95,9 +95,9 @@ describe("TokenSelectModal", () => {
       expect(monButton).not.toBeNull();
     });
 
-    it("should show CUSTOM badge for custom tokens", () => {
+    it("should show Custom badge for custom tokens", () => {
       render(<TokenSelectModal {...PROPS} />);
-      expect(screen.getByText("CUSTOM")).toBeInTheDocument();
+      expect(screen.getByText("Custom")).toBeInTheDocument();
     });
 
     it("should call onClose when close button clicked", () => {
@@ -156,7 +156,7 @@ describe("TokenSelectModal", () => {
       const input = screen.getByPlaceholderText("Search name or paste address");
       fireEvent.change(input, { target: { value: "0xabc" } });
       expect(
-        screen.getByText(/Import "0xabc" as custom token/),
+        screen.getByText(/Import .0xabc. as custom token/),
       ).toBeInTheDocument();
     });
 
@@ -164,7 +164,7 @@ describe("TokenSelectModal", () => {
       render(<TokenSelectModal {...PROPS} />);
       fireEvent.click(screen.getByText("Import Custom Token"));
       expect(
-        screen.getByPlaceholderText("0x... contract address"),
+        screen.getByPlaceholderText("0x… contract address"),
       ).toBeInTheDocument();
     });
 
@@ -195,9 +195,9 @@ describe("TokenSelectModal", () => {
       render(<TokenSelectModal {...PROPS} />);
       const input = screen.getByPlaceholderText("Search name or paste address");
       fireEvent.change(input, { target: { value: "0xdeadbeef" } });
-      fireEvent.click(screen.getByText(/Import "0xdeadbeef"/));
+      fireEvent.click(screen.getByText(/Import .0xdeadbeef./));
       expect(
-        (screen.getByPlaceholderText("0x... contract address") as HTMLInputElement)
+        (screen.getByPlaceholderText("0x… contract address") as HTMLInputElement)
           .value,
       ).toBe("0xdeadbeef");
     });
@@ -223,7 +223,7 @@ describe("TokenSelectModal", () => {
       fireEvent.click(screen.getByText("Import Custom Token"));
 
       // Enter an address to trigger metadata fetch
-      const input = screen.getByPlaceholderText("0x... contract address");
+      const input = screen.getByPlaceholderText("0x… contract address");
       fireEvent.change(input, {
         target: { value: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" },
       });
@@ -244,7 +244,7 @@ describe("TokenSelectModal", () => {
       render(<TokenSelectModal {...PROPS} />);
       fireEvent.click(screen.getByText("Import Custom Token"));
 
-      expect(screen.getByText("Fetching token metadata...")).toBeInTheDocument();
+      expect(screen.getByText("Fetching metadata…")).toBeInTheDocument();
     });
 
     it("should show error state", () => {

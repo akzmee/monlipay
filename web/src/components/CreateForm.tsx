@@ -172,8 +172,8 @@ export function CreateForm({
         onClose={() => setShowTokenModal(false)}
         tokens={tokens}
         selectedToken={selectedToken}
-        onSelect={setSelectedToken}
-        onAddCustomToken={addToken}
+        onSelect={(t) => setSelectedToken(t as TokenInfo)}
+        onAddCustomToken={(t) => addToken(t as TokenInfo)}
         onRemoveCustomToken={removeToken}
         customTokenAddresses={customTokenAddresses}
       />
