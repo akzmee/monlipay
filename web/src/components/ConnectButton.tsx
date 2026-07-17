@@ -6,9 +6,12 @@ import { monadChain } from "@/config/chain";
 /**
  * Wrapper around RainbowKit's ConnectButton with custom branding.
  *
- * When connected to the correct chain, shows only a small green dot
- * indicator (no chain name text). Click opens RainbowKit's chain modal
- * where users can switch between Monad Testnet and Mainnet.
+ * When connected to the correct chain, layout (left → right) is:
+ *   [ThemeToggle] [Account address] [Green dot]
+ * The green dot chain indicator is on the far right with a fixed
+ * 36×36 px size (h-9 w-9) so it renders identically in light and
+ * dark mode. Click it to open RainbowKit's chain modal where users
+ * can switch between Monad Testnet and Mainnet.
  *
  * When on the wrong network, shows an amber pulsing "Wrong Network" badge.
  */
@@ -53,16 +56,6 @@ export function ConnectButton() {
               </button>
             ) : (
               <div className="flex items-center gap-2">
-                {/* Chain indicator — green dot only, click opens chain modal */}
-                <button
-                  onClick={openChainModal}
-                  type="button"
-                  aria-label={`Connected to ${chain.name}. Click to switch network.`}
-                  className="flex items-center gap-1.5 rounded-lg border border-stone-300 px-2.5 py-2 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
-                  title={chain.name}
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-                </button>
                 {/* Account button */}
                 <button
                   onClick={openAccountModal}
@@ -70,6 +63,17 @@ export function ConnectButton() {
                   className="rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium font-mono transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
                 >
                   {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                </button>
+                {/* Chain indicator — green dot only, click opens chain modal.
+                    Fixed dimensions ensure identical size in light and dark mode. */}
+                <button
+                  onClick={openChainModal}
+                  type="button"
+                  aria-label={`Connected to ${chain.name}. Click to switch network.`}
+                  title={chain.name}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 </button>
               </div>
             )}

@@ -2,6 +2,19 @@ import { defineChain } from "viem";
 import tokenList from "./tokens.json";
 
 /**
+ * Monad logo as inline SVG data URI.
+ *
+ * RainbowKit doesn't ship a logo for Monad, so without this both chains
+ * show a blank placeholder circle in the chain modal. We use the Monad
+ * "M" mark on the official brand violet (#6E54FF).
+ */
+const MONAD_ICON_URL =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#6E54FF"/><path d="M9 23V9h2.5l7 9.5V9H21v14h-2.5l-7-9.5V23H9Z" fill="#fafaf9"/></svg>`,
+  );
+
+/**
  * Monad Testnet configuration.
  * Chain ID: 10143
  */
@@ -25,6 +38,7 @@ export const monadTestnetChain = defineChain({
     },
   },
   testnet: true,
+  iconUrl: MONAD_ICON_URL,
 });
 
 /**
@@ -40,7 +54,7 @@ export const monadTestnetChain = defineChain({
  */
 export const monadMainnetChain = defineChain({
   id: 143,
-  name: "Monad",
+  name: "Monad Mainnet",
   nativeCurrency: {
     name: "Monad",
     symbol: "MON",
@@ -58,6 +72,7 @@ export const monadMainnetChain = defineChain({
     },
   },
   testnet: false,
+  iconUrl: MONAD_ICON_URL,
 });
 
 /**
