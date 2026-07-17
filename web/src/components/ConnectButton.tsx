@@ -20,7 +20,7 @@ import { monadChain } from "@/config/chain";
  *
  * Click behavior of the chain pill depends on state:
  *   - Disconnected → openConnectModal (can't switch chain without wallet)
- *   - Connected    → openChainModal (switch between Monad Testnet/Mainnet)
+ *   - Connected    → openChainModal (chain info modal — app is single-chain)
  */
 export function ConnectButton() {
   return (

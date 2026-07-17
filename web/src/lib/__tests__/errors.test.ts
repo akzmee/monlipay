@@ -137,4 +137,52 @@ describe("errors.formatUserError", () => {
     );
     expect(formatUserError(42 as unknown, FALLBACK)).toBe(FALLBACK);
   });
+
+  // -----------------------------------------------------------------
+  // chainName parameter (dynamic network name support)
+  // -----------------------------------------------------------------
+  describe("chainName parameter", () => {
+    it("should default to 'Monad Testnet' when chainName is not provided", () => {
+      expect(formatUserError("wrong chain id", FALLBACK)).toContain(
+        "Monad Testnet",
+      );
+    });
+
+    it("should use provided chainName in wrong-network message", () => {
+      expect(
+        formatUserError("wrong chain id", FALLBACK, "Monad Mainnet"),
+      ).toContain("Monad Mainnet");
+    });
+
+    it("should use provided chainName for chain mismatch", () => {
+      const msg = formatUserError(
+        "chain mismatch detected",
+        FALLBACK,
+        "Custom Chain",
+      );
+      expect(msg).toContain("Custom Chain");
+    });
+
+    it("should use provided chainName for unrecognized chain", () => {
+      const msg = formatUserError(
+        "unrecognized chain id",
+        FALLBACK,
+        "My Network",
+      );
+      expect(msg).toContain("My Network");
+    });
+
+    it("should not affect other error categories", () => {
+      // chainName should not leak into non-chain-related errors
+      expect(
+        formatUserError("user rejected", FALLBACK, "Monad Mainnet"),
+      ).toBe("Transaction cancelled. You can try again anytime.");
+    });
+
+    it("should not affect errors that fall through to raw message", () => {
+      expect(
+        formatUserError("Custom short error", FALLBACK, "Monad Mainnet"),
+      ).toBe("Custom short error");
+    });
+  });
 });

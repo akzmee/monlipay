@@ -56,7 +56,7 @@ export default function MyLinksPage() {
           </div>
           <h1 className="text-xl font-semibold">Wrong network</h1>
           <p className="mt-2 text-sm text-stone-500">
-            Switch to Monad Testnet to manage your links.
+            Switch to {monadChain.name} to manage your links.
           </p>
           <button
             onClick={async () => {
@@ -68,7 +68,7 @@ export default function MyLinksPage() {
             }}
             className="mt-4 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500"
           >
-            Switch to Monad Testnet
+            Switch to {monadChain.name}
           </button>
         </div>
       </div>

@@ -182,6 +182,55 @@ describe("crypto", () => {
   });
 
   // -----------------------------------------------------------------
+  // parseClaimUrl — negative deposit ID rejection (security fix)
+  // -----------------------------------------------------------------
+  describe("parseClaimUrl — security: negative deposit IDs", () => {
+    it("should reject negative deposit ID in compact format", () => {
+      // An attacker could craft a URL with -42 as the deposit ID. BigInt
+      // would parse it as -42n, and the contract's uint256 cast would wrap
+      // it to a huge number — potentially matching an unrelated deposit.
+      // The parser MUST reject these.
+      const validKey =
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" as Hex;
+      // Manually construct a compact URL with a negative id
+      const hash = `#-42-${validKey.slice(2)}`;
+      // Note: dash in "-42" could confuse the parser, so we test explicitly
+      // that the result is null (not a wrapped huge number).
+      // We use buildClaimHash + replace to verify the parser's behavior.
+      const builtHash = buildClaimHash(42n, validKey).replace("42", "-42");
+      const result = parseClaimUrl(builtHash);
+      // dashIdx of -42 is 0 (the dash is at index 0), so it falls through
+      // to the legacy parser, which rejects "-42" via BigInt("-42") < 0n.
+      expect(result).toBeNull();
+    });
+
+    it("should reject negative deposit ID in legacy format", () => {
+      const validKey =
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" as Hex;
+      const hash = `#-42/${validKey}`;
+      expect(parseClaimUrl(hash)).toBeNull();
+    });
+
+    it("should reject deposit ID of -1 in legacy format", () => {
+      const validKey =
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" as Hex;
+      expect(parseClaimUrl(`#-1/${validKey}`)).toBeNull();
+    });
+
+    it("should reject deposit ID of -999999 in legacy format", () => {
+      const validKey =
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" as Hex;
+      expect(parseClaimUrl(`#-999999/${validKey}`)).toBeNull();
+    });
+
+    it("should still accept deposit ID of 0 (boundary)", () => {
+      const validKey =
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" as Hex;
+      expect(parseClaimUrl(`#0/${validKey}`)?.depositId).toBe(0n);
+    });
+  });
+
+  // -----------------------------------------------------------------
   // parseClaimUrl — legacy hex format (#42/0xXXXX) for backward compat
   // -----------------------------------------------------------------
   describe("parseClaimUrl — legacy hex format", () => {

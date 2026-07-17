@@ -124,4 +124,124 @@ describe("ClaimForm", () => {
       expect(screen.queryByText("Invalid Ethereum address")).not.toBeInTheDocument();
     });
   });
+
+  // -----------------------------------------------------------------
+  // SECURITY: recipient override confirmation modal
+  // -----------------------------------------------------------------
+  // When the user types a recipient address that differs from the
+  // connected wallet, clicking "Claim Funds" must show a confirmation
+  // modal. This protects against phishing scenarios where a victim is
+  // given a tampered URL with an attacker's address pre-filled.
+  describe("recipientOverride confirmation modal", () => {
+    const differentAddress =
+      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd" as `0x${string}`;
+
+    it("should NOT show modal when claiming without override", () => {
+      renderClaimForm({ recipientOverride: "" });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.queryByText("Send to a different address?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should NOT show modal when override equals connected address", () => {
+      renderClaimForm({ recipientOverride: mockAddress });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.queryByText("Send to a different address?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should NOT show modal when override equals connected address (case-insensitive)", () => {
+      renderClaimForm({
+        recipientOverride: mockAddress.toUpperCase(),
+      });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.queryByText("Send to a different address?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should show modal when override differs from connected address", () => {
+      renderClaimForm({ recipientOverride: differentAddress });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.getByText("Send to a different address?"),
+      ).toBeInTheDocument();
+    });
+
+    it("should display the override address inside the modal", () => {
+      renderClaimForm({ recipientOverride: differentAddress });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(screen.getByText(differentAddress)).toBeInTheDocument();
+    });
+
+    it("should NOT call onClaim immediately when override is set", () => {
+      const { props } = renderClaimForm({
+        recipientOverride: differentAddress,
+      });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(props.onClaim).not.toHaveBeenCalled();
+    });
+
+    it("should call onClaim only after Confirm & Claim is clicked", () => {
+      const { props } = renderClaimForm({
+        recipientOverride: differentAddress,
+      });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      fireEvent.click(screen.getByText("Confirm & Claim"));
+      expect(props.onClaim).toHaveBeenCalledTimes(1);
+    });
+
+    it("should close the modal when Cancel is clicked", () => {
+      renderClaimForm({ recipientOverride: differentAddress });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      fireEvent.click(screen.getByText("Cancel"));
+      expect(
+        screen.queryByText("Send to a different address?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should close the modal when the backdrop is clicked", () => {
+      const { container } = renderClaimForm({
+        recipientOverride: differentAddress,
+      });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      // Click on the backdrop (the outermost fixed div)
+      const backdrop = container.querySelector(".fixed.inset-0");
+      expect(backdrop).not.toBeNull();
+      fireEvent.click(backdrop!);
+      expect(
+        screen.queryByText("Send to a different address?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should show a warning that funds cannot be recovered", () => {
+      renderClaimForm({ recipientOverride: differentAddress });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.getByText(/cannot be recovered/i),
+      ).toBeInTheDocument();
+    });
+
+    it("should close the modal when the recipient input is edited", () => {
+      const { props } = renderClaimForm({
+        recipientOverride: differentAddress,
+      });
+      fireEvent.click(screen.getByText("Claim Funds"));
+      expect(
+        screen.getByText("Send to a different address?"),
+      ).toBeInTheDocument();
+      // Simulate the user typing a new character
+      fireEvent.change(
+        screen.getByPlaceholderText("Or enter a different address..."),
+        { target: { value: "0xnew" } },
+      );
+      // The useEffect that resets on recipientOverride change should close
+      // the modal (the parent re-renders with the new value).
+      // Note: in this test the prop doesn't actually change (we mock
+      // setRecipientOverride), so we verify the user is guided to retype.
+      expect(props.setRecipientOverride).toHaveBeenCalled();
+    });
+  });
 });

@@ -43,6 +43,46 @@ describe("chain config", () => {
     it("should be a valid hex address", () => {
       expect(LINK_VAULT_ADDRESS).toMatch(/^0x[0-9a-fA-F]{40}$/);
     });
+
+    it("should fall back to zero address when env var is missing", () => {
+      // In test environment, NEXT_PUBLIC_LINK_VAULT_ADDRESS is not set.
+      // The validator should fall back to zero address (treated as "not deployed")
+      // rather than crashing or passing through garbage.
+      expect(LINK_VAULT_ADDRESS).toBe(
+        "0x0000000000000000000000000000000000000000",
+      );
+    });
+
+    it("isContractDeployed should be false when address is zero", () => {
+      expect(isContractDeployed).toBe(false);
+    });
+  });
+
+  describe("LINK_VAULT_ADDRESS — security: env var validation", () => {
+    // SECURITY: If a deployer typos the address in .env.local, transactions
+    // would be sent to a random EOA (funds lost) or non-existent contract.
+    // The validator must sanitize invalid env values back to zero address.
+    //
+    // We can't easily test this by changing process.env at runtime because
+    // the module is already imported. Instead we verify the exported values
+    // are always in a safe state regardless of how env was set.
+    //
+    // These tests document the contract: LINK_VAULT_ADDRESS is ALWAYS either
+    // a valid 0x address or the zero address. Never raw garbage.
+
+    it("LINK_VAULT_ADDRESS is always a valid 0x-prefixed 40-hex string", () => {
+      expect(LINK_VAULT_ADDRESS).toMatch(/^0x[0-9a-fA-F]{40}$/);
+    });
+
+    it("isContractDeployed is a boolean", () => {
+      expect(typeof isContractDeployed).toBe("boolean");
+    });
+
+    it("LINK_VAULT_ADDRESS and isContractDeployed are consistent", () => {
+      const isZero =
+        LINK_VAULT_ADDRESS === "0x0000000000000000000000000000000000000000";
+      expect(isContractDeployed).toBe(!isZero);
+    });
   });
 
   describe("isContractDeployed", () => {

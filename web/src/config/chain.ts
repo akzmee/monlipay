@@ -1,4 +1,4 @@
-import { defineChain } from "viem";
+import { defineChain, isAddress } from "viem";
 import tokenList from "./tokens.json";
 
 /**
@@ -94,13 +94,40 @@ export const monadChain = isMainnet ? monadMainnetChain : monadTestnetChain;
 /**
  * Contract address — set in .env.local after deploying LinkVault.sol.
  * The zero address means the contract is not deployed yet.
+ *
+ * SECURITY: We validate the env var format on module load. If a deployer
+ * typos the address, transactions would be sent to either a random EOA
+ * (funds lost) or to a non-existent contract (revert but confusing UX).
+ * We fail loudly in the console and treat the contract as "not deployed"
+ * so the UI falls back to its disabled state rather than misbehaving.
  */
-export const LINK_VAULT_ADDRESS = (process.env.NEXT_PUBLIC_LINK_VAULT_ADDRESS ??
-  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+const RAW_LINK_VAULT_ADDRESS =
+  process.env.NEXT_PUBLIC_LINK_VAULT_ADDRESS ??
+  "0x0000000000000000000000000000000000000000";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+if (
+  RAW_LINK_VAULT_ADDRESS !== ZERO_ADDRESS &&
+  !isAddress(RAW_LINK_VAULT_ADDRESS)
+) {
+  // Fail loudly but don't crash — better to render an "undeployed" UI
+  // than to break the whole app on a misconfigured env. Tests can detect
+  // this state via `isContractDeployed === false`.
+  console.error(
+    `[chain] NEXT_PUBLIC_LINK_VAULT_ADDRESS is not a valid address: "${RAW_LINK_VAULT_ADDRESS}". ` +
+      `Treating contract as not deployed. Please fix your .env.local.`,
+  );
+}
+
+export const LINK_VAULT_ADDRESS = (
+  isAddress(RAW_LINK_VAULT_ADDRESS)
+    ? RAW_LINK_VAULT_ADDRESS
+    : ZERO_ADDRESS
+) as `0x${string}`;
 
 /** Check if the contract has been deployed. */
-export const isContractDeployed =
-  LINK_VAULT_ADDRESS !== "0x0000000000000000000000000000000000000000";
+export const isContractDeployed = LINK_VAULT_ADDRESS !== ZERO_ADDRESS;
 
 /**
  * Token info for tokens shown in the create form.

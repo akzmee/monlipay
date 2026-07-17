@@ -10,8 +10,16 @@
 /**
  * Convert any caught value into a user-friendly string.
  * Returns a short message (<= ~80 chars) suitable for inline UI display.
+ *
+ * @param chainName — the network name to display in "wrong network" messages
+ *                   (defaults to "Monad Testnet" for backwards compat).
+ *                   Callers should pass `monadChain.name` from `@/config/chain`.
  */
-export function formatUserError(err: unknown, fallback: string): string {
+export function formatUserError(
+  err: unknown,
+  fallback: string,
+  chainName: string = "Monad Testnet",
+): string {
   if (!err) return fallback;
 
   const message =
@@ -50,7 +58,7 @@ export function formatUserError(err: unknown, fallback: string): string {
     lower.includes("unrecognized chain") ||
     lower.includes("switch chain")
   ) {
-    return "Wrong network. Please switch to Monad Testnet in your wallet.";
+    return `Wrong network. Please switch to ${chainName} in your wallet.`;
   }
 
   // Contract reverted with a reason string (viem includes "Reason: ...")

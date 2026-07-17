@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { type Address } from "viem";
 
 interface ClaimFormProps {
@@ -14,6 +15,14 @@ interface ClaimFormProps {
   onClaim: () => void;
 }
 
+/**
+ * Truncate an Ethereum address: 0x1234…abcd
+ */
+function truncateAddress(address: string): string {
+  if (address.length < 12) return address;
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
+
 export function ClaimForm({
   isConnected,
   isBusy,
@@ -26,6 +35,38 @@ export function ClaimForm({
   onClaim,
 }: ClaimFormProps) {
   const canClaim = isConnected && !isWrongChain && !isBusy && !recipientError;
+  const [showOverrideConfirm, setShowOverrideConfirm] = useState(false);
+
+  // If the user edits the recipient after the confirm modal opens, close it
+  // — they should re-read the new address before confirming again.
+  useEffect(() => {
+    setShowOverrideConfirm(false);
+  }, [recipientOverride]);
+
+  const handleClickClaim = () => {
+    // SECURITY: When the user overrides the recipient to a different address,
+    // require an explicit confirmation modal. This prevents phishing scenarios
+    // where a victim is given a tampered claim URL with an attacker's address
+    // pre-filled. The modal forces the user to acknowledge they are sending
+    // funds to a non-default address.
+    const trimmed = recipientOverride.trim();
+    const hasOverride = trimmed.length > 0 && trimmed.toLowerCase() !== address?.toLowerCase();
+    if (hasOverride) {
+      setShowOverrideConfirm(true);
+      return;
+    }
+    onClaim();
+  };
+
+  // Close on Escape
+  useEffect(() => {
+    if (!showOverrideConfirm) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowOverrideConfirm(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [showOverrideConfirm]);
 
   if (!isConnected) {
     return (
@@ -92,7 +133,7 @@ export function ClaimForm({
       {/* Claim button */}
       <button
         type="button"
-        onClick={onClaim}
+        onClick={handleClickClaim}
         disabled={!canClaim}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-indigo-500 active:from-violet-700 active:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
       >
@@ -116,6 +157,84 @@ export function ClaimForm({
       <p className="text-center text-xs text-stone-400">
         Claiming requires a small gas fee in MON for the transaction.
       </p>
+
+      {/* Recipient override confirmation modal.
+          SECURITY: This modal exists to make sure the user actively confirms
+          that funds will go to the address they typed, not the connected
+          wallet. Closes on Escape and on recipient edit. */}
+      {showOverrideConfirm && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
+          onClick={() => setShowOverrideConfirm(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-stone-700 dark:bg-stone-900"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="override-title"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50">
+              <svg
+                className="h-6 w-6 text-amber-600 dark:text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                />
+              </svg>
+            </div>
+            <h3
+              id="override-title"
+              className="text-lg font-bold text-stone-900 dark:text-stone-100"
+            >
+              Send to a different address?
+            </h3>
+            <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
+              You are about to claim these funds to a wallet that is not the
+              one you are currently connected with. Please verify the address
+              carefully — funds sent to the wrong address cannot be recovered.
+            </p>
+            <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800">
+              <div className="text-xs uppercase tracking-wide text-stone-500">
+                Recipient
+              </div>
+              <div className="mt-1 break-all font-mono text-sm">
+                {recipientOverride.trim()}
+              </div>
+              <div className="mt-2 text-xs text-stone-400">
+                Shorthand: {truncateAddress(recipientOverride.trim())}
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowOverrideConfirm(false)}
+                disabled={isBusy}
+                className="flex-1 rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOverrideConfirm(false);
+                  onClaim();
+                }}
+                disabled={isBusy}
+                className="flex-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-indigo-500"
+              >
+                Confirm & Claim
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

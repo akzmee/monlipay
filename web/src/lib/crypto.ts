@@ -180,6 +180,11 @@ export async function signClaim(params: {
  * Parse the secret key and deposit ID from a URL hash.
  * Supports both the compact base58 format (#42-XXXX) and the legacy
  * hex format (#42/0xXXXX).
+ *
+ * SECURITY: Rejects negative deposit IDs. A negative id parsed via BigInt
+ * ("-42") would be cast to uint256 by the contract (wrapping to a huge
+ * number), causing confusing "deposit not found" errors at best, and
+ * potentially matching an unrelated deposit at worst. We fail closed.
  */
 export function parseClaimUrl(hash: string): { depositId: bigint; secretKey: Hex } | null {
   // Remove leading #
@@ -192,6 +197,7 @@ export function parseClaimUrl(hash: string): { depositId: bigint; secretKey: Hex
     const keyStr = clean.slice(dashIdx + 1);
     try {
       const depositId = BigInt(idStr);
+      if (depositId < 0n) return null;
       const keyBytes = base58ToBytes(keyStr);
       if (!keyBytes || keyBytes.length !== 32) return null;
       const secretKey = bytesToHex(keyBytes) as Hex;
@@ -210,6 +216,7 @@ export function parseClaimUrl(hash: string): { depositId: bigint; secretKey: Hex
 
   try {
     const depositId = BigInt(idStr);
+    if (depositId < 0n) return null;
     if (!keyStr.startsWith("0x") || keyStr.length !== 66) return null;
     return { depositId, secretKey: keyStr as Hex };
   } catch {
