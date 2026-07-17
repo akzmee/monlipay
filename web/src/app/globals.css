@@ -5,11 +5,20 @@
 
 /*
  * MonliPay Design System
- * Identity: Monad-native. Uses the official Monad brand palette:
- *   - Primary electric violet: #6E54FF
- *   - Lavender: #DDD7FE
- *   - Deep indigo background: #0E091C
- *   - Secondary cyan: #85E6FF
+ * Identity: Monad-native. Uses the official Monad brand palette.
+ *
+ * Primary:
+ *   #6E54FF  — electric violet (logomark, primary CTAs)
+ *   #DDD7FE  — lavender (tints, soft accents)
+ *   #0E091C  — near-black indigo (deep backgrounds)
+ *   #000000  — pure black (text, maximum contrast)
+ *   #FFFFFF  — pure white (surfaces, inverse text)
+ *
+ * Secondary:
+ *   #85E6FF  — cyan (secondary accent, "To" indicators)
+ *   #B9E3F9  — light cyan (secondary tints)
+ *   #FF8EE4  — pink (tertiary accent, gradients)
+ *   #FFAE45  — orange (tertiary accent, highlights)
  */
 
 :root {
@@ -19,19 +28,30 @@
   --surface-elevated: #ffffff;
   --border: #e7e5e4;
 
-  /* Monad brand palette — sourced from official Monad Brand Kit */
-  --monad-primary: #6E54FF;        /* violet — logomark + MON token */
-  --monad-primary-hover: #5a3fe0;
-  --monad-deep-violet: #391B97;    /* deep violet — WMON token background */
-  --monad-lavender: #DDD7FE;       /* light violet tint */
-  --monad-indigo: #0E091C;         /* near-black with violet tint */
-  --monad-cyan: #85E6FF;           /* secondary accent */
+  /* === Monad official palette (verbatim from Brand Kit) === */
+  /* Primary */
+  --monad-primary: #6E54FF;
+  --monad-lavender: #DDD7FE;
+  --monad-indigo: #0E091C;
+  --monad-black: #000000;
+  --monad-white: #FFFFFF;
+  /* Secondary */
+  --monad-cyan: #85E6FF;
+  --monad-cyan-light: #B9E3F9;
+  --monad-pink: #FF8EE4;
+  --monad-orange: #FFAE45;
+  /* Derived (not in palette doc, but sourced from official assets) */
+  --monad-primary-hover: #5a3fe0;        /* darkened #6E54FF */
+  --monad-deep-violet: #391B97;          /* WMON token background */
 
-  --primary: #6E54FF;
+  /* === Semantic tokens === */
+  --primary: var(--monad-primary);
   --primary-hover: #5a3fe0;
   --primary-light: #f1ecff;
-  --accent: #85E6FF;
+  --accent: var(--monad-cyan);
   --accent-light: #ecfdff;
+  --accent-2: var(--monad-pink);         /* tertiary accent (pink) */
+  --accent-3: var(--monad-orange);       /* tertiary accent (orange) */
   --success: #16a34a;
   --success-light: #f0fdf4;
   --warning: #d97706;
@@ -54,10 +74,20 @@
   --color-primary-light: var(--primary-light);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+  /* Expose the full Monad palette as Tailwind colors:
+     e.g. bg-monad-pink, text-monad-orange, border-monad-cyan-light */
   --color-monad-primary: var(--monad-primary);
-  --color-monad-deep-violet: var(--monad-deep-violet);
   --color-monad-lavender: var(--monad-lavender);
+  --color-monad-indigo: var(--monad-indigo);
+  --color-monad-black: var(--monad-black);
+  --color-monad-white: var(--monad-white);
   --color-monad-cyan: var(--monad-cyan);
+  --color-monad-cyan-light: var(--monad-cyan-light);
+  --color-monad-pink: var(--monad-pink);
+  --color-monad-orange: var(--monad-orange);
+  --color-monad-deep-violet: var(--monad-deep-violet);
   --color-success: var(--success);
   --color-success-light: var(--success-light);
   --color-warning: var(--warning);
@@ -158,30 +188,40 @@ textarea {
   background: var(--text-muted);
 }
 
-/* Signature hero gradient — Monad violet glow */
+/*
+ * Hero gradient — full Monad palette glow.
+ * Layer order (back → front): indigo base, violet primary, cyan+pink+orange
+ * accents. Low opacity so it never overwhelms content.
+ */
 .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.08), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.05), transparent 60%);
+    radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.06), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.05), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.06), transparent 60%);
 }
 
 @media (prefers-color-scheme: dark) {
   .hero-gradient {
     background:
-      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.12), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.06), transparent 60%);
+      radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.10), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.08), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.18), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.08), transparent 60%);
   }
 }
 
 .dark .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.12), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(133, 230, 255, 0.06), transparent 60%);
+    radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.10), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.08), transparent 60%);
 }
 
-/* Logo mark — Monad violet gradient */
+/* Logo mark — uses the three brand primary stops */
 .logo-mark {
-  background: linear-gradient(135deg, #6E54FF 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #6E54FF 0%, #DDD7FE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
