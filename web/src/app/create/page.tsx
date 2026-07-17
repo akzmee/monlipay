@@ -51,7 +51,7 @@ export default function CreatePage() {
 
         {/* Hero */}
         <div className="mb-5 text-center sm:mb-6">
-          <h1 className="mb-2 text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 sm:text-3xl">
             Create a payment link
           </h1>
           <p className="text-sm text-stone-600 dark:text-stone-400">
@@ -63,9 +63,9 @@ export default function CreatePage() {
         <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-5">
           {!isConnected ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
                 <svg
-                  className="h-6 w-6 text-violet-600 dark:text-violet-400"
+                  className="h-6 w-6 text-red-600 dark:text-red-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -79,17 +79,17 @@ export default function CreatePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-sm font-semibold">Connect your wallet</h2>
-                <p className="mt-1 text-xs text-stone-500">
+                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Connect your wallet</h2>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
                   Tap Connect at the top to create a payment link
                 </p>
               </div>
             </div>
           ) : !isContractDeployed ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/40">
                 <svg
-                  className="h-6 w-6 text-violet-600 dark:text-violet-400"
+                  className="h-6 w-6 text-red-600 dark:text-red-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -99,8 +99,8 @@ export default function CreatePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-sm font-semibold">Contract not deployed</h2>
-                <p className="mt-1 text-xs text-stone-500">
+                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Contract not deployed</h2>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
                   Deploy LinkVault.sol and set the address in .env.local
                 </p>
               </div>
@@ -123,9 +123,9 @@ export default function CreatePage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-sm font-semibold">Wrong network</h2>
-                <p className="mt-1 text-xs text-stone-500">
-                  Switch to Monad Testnet to create payment links.
+                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Wrong network</h2>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
+                  Switch to {monadChain.name} to create payment links.
                 </p>
               </div>
               <button
@@ -136,9 +136,9 @@ export default function CreatePage() {
                     // User rejected
                   }
                 }}
-                className="mt-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 active:scale-95"
+                className="mt-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-red-500 hover:to-orange-400 active:scale-95"
               >
-                Switch to Monad Testnet
+                Switch to {monadChain.name}
               </button>
             </div>
           ) : (

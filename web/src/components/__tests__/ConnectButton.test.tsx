@@ -115,11 +115,12 @@ describe("ConnectButton", () => {
       expect(screen.getByText("0x1234...5678")).toBeInTheDocument();
     });
 
-    it("should show chain name with green indicator", () => {
+    it("should show green dot indicator (no chain name text)", () => {
       const { container } = render(<ConnectButton />);
-      const indicator = container.querySelector(".bg-green-500");
+      const indicator = container.querySelector(".bg-emerald-500");
       expect(indicator).toBeInTheDocument();
-      expect(screen.getByText("Monad Testnet")).toBeInTheDocument();
+      // Chain name text should NOT be visible in the button (only as title/aria)
+      expect(screen.queryByText("Monad Testnet")).not.toBeInTheDocument();
     });
 
     it("should call openAccountModal when address button is clicked", () => {
@@ -128,10 +129,18 @@ describe("ConnectButton", () => {
       expect(mockOpenAccountModal).toHaveBeenCalledTimes(1);
     });
 
-    it("should call openChainModal when chain button is clicked", () => {
-      render(<ConnectButton />);
-      fireEvent.click(screen.getByText("Monad Testnet"));
+    it("should call openChainModal when chain dot indicator is clicked", () => {
+      const { container } = render(<ConnectButton />);
+      const indicator = container.querySelector(".bg-emerald-500");
+      fireEvent.click(indicator!.closest("button")!);
       expect(mockOpenChainModal).toHaveBeenCalledTimes(1);
+    });
+
+    it("should have title attribute with chain name for tooltip", () => {
+      const { container } = render(<ConnectButton />);
+      const indicator = container.querySelector(".bg-emerald-500");
+      const chainButton = indicator!.closest("button");
+      expect(chainButton?.getAttribute("title")).toBe("Monad Testnet");
     });
 
     it("should not show Wrong Network", () => {

@@ -42,15 +42,16 @@ export function CreateForm({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Amount + Token selector — DeFi style */}
-      <div className="rounded-xl border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800/50">
-        <div className="mb-1 flex items-center justify-between">
-          <label className="text-xs font-medium text-stone-500 dark:text-stone-400">
-            Amount
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-red-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-red-500 dark:focus-within:bg-stone-800">
+        <label
+          htmlFor="amount"
+          className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400"
+        >
+          Amount
+        </label>
+        <div className="flex items-center gap-3">
           <input
             id="amount"
             type="number"
@@ -59,20 +60,20 @@ export function CreateForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isBusy}
-            className="min-w-0 flex-1 bg-transparent text-2xl font-bold outline-none placeholder:text-stone-400 dark:text-stone-100"
+            className="min-w-0 flex-1 bg-transparent text-3xl font-bold text-stone-900 outline-none placeholder:text-stone-300 dark:text-stone-100 dark:placeholder:text-stone-600"
           />
           {/* Token selector button */}
           <button
             type="button"
             onClick={() => setShowTokenModal(true)}
             disabled={isBusy}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md active:scale-95 dark:bg-stone-700 dark:text-stone-100"
+            className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100"
           >
             {/* Token avatar */}
             <div
-              className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${
+              className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${
                 selectedToken.isNative
-                  ? "from-violet-500 to-purple-600"
+                  ? "from-red-500 to-orange-500"
                   : "from-blue-500 to-cyan-600"
               } text-xs font-bold text-white`}
             >
@@ -100,7 +101,7 @@ export function CreateForm({
 
       {/* Expiry */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
+        <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
           Expires in
         </label>
         <div className="flex flex-wrap gap-2">
@@ -110,10 +111,10 @@ export function CreateForm({
               type="button"
               onClick={() => setExpirySeconds(preset.value)}
               disabled={isBusy}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+              className={`rounded-xl border px-3.5 py-2 text-xs font-medium transition-all active:scale-95 ${
                 expirySeconds === preset.value
-                  ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300"
-                  : "border-stone-200 text-stone-600 hover:border-stone-300 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-600"
+                  ? "border-red-400 bg-red-50 text-red-700 dark:border-red-500 dark:bg-red-950/40 dark:text-red-300"
+                  : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-700/50"
               }`}
             >
               {preset.label}
@@ -124,7 +125,7 @@ export function CreateForm({
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5 text-sm text-violet-700 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       )}
@@ -134,7 +135,7 @@ export function CreateForm({
         type="button"
         onClick={onCreate}
         disabled={!isAmountValid || isBusy}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl hover:shadow-violet-500/40 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-red-500/25 transition-all hover:shadow-xl hover:shadow-red-500/40 hover:from-red-500 hover:to-orange-400 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none disabled:hover:from-stone-400 disabled:hover:to-stone-400"
       >
         {isBusy ? (
           <>
@@ -156,7 +157,12 @@ export function CreateForm({
             Confirming...
           </>
         ) : (
-          <>Create Payment Link</>
+          <>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Create Payment Link
+          </>
         )}
       </button>
 

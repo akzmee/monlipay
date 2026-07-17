@@ -116,7 +116,7 @@ describe("CreateForm", () => {
   it("should highlight the selected expiry preset", () => {
     renderCreateForm({ expirySeconds: EXPIRY_PRESETS[0].value });
     const presetButton = screen.getByText("1 hour").closest("button");
-    expect(presetButton?.className).toContain("violet");
+    expect(presetButton?.className).toContain("red");
   });
 
   it("should disable inputs when busy", () => {

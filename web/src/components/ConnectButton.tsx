@@ -6,11 +6,11 @@ import { monadChain } from "@/config/chain";
 /**
  * Wrapper around RainbowKit's ConnectButton with custom branding.
  *
- * Uses RainbowKit's render prop API to customize the button label
- * and ensure the modal shows our brand colors (configured in Providers).
+ * When connected to the correct chain, shows only a small green dot
+ * indicator (no chain name text). Click opens RainbowKit's chain modal
+ * where users can switch between Monad Testnet and Mainnet.
  *
- * When the user is on the wrong network, RainbowKit automatically
- * shows a "Wrong network" button that prompts switching.
+ * When on the wrong network, shows an amber pulsing "Wrong Network" badge.
  */
 export function ConnectButton() {
   return (
@@ -45,21 +45,25 @@ export function ConnectButton() {
               <button
                 onClick={openChainModal}
                 type="button"
+                aria-label="Wrong network"
                 className="flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-300"
               >
                 <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                Wrong Network
+                <span className="hidden sm:inline">Wrong Network</span>
               </button>
             ) : (
               <div className="flex items-center gap-2">
+                {/* Chain indicator — green dot only, click opens chain modal */}
                 <button
                   onClick={openChainModal}
                   type="button"
-                  className="flex items-center gap-2 rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                  aria-label={`Connected to ${chain.name}. Click to switch network.`}
+                  className="flex items-center gap-1.5 rounded-lg border border-stone-300 px-2.5 py-2 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                  title={chain.name}
                 >
-                  <span className="h-2 w-2 rounded-full bg-green-500" />
-                  <span className="hidden sm:inline">{chain.name}</span>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 </button>
+                {/* Account button */}
                 <button
                   onClick={openAccountModal}
                   type="button"

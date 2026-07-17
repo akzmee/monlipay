@@ -2,7 +2,12 @@
 
 import { http, createConfig, createStorage } from "wagmi";
 import { getDefaultWallets } from "@rainbow-me/rainbowkit";
-import { monadChain } from "./chain";
+import {
+  monadChain,
+  monadTestnetChain,
+  monadMainnetChain,
+  isMainnet,
+} from "./chain";
 
 /**
  * WalletConnect Cloud project ID.
@@ -22,13 +27,14 @@ const { connectors } = getDefaultWallets({
 });
 
 /**
- * Wagmi configuration for the Monad chain with RainbowKit connectors.
+ * Wagmi configuration.
  *
- * Only the active chain (testnet or mainnet) is registered. Switching
- * between networks requires setting NEXT_PUBLIC_NETWORK and rebuilding.
+ * Both Monad Testnet and Mainnet are registered so users can switch
+ * between them via the chain modal — the default chain is controlled
+ * by NEXT_PUBLIC_NETWORK env var.
  */
 export const wagmiConfig = createConfig({
-  chains: [monadChain],
+  chains: [monadTestnetChain, monadMainnetChain],
   connectors,
   storage: createStorage({
     storage: typeof window !== "undefined" ? localStorage : undefined,
@@ -36,8 +42,12 @@ export const wagmiConfig = createConfig({
   ssr: true,
   multiInjectedProviderDiscovery: true,
   transports: {
-    // Use the chain's built-in RPC URL (defined in chain.ts)
-    [monadChain.id]: http(),
-  } as Record<typeof monadChain.id, ReturnType<typeof http>>,
+    [monadTestnetChain.id]: http(),
+    [monadMainnetChain.id]: http(),
+  } as Record<
+    typeof monadTestnetChain.id | typeof monadMainnetChain.id,
+    ReturnType<typeof http>
+  >,
 });
 
+export { monadChain, isMainnet };
