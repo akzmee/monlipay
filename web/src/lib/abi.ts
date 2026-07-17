@@ -39,6 +39,13 @@ export const linkVaultAbi = [
   },
   {
     type: "function",
+    name: "autoRefund",
+    inputs: [{ name: "depositId", type: "uint256", internalType: "uint256" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "getDeposit",
     inputs: [{ name: "depositId", type: "uint256", internalType: "uint256" }],
     outputs: [

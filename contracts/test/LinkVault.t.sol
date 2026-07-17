@@ -427,6 +427,161 @@ contract LinkVaultTest is Test {
     }
 
     // -----------------------------------------------------------------
+    // autoRefund: permissionless refund for expired deposits
+    // -----------------------------------------------------------------
+
+    function test_AutoRefundNative() public {
+        uint256 amount = 1 ether;
+        uint256 id = _createNativeLink(amount, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        uint256 senderBefore = sender.balance;
+
+        // Anyone can call autoRefund — here the attacker triggers it
+        vm.prank(attacker);
+        vault.autoRefund(id);
+
+        // Funds go to the original sender, NOT to attacker
+        assertEq(sender.balance, senderBefore + amount);
+        assertEq(attacker.balance, 0); // attacker gets nothing
+
+        LinkVault.Deposit memory d = vault.getDeposit(id);
+        assertTrue(d.claimed);
+    }
+
+    function test_AutoRefundERC20() public {
+        uint256 amount = 100 * 10 ** 18;
+        uint256 id = _createERC20Link(amount, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        uint256 senderBefore = token.balanceOf(sender);
+
+        vm.prank(attacker);
+        vault.autoRefund(id);
+
+        assertEq(token.balanceOf(sender), senderBefore + amount);
+        assertEq(token.balanceOf(attacker), 0);
+    }
+
+    function test_AutoRefundEmitsEvent() public {
+        uint256 amount = 1 ether;
+        uint256 id = _createNativeLink(amount, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        vm.expectEmit(true, true, true, true);
+        emit LinkVault.LinkRefunded(id, sender, address(0), amount);
+
+        vm.prank(attacker);
+        vault.autoRefund(id);
+    }
+
+    function test_AutoRefundSenderCanAlsoCall() public {
+        uint256 amount = 1 ether;
+        uint256 id = _createNativeLink(amount, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        // The sender can also call autoRefund (acts like refund without NotSender check)
+        uint256 senderBefore = sender.balance;
+        vm.prank(sender);
+        vault.autoRefund(id);
+
+        assertEq(sender.balance, senderBefore + amount);
+    }
+
+    function test_RevertAutoRefundBeforeExpiry() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        vm.expectRevert(LinkVault.NotExpired.selector);
+        vm.prank(attacker);
+        vault.autoRefund(id);
+    }
+
+    function test_RevertAutoRefundNonexistent() public {
+        vm.expectRevert(LinkVault.DepositNotFound.selector);
+        vault.autoRefund(999);
+    }
+
+    function test_RevertAutoRefundAlreadyClaimed() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        // Claim first
+        (uint8 v, bytes32 r, bytes32 s) = _signClaim(id, recipient, secretKey);
+        vm.prank(attacker);
+        vault.claim(id, recipient, v, r, s);
+
+        // Try autoRefund after expiry
+        vm.warp(block.timestamp + 2 hours);
+
+        vm.expectRevert(LinkVault.AlreadyClaimed.selector);
+        vm.prank(attacker);
+        vault.autoRefund(id);
+    }
+
+    function test_RevertAutoRefundAlreadyRefunded() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        // First autoRefund succeeds
+        vm.prank(attacker);
+        vault.autoRefund(id);
+
+        // Second call should revert
+        vm.expectRevert(LinkVault.AlreadyClaimed.selector);
+        vm.prank(attacker);
+        vault.autoRefund(id);
+    }
+
+    function test_AutoRefundAtExactExpiry() public {
+        uint256 id = _createNativeLink(1 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours);
+
+        vm.prank(attacker);
+        vault.autoRefund(id);
+        // Should succeed at exact expiry (>= check)
+    }
+
+    function test_AutoRefundBatch() public {
+        // Anyone can batch-refund multiple expired deposits
+        uint256 id1 = _createNativeLink(0.5 ether, 1 hours);
+        uint256 id2 = _createNativeLink(0.3 ether, 1 hours);
+        uint256 id3 = _createNativeLink(0.2 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        uint256 senderBefore = sender.balance;
+
+        vm.startPrank(attacker);
+        vault.autoRefund(id1);
+        vault.autoRefund(id2);
+        vault.autoRefund(id3);
+        vm.stopPrank();
+
+        // Sender recovers all 1 ether
+        assertEq(sender.balance, senderBefore + 1 ether);
+    }
+
+    function test_AutoRefundDoesNotAffectOtherDeposits() public {
+        // autoRefund on one deposit must not affect others with same key
+        uint256 id1 = _createNativeLink(0.5 ether, 1 hours);
+        uint256 id2 = _createNativeLink(0.5 ether, 1 hours);
+
+        vm.warp(block.timestamp + 1 hours + 1 seconds);
+
+        vm.prank(attacker);
+        vault.autoRefund(id1);
+
+        // id2 should still be refundable
+        LinkVault.Deposit memory d2 = vault.getDeposit(id2);
+        assertFalse(d2.claimed);
+    }
+
+    // -----------------------------------------------------------------
     // Claim-at-the-edge: exact boundary timing
     // -----------------------------------------------------------------
 

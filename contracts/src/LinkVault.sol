@@ -224,6 +224,42 @@ contract LinkVault is ReentrancyGuardTransient {
         emit LinkRefunded(depositId, d.sender, d.token, d.amount);
     }
 
+    /**
+     * @notice Permissionless auto-refund for expired deposits.
+     *
+     * @dev Anyone can call this once a deposit's expiry has passed. Funds are
+     *      ALWAYS returned to `d.sender` (the original creator), never to the
+     *      caller. This enables:
+     *        - Frontends to auto-trigger refunds when a user opens "my links"
+     *          (no manual "Claim Refund" button needed)
+     *        - Future keeper/relayer services to batch-refund expired links
+     *          on behalf of users (no gas cost to the user)
+     *
+     *      Security: indistinguishable from `refund()` in effect — funds flow
+     *      to the same `d.sender`, with the same expiry and `!claimed` checks.
+     *      The only difference is the absence of the `msg.sender == d.sender`
+     *      check, which is safe because the caller never receives funds.
+     *
+     *      Reentrancy: guarded by `nonReentrant` (transient storage, Cancun+).
+     *      Effects-before-interactions: `d.claimed` is set before `_transfer`.
+     *
+     * @param depositId  The deposit to auto-refund.
+     */
+    function autoRefund(uint256 depositId) external nonReentrant {
+        Deposit storage d = deposits[depositId];
+        if (d.sender == address(0)) revert DepositNotFound();
+        if (d.claimed) revert AlreadyClaimed();
+        if (block.timestamp < d.expiry) revert NotExpired();
+
+        // Effects before interactions — set claimed flag first
+        d.claimed = true;
+
+        // Funds return to original sender, NOT to msg.sender
+        _transfer(d.token, d.sender, d.amount);
+
+        emit LinkRefunded(depositId, d.sender, d.token, d.amount);
+    }
+
     // ---------------------------------------------------------------------
     // View Functions
     // ---------------------------------------------------------------------

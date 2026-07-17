@@ -139,7 +139,12 @@ export function useCreateLink() {
                   const depositId = (decoded.args as { depositId: bigint }).depositId;
                   const url = buildShareableUrl(params.baseUrl, depositId, secretKey);
 
-                  // Save to localStorage for "My Links" tracking
+                  // Save to localStorage for "My Links" tracking.
+                  // CRITICAL: shareableUrl MUST be saved — it contains the
+                  // ephemeral secret key in the URL fragment. Without it,
+                  // the link becomes unclaimable AND unrefundable (until
+                  // expiry) because the secret key is lost forever.
+                  // See storage.ts for schema details.
                   addStoredLink({
                     depositId: depositId.toString(),
                     token: params.token,
@@ -147,6 +152,7 @@ export function useCreateLink() {
                     expiry: expiryTimestamp,
                     createdAt: Math.floor(Date.now() / 1000),
                     sender: address,
+                    shareableUrl: url,
                   });
 
                   setResult({ depositId, shareableUrl: url });
@@ -325,6 +331,117 @@ export function useRefundLink() {
     isConfirming,
     txHash,
     isSuccess,
+    reset,
+  };
+}
+
+/**
+ * Auto-refund expired payment links.
+ *
+ * Scans the user's stored links, finds ones that are:
+ *   1. Past their expiry timestamp
+ *   2. Not yet marked as claimed/refunded in localStorage
+ * then calls `autoRefund(depositId)` on the contract for each.
+ *
+ * This is "permissionless refund" — anyone can call autoRefund, funds
+ * always return to the original sender. The caller (the user here)
+ * pays the gas, but recovers their own funds in return.
+ *
+ * UX: called automatically when the user opens "My Links". A toast/
+ * banner should show how many links were refunded.
+ *
+ * The hook is idempotent — calling it multiple times is safe because
+ * autoRefund on an already-claimed deposit reverts (caught silently).
+ */
+export function useAutoRefundExpiredLinks() {
+  const { sendTransactionAsync } = useSendTransaction();
+  const { address } = useAccount();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [refundedCount, setRefundedCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const processExpiredLinks = useCallback(async () => {
+    if (!address) return;
+    setIsProcessing(true);
+    setError(null);
+    let successCount = 0;
+
+    try {
+      // Import dynamically to avoid SSR issues
+      const { getStoredLinks, updateStoredLinkStatus } = await import("@/lib/storage");
+      const links = getStoredLinks();
+      const now = Math.floor(Date.now() / 1000);
+
+      // Filter to links owned by this user, expired, not yet refunded/claimed
+      const expiredLinks = links.filter(
+        (l) =>
+          l.sender.toLowerCase() === address.toLowerCase() &&
+          l.expiry <= now &&
+          l.status !== "refunded" &&
+          l.status !== "claimed",
+      );
+
+      if (expiredLinks.length === 0) {
+        setRefundedCount(0);
+        return;
+      }
+
+      const { encodeFunctionData } = await import("viem");
+      const { waitForTransactionReceipt } = await import("wagmi/actions");
+      const { wagmiConfig } = await import("@/config/wagmi");
+
+      // Process sequentially — parallel calls to sendTransactionAsync
+      // can cause nonce collisions in some wallets.
+      for (const link of expiredLinks) {
+        try {
+          const depositId = BigInt(link.depositId);
+          const txData = encodeFunctionData({
+            abi: linkVaultAbi,
+            functionName: "autoRefund",
+            args: [depositId],
+          });
+
+          const hash = await sendTransactionAsync({
+            to: LINK_VAULT_ADDRESS,
+            data: txData,
+          });
+
+          const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+
+          if (receipt.status === "success") {
+            updateStoredLinkStatus(link.depositId, "refunded");
+            successCount++;
+          }
+          // Silently skip reverted txs (e.g., already claimed by recipient
+          // in a race, or already refunded by another caller)
+        } catch {
+          // Silently skip individual failures so one bad link doesn't
+          // abort the entire batch. Most common cause: the link was
+          // already claimed/refunded in a race.
+        }
+      }
+
+      setRefundedCount(successCount);
+    } catch (err) {
+      // Top-level error (not per-link)
+      setError(
+        err instanceof Error ? err.message : "Failed to auto-refund expired links",
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [address, sendTransactionAsync]);
+
+  const reset = useCallback(() => {
+    setRefundedCount(0);
+    setError(null);
+  }, []);
+
+  return {
+    processExpiredLinks,
+    isProcessing,
+    refundedCount,
+    error,
     reset,
   };
 }

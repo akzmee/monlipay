@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { getStoredLinks, removeStoredLink, type StoredLink } from "@/lib/storage";
-import { useDeposit } from "@/hooks/useLinkVault";
+import { useDeposit, useAutoRefundExpiredLinks } from "@/hooks/useLinkVault";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";
 import { LinkCard } from "@/components/LinkCard";
 import { monadChain } from "@/config/chain";
@@ -14,13 +14,43 @@ export default function MyLinksPage() {
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const [links, setLinks] = useState<StoredLink[]>([]);
+  const isWrongChain = isConnected && chainId !== monadChain.id;
+
+  // Auto-refund expired links when the page mounts and the user is on the
+  // correct chain. This is "permissionless refund" — anyone can call
+  // autoRefund, funds always return to the original sender. The user pays
+  // the gas but recovers their own funds.
+  const {
+    processExpiredLinks,
+    isProcessing: isAutoRefunding,
+    refundedCount,
+    error: autoRefundError,
+    reset: resetAutoRefund,
+  } = useAutoRefundExpiredLinks();
+
+  // Auto-trigger once when the page mounts (and chain is correct).
+  // We use a ref guard to prevent retriggering in StrictMode dev double-render.
+  const hasAutoRefunded = useRef(false);
+  useEffect(() => {
+    if (
+      isConnected &&
+      !isWrongChain &&
+      !hasAutoRefunded.current &&
+      !isAutoRefunding
+    ) {
+      hasAutoRefunded.current = true;
+      processExpiredLinks().then(() => {
+        // Refresh the list after auto-refund completes
+        setLinks(getStoredLinks());
+      });
+    }
+  }, [isConnected, isWrongChain, isAutoRefunding, processExpiredLinks]);
 
   useEffect(() => {
     setLinks(getStoredLinks());
   }, []);
 
   const { refundMultiple, busyDepositIds, error: refundError } = useRefundMultiple();
-  const isWrongChain = isConnected && chainId !== monadChain.id;
 
   if (!isConnected) {
     return (
@@ -114,11 +144,52 @@ export default function MyLinksPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
         <p className="mt-1 text-sm text-stone-500">
-          Track and manage your payment links. Refund expired unclaimed links anytime.
+          Track and manage your payment links. Expired links auto-refund on open.
         </p>
       </div>
 
       <div className="space-y-3">
+        {/* Auto-refund notifications */}
+        {isAutoRefunding && (
+          <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-300">
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span>Auto-refunding expired links…</span>
+          </div>
+        )}
+        {!isAutoRefunding && refundedCount > 0 && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300">
+            <span>
+              ✓ Auto-refunded <strong>{refundedCount}</strong>{" "}
+              {refundedCount === 1 ? "link" : "links"} successfully. Funds returned to your wallet.
+            </span>
+            <button
+              type="button"
+              onClick={resetAutoRefund}
+              className="text-green-700/70 hover:text-green-700 dark:text-green-300/70 dark:hover:text-green-300"
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        {autoRefundError && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+            <span>
+              Auto-refund skipped: {autoRefundError}. You can still refund manually.
+            </span>
+            <button
+              type="button"
+              onClick={resetAutoRefund}
+              className="text-amber-700/70 hover:text-amber-700 dark:text-amber-300/70 dark:hover:text-amber-300"
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </div>
+        )}
         {refundError && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
             {refundError}
