@@ -7,6 +7,7 @@ import { useBridgeQuote, useBridgeBalance } from "@/hooks/useBridge";
 import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
 import { SOURCE_CHAINS, MONAD_DESTINATION_CHAIN_ID } from "@/lib/bridge-client";
 import { TokenSelectModal, type ModalToken } from "@/components/TokenSelectModal";
+import { MonadLogo } from "@/components/MonadLogo";
 import type { BridgeRoute, BridgeToken, TokenBalance } from "@/lib/bridge-types";
 
 /**
@@ -298,13 +299,13 @@ export default function BridgePage() {
               </div>
 
               {/* Destination: Monad + Token */}
-              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-700 dark:bg-stone-800/50">
+              <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4 dark:border-violet-800/60 dark:bg-violet-950/20">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
                     To
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-300">
+                    <MonadLogo variant="mark" size={14} />
                     {monadChain.name}
                   </span>
                 </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { Scene3D } from "@/components/Scene3D";
+import { MonadLogo } from "@/components/MonadLogo";
 import { isContractDeployed } from "@/config/chain";
 
 /**
@@ -21,13 +22,22 @@ export default function HomePage() {
       <div className="mx-auto max-w-4xl px-4 py-20 sm:py-28">
         {/* Hero */}
         <div className="text-center">
+          {/* Monad logomark — hero brand anchor */}
+          <div className="mb-6 flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 -z-10 animate-pulse rounded-full bg-[#6E54FF]/30 blur-3xl" />
+              <MonadLogo variant="mark" size={72} priority />
+            </div>
+          </div>
+
           {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/70 px-3 py-1 text-xs font-medium text-stone-700 backdrop-blur dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-300">
-            <span className="relative flex h-2 w-2">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50/80 px-3 py-1 text-xs font-medium text-violet-700 backdrop-blur dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
+            <MonadLogo variant="mark" size={14} />
+            <span>Live on Monad</span>
+            <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            Live on Monad
           </div>
 
           {/* Headline */}

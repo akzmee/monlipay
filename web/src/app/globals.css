@@ -19,12 +19,13 @@
   --surface-elevated: #ffffff;
   --border: #e7e5e4;
 
-  /* Monad brand palette */
-  --monad-primary: #6E54FF;
+  /* Monad brand palette — sourced from official Monad Brand Kit */
+  --monad-primary: #6E54FF;        /* violet — logomark + MON token */
   --monad-primary-hover: #5a3fe0;
-  --monad-lavender: #DDD7FE;
-  --monad-indigo: #0E091C;
-  --monad-cyan: #85E6FF;
+  --monad-deep-violet: #391B97;    /* deep violet — WMON token background */
+  --monad-lavender: #DDD7FE;       /* light violet tint */
+  --monad-indigo: #0E091C;         /* near-black with violet tint */
+  --monad-cyan: #85E6FF;           /* secondary accent */
 
   --primary: #6E54FF;
   --primary-hover: #5a3fe0;
@@ -53,6 +54,10 @@
   --color-primary-light: var(--primary-light);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-monad-primary: var(--monad-primary);
+  --color-monad-deep-violet: var(--monad-deep-violet);
+  --color-monad-lavender: var(--monad-lavender);
+  --color-monad-cyan: var(--monad-cyan);
   --color-success: var(--success);
   --color-success-light: var(--success-light);
   --color-warning: var(--warning);
