@@ -9,6 +9,7 @@ import { SOURCE_CHAINS, MONAD_DESTINATION_CHAIN_ID } from "@/lib/bridge-client";
 import { TokenSelectModal, type ModalToken } from "@/components/TokenSelectModal";
 import { TokenAvatar } from "@/components/TokenAvatar";
 import { MonadLogo } from "@/components/MonadLogo";
+import { chainLogoUri } from "@/lib/chain-logos";
 import type { BridgeRoute, BridgeToken, TokenBalance } from "@/lib/bridge-types";
 
 /**
@@ -39,6 +40,7 @@ const FALLBACK_TOKENS_ETH: BridgeToken[] = [
     name: "Ether",
     decimals: 18,
     chainId: 1,
+    logoURI: chainLogoUri(1),
   },
 ];
 
@@ -94,6 +96,7 @@ export default function BridgePage() {
           name: NATIVE_NAMES[fromChainId] || "Ether",
           decimals: 18,
           chainId: fromChainId,
+          logoURI: chainLogoUri(fromChainId),
         };
 
         const erc20Tokens = (data.tokens || []).filter(
@@ -151,6 +154,7 @@ export default function BridgePage() {
         name: NATIVE_NAMES[fromChainId] || "Ether",
         decimals: 18,
         chainId: fromChainId,
+        logoURI: chainLogoUri(fromChainId),
       }
     );
   }, [tokenList, fromTokenAddress, fromChainId]);

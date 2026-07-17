@@ -35,6 +35,7 @@ import {
   ERRORS,
 } from "@/lib/bridge-validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { chainLogoUri } from "@/lib/chain-logos";
 import type { TokenBalance, BalanceResponse } from "@/lib/bridge-types";
 
 export const dynamic = "force-dynamic";
@@ -121,6 +122,9 @@ export async function GET(request: Request): Promise<Response> {
               name: NATIVE_TOKEN_NAMES[chainId] || nativeSymbol,
               decimals: nativeDecimals,
               chainId,
+              // Native token logo = chain logo (ETH, MATIC, BNB, AVAX).
+              // Visually identical and the canonical source per trustwallet.
+              logoURI: chainLogoUri(chainId),
             },
             balance: nativeBalanceWei.toString(),
             balanceFormatted,

@@ -15,6 +15,7 @@
  *   - Rate limited to prevent abuse.
  */
 
+import { getAddress } from "viem";
 import {
   LIFI_BASE_URL,
   LIFI_API_KEY,
@@ -28,6 +29,7 @@ import {
   ERRORS,
 } from "@/lib/bridge-validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { chainLogoUri, erc20LogoUri } from "@/lib/chain-logos";
 import type { BridgeToken } from "@/lib/bridge-types";
 
 export const dynamic = "force-dynamic";
@@ -95,15 +97,37 @@ export async function GET(request: Request): Promise<Response> {
         }>;
 
         return chainTokens.map(
-          (t): BridgeToken => ({
-            address: t.address as `0x${string}`,
-            symbol: t.symbol,
-            name: t.name,
-            decimals: t.decimals,
-            chainId: t.chainId,
-            logoURI: t.logoURI,
-            priceUSD: t.priceUSD,
-          }),
+          (t): BridgeToken => {
+            const isNative =
+              t.address === "0x0000000000000000000000000000000000000000" ||
+              t.address === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+
+            // Logo resolution priority:
+            //   1. logoURI from LI.FI (already populated for most popular tokens)
+            //   2. Native token → trustwallet chain logo
+            //   3. ERC-20 → trustwallet asset URL (best-effort; the <TokenAvatar>
+            //      component falls back to a gradient if this 404s)
+            let logoURI = t.logoURI;
+            if (!logoURI) {
+              if (isNative) {
+                logoURI = chainLogoUri(chainId);
+              } else {
+                // Trustwallet requires EIP-55 checksummed addresses.
+                // viem's getAddress does that deterministically.
+                logoURI = erc20LogoUri(chainId, getAddress(t.address));
+              }
+            }
+
+            return {
+              address: t.address as `0x${string}`,
+              symbol: t.symbol,
+              name: t.name,
+              decimals: t.decimals,
+              chainId: t.chainId,
+              logoURI,
+              priceUSD: t.priceUSD,
+            };
+          },
         );
       }),
     );
