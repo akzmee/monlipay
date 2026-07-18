@@ -4,10 +4,6 @@
 
 Built for the **BuildAnything "Spark"** hackathon on Monad.
 
-**Why I built this →** see [`STORY.md`](./STORY.md) (the real-world problem behind this project, not a marketing pitch).
-
-**How to demo in 3 minutes →** see [`DEMO.md`](./DEMO.md).
-
 ---
 
 ## Problem
