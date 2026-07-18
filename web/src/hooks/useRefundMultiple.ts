@@ -14,6 +14,8 @@ export function useRefundMultiple() {
   const refundMultiple = useCallback(
     async (depositId: bigint, onSuccess?: () => void) => {
       const id = depositId.toString();
+      // Clear stale error from a previous attempt before starting a new one.
+      reset();
       setBusyDepositIds((prev) => new Set(prev).add(id));
 
       try {
@@ -27,7 +29,7 @@ export function useRefundMultiple() {
         });
       }
     },
-    [refund],
+    [refund, reset],
   );
 
   return {

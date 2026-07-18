@@ -72,13 +72,6 @@ vi.mock("@/lib/crypto", () => ({
   signClaim: () => mockSignClaim(),
 }));
 
-const mockAddStoredLink = vi.fn();
-vi.mock("@/lib/storage", () => ({
-  addStoredLink: (...args: unknown[]) => mockAddStoredLink(...args),
-  getStoredLinks: () => [],
-  removeStoredLink: vi.fn(),
-}));
-
 vi.mock("@/config/chain", () => ({
   LINK_VAULT_ADDRESS: "0xvault" as `0x${string}`,
   monadChain: { id: 10143 },
@@ -127,7 +120,10 @@ describe("useCreateLink - transaction flow", () => {
     });
     expect(result.current.error).toBeNull();
     expect(result.current.isConfirming).toBe(false);
-    expect(mockAddStoredLink).toHaveBeenCalled();
+    // NOTE: We no longer assert addStoredLink was called — the create flow
+    // intentionally doesn't persist to localStorage anymore. The Ponder
+    // indexer picks up the LinkCreated event and the useMyLinks hook reads
+    // it from there within a few seconds of confirmation.
   });
 
   it("should set error when transaction reverts", async () => {

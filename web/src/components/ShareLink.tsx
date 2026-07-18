@@ -259,25 +259,49 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
         </button>
       </div>
 
-      {/* Warning */}
-      <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
-        <svg
-          className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-          />
-        </svg>
-        <p className="text-xs text-amber-800 dark:text-amber-200">
-          Anyone with this link can claim the funds. Share it privately with the
-          intended recipient only.
-        </p>
+      {/* WARNING — save link now (shown only once) */}
+      <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 dark:border-amber-800 dark:bg-amber-950/40">
+        <div className="flex items-start gap-3">
+          <svg
+            className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+            />
+          </svg>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+              Save this link now — it won't be shown again.
+            </p>
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              The secret key inside the URL fragment is generated in your
+              browser and is never sent to the chain. After you close this
+              screen, the URL is gone for good. The recipient won't be able
+              to claim without it, and you'll need to wait until expiry to
+              refund.
+            </p>
+          </div>
+        </div>
+        <ul className="ml-8 list-disc space-y-0.5 text-xs text-amber-800 dark:text-amber-200">
+          <li>
+            <strong>Copy</strong> the link above and paste it somewhere safe
+            (password manager, notes app).
+          </li>
+          <li>
+            Or <strong>download the QR code</strong> (PNG or SVG) using the
+            buttons in the QR tab.
+          </li>
+          <li>
+            Anyone with this link can claim the funds — share it only with
+            the intended recipient.
+          </li>
+        </ul>
       </div>
 
       {/* Create another */}
