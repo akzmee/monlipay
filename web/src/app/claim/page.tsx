@@ -7,6 +7,8 @@ import { formatEther, isAddress, type Hex } from "viem";
 import { useDeposit, useClaimLink } from "@/hooks/useLinkVault";
 import { parseClaimUrl } from "@/lib/crypto";
 import { monadChain } from "@/config/chain";
+import { isGasSponsorAvailable } from "@/config/gas-sponsor";
+import { sponsorClaim } from "@/lib/sponsor-client";
 import { ClaimForm } from "@/components/ClaimForm";
 
 function ClaimPageContent() {
@@ -29,6 +31,24 @@ function ClaimPageContent() {
   const { data: deposit, isLoading: depositLoading } = useDeposit(depositId);
   const { claim, error, isSending, isConfirming, isSuccess, reset } = useClaimLink();
   const [recipientOverride, setRecipientOverride] = useState("");
+
+  // Sponsor-claim state. When the user clicks claim, we try the sponsor
+  // path first (if available) and fall back to direct claim on any
+  // failure. This state mirrors the direct-claim hook so the UI can show
+  // a single consistent loading + success state.
+  const [sponsorBusy, setSponsorBusy] = useState(false);
+  const [sponsorSuccess, setSponsorSuccess] = useState(false);
+  const [sponsorError, setSponsorError] = useState<string | null>(null);
+
+  // Combined busy/success/error across both paths.
+  const isBusy = isSending || isConfirming || sponsorBusy;
+  const isSuccessOverall = isSuccess || sponsorSuccess;
+  const errorOverall = error ?? sponsorError;
+
+  // Reset sponsor state when the user changes the recipient
+  useEffect(() => {
+    setSponsorError(null);
+  }, [recipientOverride]);
 
   // FIX S1: Validate the override address before using it.
   // Fall back to the connected wallet, or zero-address sentinel (contract will reject).
@@ -158,7 +178,7 @@ function ClaimPageContent() {
   }
 
   // Success state
-  if (isSuccess) {
+  if (isSuccessOverall) {
     return (
       <div className="hero-gradient">
         <div className="mx-auto max-w-md px-4 py-16 text-center">
@@ -185,7 +205,6 @@ function ClaimPageContent() {
   // Main claim UI
   const isWrongChain = isConnected && chainId !== monadChain.id;
   const tokenSymbol = deposit?.token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
-  const isBusy = isSending || isConfirming;
 
   return (
     <div className="hero-gradient">
@@ -232,7 +251,7 @@ function ClaimPageContent() {
           isConnected={isConnected}
           isBusy={isBusy}
           isWrongChain={isWrongChain}
-          error={error}
+          error={errorOverall}
           address={address}
           recipientOverride={recipientOverride}
           setRecipientOverride={setRecipientOverride}
@@ -241,8 +260,58 @@ function ClaimPageContent() {
               ? "Invalid Ethereum address"
               : null
           }
-          onClaim={() => {
+          onClaim={async () => {
             if (!secretKey || !depositId) return;
+
+            // Try sponsor path first (if configured). On any failure, fall
+            // back to direct user-paid claim. This dual-mode approach lets
+            // the app gracefully degrade if the sponsor is down, rate
+            // limited, or out of budget.
+            if (isGasSponsorAvailable) {
+              setSponsorBusy(true);
+              setSponsorError(null);
+              try {
+                const result = await sponsorClaim({
+                  depositId,
+                  secretKey: secretKey as Hex,
+                  recipient: effectiveRecipient,
+                });
+                if (result.ok) {
+                  setSponsorSuccess(true);
+                  return;
+                }
+                // If the failure is "rate_limited" or "budget_exhausted",
+                // don't silently fall back — the user might want to wait.
+                // For "not_configured", "invalid_request", "network_error",
+                // and "relay_failed", we fall back to direct claim.
+                if (
+                  result.reason === "rate_limited" ||
+                  result.reason === "budget_exhausted"
+                ) {
+                  setSponsorError(
+                    result.message ??
+                      "Sponsor unavailable. Please try again later or claim directly.",
+                  );
+                  setSponsorBusy(false);
+                  return;
+                }
+                // Other failures: log and fall through to direct claim
+                console.warn(
+                  "[claim] Sponsor path failed, falling back to direct:",
+                  result.reason,
+                  result.message,
+                );
+              } catch (err) {
+                console.warn(
+                  "[claim] Sponsor path threw, falling back to direct:",
+                  err,
+                );
+              } finally {
+                setSponsorBusy(false);
+              }
+            }
+
+            // Direct claim path (user pays gas)
             claim({
               depositId,
               secretKey: secretKey as Hex,

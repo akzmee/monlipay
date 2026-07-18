@@ -127,6 +127,74 @@ export const linkVaultAbi = [
 ] as const;
 
 /**
+ * ERC2771Forwarder ABI — only the functions the sponsor client/server
+ * need to read forwarder state and relay meta-transactions.
+ *
+ * Extracted from
+ * @openzeppelin/contracts/metatx/ERC2771Forwarder.sol.
+ */
+export const erc2771ForwarderAbi = [
+  {
+    type: "function",
+    name: "execute",
+    inputs: [
+      {
+        name: "request",
+        type: "tuple",
+        internalType: "struct ERC2771Forwarder.ForwardRequestData",
+        components: [
+          { name: "from", type: "address", internalType: "address" },
+          { name: "to", type: "address", internalType: "address" },
+          { name: "value", type: "uint256", internalType: "uint256" },
+          { name: "gas", type: "uint256", internalType: "uint256" },
+          { name: "nonce", type: "uint256", internalType: "uint256" },
+          { name: "deadline", type: "uint48", internalType: "uint48" },
+          { name: "data", type: "bytes", internalType: "bytes" },
+          { name: "signature", type: "bytes", internalType: "bytes" },
+        ],
+      },
+    ],
+    outputs: [],
+    stateMutability: "payable",
+  },
+  {
+    type: "function",
+    name: "nonces",
+    inputs: [{ name: "signer", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "eip712Domain",
+    inputs: [],
+    outputs: [
+      { name: "fields", type: "bytes1", internalType: "bytes1" },
+      { name: "name", type: "string", internalType: "string" },
+      { name: "version", type: "string", internalType: "string" },
+      { name: "chainId", type: "uint256", internalType: "uint256" },
+      { name: "verifyingContract", type: "address", internalType: "address" },
+      { name: "salt", type: "bytes32", internalType: "bytes32" },
+      { name: "extensions", type: "uint256[]", internalType: "uint256[]" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "error",
+    name: "ERC2771ForwarderInvalidSigner",
+    inputs: [
+      { name: "signer", type: "address", internalType: "address" },
+      { name: "from", type: "address", internalType: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "ERC2771ForwarderExpiredRequest",
+    inputs: [{ name: "deadline", type: "uint48", internalType: "uint48" }],
+  },
+] as const;
+
+/**
  * Minimal ERC-20 ABI for reading token metadata (name, symbol, decimals).
  * Used when a user enters a custom token contract address.
  */

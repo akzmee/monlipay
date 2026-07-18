@@ -4,6 +4,12 @@ import { ClaimForm } from "@/components/ClaimForm";
 
 const mockAddress = "0x1234567890123456789012345678901234567890" as `0x${string}`;
 
+// Default mock: sponsor NOT available. Tests that need the sponsor badge
+// will override this via vi.doMock + dynamic import.
+vi.mock("@/config/gas-sponsor", () => ({
+  isGasSponsorAvailable: false,
+}));
+
 function renderClaimForm(overrides: Partial<Parameters<typeof ClaimForm>[0]> = {}) {
   const props = {
     isConnected: true,
@@ -242,6 +248,82 @@ describe("ClaimForm", () => {
       // Note: in this test the prop doesn't actually change (we mock
       // setRecipientOverride), so we verify the user is guided to retype.
       expect(props.setRecipientOverride).toHaveBeenCalled();
+    });
+  });
+
+  // -----------------------------------------------------------------
+  // Gas sponsor badge: shown when isGasSponsorAvailable is true.
+  // The badge tells the user that gas is covered by the sponsor.
+  // -----------------------------------------------------------------
+  describe("gas sponsor badge", () => {
+    it("should NOT show sponsor badge when sponsor is unavailable", () => {
+      renderClaimForm();
+      expect(screen.queryByText(/Gasless claim/i)).not.toBeInTheDocument();
+    });
+
+    it("should show 'small gas fee' message when sponsor is unavailable", () => {
+      renderClaimForm();
+      expect(
+        screen.getByText(/Claiming requires a small gas fee/i),
+      ).toBeInTheDocument();
+    });
+
+    it("should show sponsor badge when sponsor is available", async () => {
+      // Override the default mock for this test only.
+      vi.doMock("@/config/gas-sponsor", () => ({
+        isGasSponsorAvailable: true,
+      }));
+      vi.resetModules();
+      const { ClaimForm: ClaimFormMocked } = await import("@/components/ClaimForm");
+
+      const props = {
+        isConnected: true,
+        isBusy: false,
+        isWrongChain: false,
+        error: null,
+        address: mockAddress,
+        recipientOverride: "",
+        setRecipientOverride: vi.fn(),
+        recipientError: null,
+        onClaim: vi.fn(),
+      };
+      render(<ClaimFormMocked {...props} />);
+
+      expect(screen.getByText(/Gasless claim/i)).toBeInTheDocument();
+      expect(screen.getByText(/MonliPay/i)).toBeInTheDocument();
+
+      // Restore the default mock
+      vi.doUnmock("@/config/gas-sponsor");
+      vi.resetModules();
+    });
+
+    it("should show 'No MON needed' message when sponsor is available", async () => {
+      vi.doMock("@/config/gas-sponsor", () => ({
+        isGasSponsorAvailable: true,
+      }));
+      vi.resetModules();
+      const { ClaimForm: ClaimFormMocked } = await import("@/components/ClaimForm");
+
+      const props = {
+        isConnected: true,
+        isBusy: false,
+        isWrongChain: false,
+        error: null,
+        address: mockAddress,
+        recipientOverride: "",
+        setRecipientOverride: vi.fn(),
+        recipientError: null,
+        onClaim: vi.fn(),
+      };
+      render(<ClaimFormMocked {...props} />);
+
+      expect(screen.getByText(/No MON needed/i)).toBeInTheDocument();
+      expect(
+        screen.queryByText(/Claiming requires a small gas fee/i),
+      ).not.toBeInTheDocument();
+
+      vi.doUnmock("@/config/gas-sponsor");
+      vi.resetModules();
     });
   });
 });

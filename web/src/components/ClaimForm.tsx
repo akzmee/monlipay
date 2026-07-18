@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { type Address } from "viem";
+import { isGasSponsorAvailable } from "@/config/gas-sponsor";
 
 interface ClaimFormProps {
   isConnected: boolean;
@@ -130,6 +131,28 @@ export function ClaimForm({
         </div>
       )}
 
+      {/* Gas sponsor badge (visible only when sponsor is configured) */}
+      {isGasSponsorAvailable && (
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
+          </svg>
+          <span>
+            <strong>Gasless claim</strong> — gas fee sponsored by MonliPay.
+          </span>
+        </div>
+      )}
+
       {/* Claim button */}
       <button
         type="button"
@@ -155,7 +178,9 @@ export function ClaimForm({
       </button>
 
       <p className="text-center text-xs text-stone-400">
-        Claiming requires a small gas fee in MON for the transaction.
+        {isGasSponsorAvailable
+          ? "No MON needed — the sponsor covers the gas fee."
+          : "Claiming requires a small gas fee in MON for the transaction."}
       </p>
 
       {/* Recipient override confirmation modal.
