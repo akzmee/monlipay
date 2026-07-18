@@ -4,6 +4,10 @@
 
 Built for the **BuildAnything "Spark"** hackathon on Monad.
 
+**Why I built this →** see [`STORY.md`](./STORY.md) (the real-world problem behind this project, not a marketing pitch).
+
+**How to demo in 3 minutes →** see [`DEMO.md`](./DEMO.md).
+
 ---
 
 ## Problem
@@ -106,7 +110,12 @@ A single contract with three core functions plus a permissionless auto-refund:
 
 ### Contract address
 
-**Monad Testnet (Chain ID 10143):** _see `web/.env.testnet` after running the deploy script_
+| Network | Chain ID | Address | Explorer |
+|---|---|---|---|
+| **Monad Testnet** | 10143 | [`0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3`](https://testnet.monadscan.com/address/0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3) | Monadscan |
+| **Monad Mainnet** | 143 | _— deploy in progress, see `DEPLOY-VPS.md`_ | — |
+
+The testnet contract has been live since July 2026 and is the recommended starting point for judges and reviewers. Try it at **https://testnet.monlipay.xyz** (testnet MON only — no real value at risk).
 
 ---
 
