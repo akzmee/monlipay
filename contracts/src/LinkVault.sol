@@ -17,13 +17,27 @@ pragma solidity 0.8.28;
  *      5. If unclaimed past expiry, the sender can call refund(...).
  *
  *      EIP-712 domain separation prevents signature replay across chains and contracts.
+ *
+ *      EIP-2771 meta-transactions (gasless sponsor):
+ *      ------------------------------------------------
+ *      The contract inherits ERC2771Context. When called through the trusted forwarder,
+ *      `_msgSender()` resolves to the user the forwarder is relaying for (so the user
+ *      does not need gas — a relayer pays it). When called directly, `_msgSender()`
+ *      falls back to `msg.sender`. This means createLink / refund / claimFailedRefund
+ *      work both ways without branching code. claim() itself is signature-based and
+ *      never used msg.sender for identity, so it is unaffected either way.
+ *
+ *      The forwarder is set at construction and cannot be changed. If meta-tx support
+ *      is no longer desired, simply stop relaying through the forwarder — direct
+ *      calls continue to work as before.
  */
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
+import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
-contract LinkVault is ReentrancyGuardTransient {
+contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
     // ---------------------------------------------------------------------
     // Errors (custom errors save gas vs require strings)
@@ -142,7 +156,13 @@ contract LinkVault is ReentrancyGuardTransient {
     // Constructor
     // ---------------------------------------------------------------------
 
-    constructor() {
+    /**
+     * @param trustedForwarder Address of the ERC2771 forwarder contract that is
+     *        allowed to relay meta-transactions on behalf of users. Set to
+     *        address(0) to disable meta-tx support entirely (the contract will
+     *        behave identically to its pre-EIP-2771 form).
+     */
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
         _CACHED_CHAIN_ID = block.chainid;
         _CACHED_DOMAIN_SEPARATOR = _buildDomainSeparator();
         nextDepositId = 1;
@@ -180,8 +200,13 @@ contract LinkVault is ReentrancyGuardTransient {
             // more than we hold.
             // SafeERC20 handles non-standard tokens (e.g. USDT) that don't return
             // a bool, and bubbles up revert reasons from standard tokens.
+            //
+            // Note: `_msgSender()` is used so that meta-tx relays via the
+            // trusted forwarder attribute the deposit to the actual user, not
+            // to the relayer. For direct calls it falls back to msg.sender.
+            address sender = _msgSender();
             uint256 balanceBefore = IERC20(token).balanceOf(address(this));
-            IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+            IERC20(token).safeTransferFrom(sender, address(this), amount);
             uint256 balanceAfter = IERC20(token).balanceOf(address(this));
             // Underflow protection: if a rebasing token decreased our balance
             // mid-flight (very rare), this would revert. Acceptable trade-off.
@@ -193,7 +218,7 @@ contract LinkVault is ReentrancyGuardTransient {
 
         depositId = nextDepositId++;
         deposits[depositId] = Deposit({
-            sender: msg.sender,
+            sender: _msgSender(),
             token: token,
             amount: amount,
             claimKey: claimKey,
@@ -201,7 +226,7 @@ contract LinkVault is ReentrancyGuardTransient {
             claimed: false
         });
 
-        emit LinkCreated(depositId, msg.sender, token, amount, claimKey, expiry);
+        emit LinkCreated(depositId, _msgSender(), token, amount, claimKey, expiry);
     }
 
     /**
@@ -266,7 +291,7 @@ contract LinkVault is ReentrancyGuardTransient {
         if (d.sender == address(0)) revert DepositNotFound();
         if (d.claimed) revert AlreadyClaimed();
         if (block.timestamp <= d.expiry) revert NotExpired();
-        if (msg.sender != d.sender) revert NotSender();
+        if (_msgSender() != d.sender) revert NotSender();
 
         d.claimed = true;
 
@@ -334,7 +359,7 @@ contract LinkVault is ReentrancyGuardTransient {
     function claimFailedRefund(uint256 depositId, address payable recipient) external nonReentrant {
         Deposit storage d = deposits[depositId];
         if (d.sender == address(0)) revert DepositNotFound();
-        if (msg.sender != d.sender) revert NotFailedRefundOwner();
+        if (_msgSender() != d.sender) revert NotFailedRefundOwner();
 
         uint256 amount = failedRefunds[depositId];
         if (amount == 0) revert NoFailedRefund();

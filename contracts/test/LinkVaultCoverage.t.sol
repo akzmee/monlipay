@@ -24,7 +24,7 @@ contract LinkVaultCoverageTest is Test {
     address claimKey;
 
     function setUp() public {
-        vault = new LinkVault();
+        vault = new LinkVault(address(0));
         token = new MockERC20("Test Token", "TST", 18);
         vm.deal(sender, 100 ether);
         token.mint(sender, 1_000_000 * 10 ** 18);

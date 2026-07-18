@@ -34,7 +34,7 @@ contract LinkVaultSecurityTest is Test {
     uint256 constant SECP256K1_N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
 
     function setUp() public {
-        vault = new LinkVault();
+        vault = new LinkVault(address(0));
         nonStandardToken = new MockNonStandardERC20("NonStandard", "NST", 18);
         maliciousToken = new MaliciousERC20("Malicious", "MAL", 18);
 

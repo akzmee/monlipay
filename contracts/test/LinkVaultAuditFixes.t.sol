@@ -31,7 +31,7 @@ contract LinkVaultAuditFixesTest is Test {
     address claimKey;
 
     function setUp() public {
-        vault = new LinkVault();
+        vault = new LinkVault(address(0));
         // 1% fee on every transfer
         feeToken = new MockFeeOnTransferERC20("Fee Token", "FEE", 18, 100);
         refuser = new ETHRefuser();

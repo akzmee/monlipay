@@ -23,7 +23,7 @@ contract LinkVaultTest is Test {
     address claimKey;
 
     function setUp() public {
-        vault = new LinkVault();
+        vault = new LinkVault(address(0));
         token = new MockERC20("Test Token", "TST", 18);
 
         // Fund sender with native MON and ERC-20
