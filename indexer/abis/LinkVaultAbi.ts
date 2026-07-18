@@ -3,7 +3,7 @@
  *
  * Source of truth: contracts/src/LinkVault.sol (matches mainnet deployment
  * 0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC and testnet deployment
- * 0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3).
+ * 0x90978783cb701AEe7896975B43ecd37e0B4819DC).
  *
  * This file is intentionally a superset of web/src/lib/abi.ts — it includes
  * the RefundFailed event that the frontend doesn't need to listen for, but

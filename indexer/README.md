@@ -27,7 +27,7 @@ Override via `.env.local` (gitignored):
 ```bash
 # Both chains are indexed by default. Set either to "" to disable it.
 PONDER_MONAD_MAINNET_VAULT=0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC
-PONDER_MONAD_TESTNET_VAULT=0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3
+PONDER_MONAD_TESTNET_VAULT=0x90978783cb701AEe7896975B43ecd37e0B4819DC
 
 # Optional — override the public RPCs (recommended in prod for rate limits):
 PONDER_RPC_MAINNET=https://rpc.monad.xyz

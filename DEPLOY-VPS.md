@@ -83,7 +83,7 @@ Fill in real values:
 
 ```bash
 NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id_here
-TESTNET_LINK_VAULT_ADDRESS=0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3
+TESTNET_LINK_VAULT_ADDRESS=0x90978783cb701AEe7896975B43ecd37e0B4819DC
 MAINNET_LINK_VAULT_ADDRESS=0x0000000000000000000000000000000000000000
 # Leave mainnet as zero until you deploy the contract to mainnet
 LIFI_API_KEY=your_lifi_key
@@ -154,7 +154,7 @@ Visit:
 
 ## Deploying the smart contract
 
-The contract on testnet is already deployed at `0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3`.
+The contract on testnet is already deployed at `0x90978783cb701AEe7896975B43ecd37e0B4819DC`.
 For mainnet, you need to deploy it yourself.
 
 ### Testnet (already done, included here for reference)

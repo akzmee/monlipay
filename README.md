@@ -106,12 +106,12 @@ A single contract with three core functions plus a permissionless auto-refund:
 
 ### Contract address
 
-| Network | Chain ID | Address | Explorer |
+| Network | Chain ID | LinkVault | Forwarder (EIP-2771) |
 |---|---|---|---|
-| **Monad Testnet** | 10143 | [`0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3`](https://testnet.monadscan.com/address/0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3) | Monadscan |
-| **Monad Mainnet** | 143 | [`0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9`](https://monadscan.com/address/0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9) | Monadscan |
+| **Monad Testnet** | 10143 | [`0x90978783cb701AEe7896975B43ecd37e0B4819DC`](https://testnet.monadscan.com/address/0x90978783cb701AEe7896975B43ecd37e0B4819DC) | [`0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9`](https://testnet.monadscan.com/address/0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9) |
+| **Monad Mainnet** | 143 | [`0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC`](https://monadscan.com/address/0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC) | [`0x90978783cb701AEe7896975B43ecd37e0B4819DC`](https://monadscan.com/address/0x90978783cb701AEe7896975B43ecd37e0B4819DC) |
 
-The testnet contract has been live since July 2026 and is the recommended starting point for judges and reviewers. Try it at **https://testnet.monlipay.xyz** (testnet MON only — no real value at risk).
+All contracts are verified on Monadscan. The testnet deployment is the recommended starting point for judges and reviewers — try it at **https://testnet.monlipay.xyz** (testnet MON only — no real value at risk).
 
 ---
 
