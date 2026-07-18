@@ -1,0 +1,66 @@
+# =============================================================================
+# Caddyfile — alternative to nginx (recommended if you're starting fresh)
+# =============================================================================
+#
+# Caddy is simpler than nginx: automatic HTTPS via Let's Encrypt, no manual
+# cert management, and a 10-line config replaces ~80 lines of nginx.
+#
+# Setup:
+#   1. Install Caddy:    https://caddyserver.com/docs/install
+#   2. Copy this file:   cp deploy/caddy/Caddyfile /etc/caddy/Caddyfile
+#   3. Restart:          systemctl restart caddy
+#
+# That's it. Caddy fetches+renews SSL certificates automatically.
+# =============================================================================
+
+# Rate limit the bridge API (shared zone).
+# Requires the "caddy-ratelimit" plugin OR use nginx if you need this.
+# For now, rely on the in-app rate limiter (src/lib/rate-limit.ts).
+
+# -----------------------------------------------------------------------------
+# MAINNET — monlipay.xyz
+# -----------------------------------------------------------------------------
+monlipay.xyz, www.monlipay.xyz {
+    # www → apex redirect
+    @www host www.monlipay.xyz
+    redir @www https://monlipay.xyz{uri} permanent
+
+    # Proxy to mainnet container
+    reverse_proxy 127.0.0.1:4000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Security headers (mirrors src/lib/security-headers.ts at the edge)
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "DENY"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+
+    encode gzip zstd
+}
+
+# -----------------------------------------------------------------------------
+# TESTNET — testnet.monlipay.xyz
+# -----------------------------------------------------------------------------
+testnet.monlipay.xyz {
+    reverse_proxy 127.0.0.1:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "DENY"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+
+    encode gzip zstd
+}

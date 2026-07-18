@@ -29,6 +29,8 @@ build/
 .env
 .env.local
 .env.*.local
+# VPS deployment secrets (docker-compose) — NEVER commit
+.env.deploy
 
 # Production
 *.log

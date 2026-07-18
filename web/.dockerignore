@@ -1,0 +1,29 @@
+# Build artifacts — don't copy into image, will be rebuilt inside Docker
+.next/
+out/
+coverage/
+node_modules/
+
+# Environment files — passed at runtime via docker-compose, not baked in.
+# IMPORTANT: never bake .env.local into an image (would leak the WC project
+# ID, LiFi API key, Alchemy key, etc. into the image layers).
+.env*
+!.env.example
+
+# Tests + dev tooling
+**/__tests__/**
+**/*.test.ts
+**/*.test.tsx
+vitest.config.ts
+vitest.setup.ts
+playwright.config.ts
+
+# Misc
+.git/
+.gitignore
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/
+.idea/
+.eslintcache

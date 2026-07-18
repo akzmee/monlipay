@@ -1,0 +1,74 @@
+# =============================================================================
+# docker-compose.yml — MonliPay dual deployment (testnet + mainnet)
+# =============================================================================
+#
+# Runs two instances of the frontend on the same VPS:
+#
+#   - monlipay-testnet  → http://127.0.0.1:3000  → testnet.monlipay.xyz
+#   - monlipay-mainnet  → http://127.0.0.1:4000  → monlipay.xyz
+#
+# Both containers share the same repo checkout but are built with different
+# NEXT_PUBLIC_NETWORK build-args (which Next.js bakes into the client bundle
+# at build time — runtime env vars alone won't flip a built image).
+#
+# Secrets (LIFI_API_KEY, ALCHEMY_API_KEY) are read from a .env.deploy file
+# at the repo root — never commit it. See DEPLOY-VPS.md.
+#
+# Usage:
+#   1. cp .env.deploy.example .env.deploy  && fill in secrets
+#   2. docker compose build
+#   3. docker compose up -d
+#   4. nginx (or caddy) reverse-proxies :80/:443 to :3000 and :4000
+# =============================================================================
+
+# docker compose auto-loads .env.deploy if named .env, so we use the
+# default_config mechanism: rename .env.deploy.example to .env on the VPS.
+# (See DEPLOY-VPS.md for the rationale — keeps secrets out of git history.)
+
+services:
+  # ---------------------------------------------------------------
+  # TESTNET — chain ID 10143
+  # ---------------------------------------------------------------
+  monlipay-testnet:
+    container_name: monlipay-testnet
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_NETWORK: testnet
+        NEXT_PUBLIC_LINK_VAULT_ADDRESS: ${TESTNET_LINK_VAULT_ADDRESS}
+        NEXT_PUBLIC_WC_PROJECT_ID: ${NEXT_PUBLIC_WC_PROJECT_ID}
+    ports:
+      - "127.0.0.1:3000:3000"   # bind to loopback only — nginx proxies public
+    restart: unless-stopped
+    environment:
+      # Server-side secrets (read from .env.deploy)
+      LIFI_API_KEY: ${LIFI_API_KEY:-}
+      ALCHEMY_API_KEY: ${ALCHEMY_API_KEY:-}
+    networks:
+      - monlipay
+
+  # ---------------------------------------------------------------
+  # MAINNET — chain ID 143
+  # ---------------------------------------------------------------
+  monlipay-mainnet:
+    container_name: monlipay-mainnet
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_NETWORK: mainnet
+        NEXT_PUBLIC_LINK_VAULT_ADDRESS: ${MAINNET_LINK_VAULT_ADDRESS}
+        NEXT_PUBLIC_WC_PROJECT_ID: ${NEXT_PUBLIC_WC_PROJECT_ID}
+    ports:
+      - "127.0.0.1:4000:3000"   # bind to loopback only — nginx proxies public
+    restart: unless-stopped
+    environment:
+      LIFI_API_KEY: ${LIFI_API_KEY:-}
+      ALCHEMY_API_KEY: ${ALCHEMY_API_KEY:-}
+    networks:
+      - monlipay
+
+networks:
+  monlipay:
+    driver: bridge
