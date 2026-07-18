@@ -1,27 +1,14 @@
 /**
  * POST /api/sponsor/claim
  *
- * Relays a gasless claim request via the ERC2771Forwarder.
- *
- * Body: {
- *   request: ForwardRequestData  // signed by the user off-chain
- * }
- *
- * The request is the EIP-712 typed struct the user signed. The sponsor
- * wraps it in `forwarder.execute()` and pays the gas.
+ * Body: { request: ForwardRequestData }  (signed by the user off-chain)
  *
  * Responses:
- *   200 { ok: true, txHash }                  — relay succeeded
+ *   200 { ok: true, txHash }
  *   400 { ok: false, reason: "invalid_request" }
- *   429 { ok: false, reason: "rate_limited" } — too many requests
+ *   429 { ok: false, reason: "rate_limited" }
  *   503 { ok: false, reason: "not_configured" | "budget_exhausted" }
  *   500 { ok: false, reason: "relay_failed" }
- *
- * Security:
- *   - Server-only route. No client imports.
- *   - Rate limited (per IP, per recipient, per deposit).
- *   - Daily budget cap on sponsor wallet.
- *   - Only LinkVault.claim() is allowlisted as the relay target.
  */
 
 import { getClientIp } from "@/lib/rate-limit";
@@ -85,17 +72,7 @@ export async function POST(request: Request): Promise<Response> {
   return toHttpResponse(result);
 }
 
-/**
- * Validate the JSON-parsed request shape and convert string-encoded
- * bigint fields back to native bigint.
- *
- * The client sends: { from, to, value: "0", gas: "500000", nonce: "0",
- * deadline: 1234567890, data, signature }
- *
- * We need to convert value/gas/nonce from string to bigint before
- * forwarding to relaySponsoredClaim, because that function expects
- * native bigints.
- */
+/** Validate JSON shape and convert string-encoded bigints (value/gas/nonce) to native bigint. */
 function parseRequestShape(
   raw: unknown,
 ): { ok: true; value: ForwardRequestData } | { ok: false; message: string } {

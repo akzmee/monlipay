@@ -1,22 +1,4 @@
-/**
- * Server-side gas sponsor relay.
- *
- * Receives an EIP-2771 forwarder request (signed by the user off-chain),
- * verifies it on-chain via `forwarder.verify()`, checks budget + rate
- * limits, then broadcasts `forwarder.execute()` from the sponsor wallet.
- *
- * The sponsor wallet pays gas. The user pays nothing.
- *
- * SECURITY
- *   - Sponsor private key NEVER leaves this module.
- *   - We re-verify the request on-chain before broadcasting — even if the
- *     client lied about validity, the forwarder contract rejects bad sigs.
- *   - Daily budget cap prevents runaway spend if the sponsor key or API
- *     is abused. When exhausted, returns 503 and the client falls back
- *     to direct claim.
- *   - Per-IP and per-recipient rate limits prevent a single abuser from
- *     draining the budget.
- */
+/** Server-side relay: validates ForwardRequest, checks rate/budget caps, broadcasts forwarder.execute(). */
 
 import {
   createWalletClient,
@@ -145,13 +127,7 @@ export function _resetBudgetForTest(): void {
 // Validation
 // ---------------------------------------------------------------------------
 
-/**
- * Pre-flight checks on the request struct before we touch the chain.
- * These catch obviously malformed requests cheaply.
- *
- * On-chain verification via the forwarder contract is the source of
- * truth, but these checks prevent burning RPC calls on junk input.
- */
+// Cheap pre-flight validation before forwarding to the chain.
 function validateRequestShape(req: unknown): req is ForwardRequestData {
   if (typeof req !== "object" || req === null) return false;
   const r = req as Record<string, unknown>;
@@ -166,14 +142,7 @@ function validateRequestShape(req: unknown): req is ForwardRequestData {
   return true;
 }
 
-/**
- * The `to` field MUST be the LinkVault contract. We don't relay arbitrary
- * calls — only LinkVault interactions.
- *
- * The `data` MUST be one of the allowlisted function selectors. Currently
- * only `claim` is supported (the most common gasless path). Other functions
- * (createLink, refund) could be added later if needed.
- */
+// Allowlist: only LinkVault.claim() calls are relayed.
 function isAllowlistedCall(req: ForwardRequestData): boolean {
   if (req.to.toLowerCase() !== LINK_VAULT_ADDRESS.toLowerCase()) return false;
   // First 4 bytes of data is the selector.
@@ -181,11 +150,7 @@ function isAllowlistedCall(req: ForwardRequestData): boolean {
   return selector === CLAIM_SELECTOR;
 }
 
-/**
- * Compute the claim() selector from the ABI at module load.
- * This is more robust than hardcoding the 4-byte value, which would need
- * to be re-derived if the function signature ever changes.
- */
+// Compute the claim() selector from the ABI.
 function computeClaimSelector(): string {
   // Manually compute keccak256("claim(uint256,address,uint8,bytes32,bytes32)")
   // slice(0, 10) — but we don't want to import viem on the server hot path,

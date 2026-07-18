@@ -56,11 +56,6 @@ export function useDepositExists(depositId: bigint | null) {
 
 /**
  * Create a payment link.
- * Handles the full flow:
- * 1. Generate ephemeral keypair
- * 2. Call createLink on the contract
- * 3. Wait for confirmation
- * 4. Return the shareable URL
  */
 export function useCreateLink() {
   const { address } = useAccount();
@@ -120,12 +115,8 @@ export function useCreateLink() {
         const { wagmiConfig } = await import("@/config/wagmi");
         const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
 
-        // 5. Extract deposit ID from events
-        // The createLink function returns depositId, but we need to parse logs
-        // to get it since sendTransaction doesn't decode return values.
-        // We can read nextDepositId before and after, or parse the event log.
+        // 5. Extract deposit ID from the LinkCreated event log.
         if (receipt.status === "success") {
-          // Find the LinkCreated event in logs
           const { decodeEventLog } = await import("viem");
           for (const log of receipt.logs) {
             if (log.address.toLowerCase() === LINK_VAULT_ADDRESS.toLowerCase()) {
@@ -139,12 +130,7 @@ export function useCreateLink() {
                   const depositId = (decoded.args as { depositId: bigint }).depositId;
                   const url = buildShareableUrl(params.baseUrl, depositId, secretKey);
 
-                  // Save to localStorage for "My Links" tracking.
-                  // CRITICAL: shareableUrl MUST be saved — it contains the
-                  // ephemeral secret key in the URL fragment. Without it,
-                  // the link becomes unclaimable AND unrefundable (until
-                  // expiry) because the secret key is lost forever.
-                  // See storage.ts for schema details.
+                  // Persist locally — the URL fragment carries the secret key.
                   addStoredLink({
                     depositId: depositId.toString(),
                     token: params.token,
@@ -336,34 +322,8 @@ export function useRefundLink() {
 }
 
 /**
- * Auto-refund expired payment links.
- *
- * Scans the user's stored links, finds ones that are:
- *   1. Past their expiry timestamp
- *   2. Not yet marked as claimed/refunded in localStorage
- * then calls `autoRefund(depositId)` on the contract for each.
- *
- * This is "permissionless refund" — anyone can call autoRefund, funds
- * always return to the original sender. The caller (the user here)
- * pays the gas, but recovers their own funds in return.
- *
- * UX: called automatically when the user opens "My Links". A toast/
- * banner should show how many links were refunded.
- *
- * The hook is idempotent — calling it multiple times is safe because
- * autoRefund on an already-claimed deposit reverts (caught silently).
- *
- * HARDENING (audit round 2):
- *   - HIGH-3: Ref-based mutex prevents concurrent invocations (e.g.
- *     React StrictMode dev double-invoke or rapid re-clicks). Without
- *     this, two concurrent batches would race on nonces and one would
- *     fail.
- *   - HIGH-5: Per-link errors are surfaced as `failedDepositIds` so the
- *     UI can flag them individually (vs a single top-level error string
- *     that hides which link failed).
- *   - MEDIUM-5: All hook state is reset when the wallet disconnects,
- *     preventing stale "refundedCount" or "failedDepositIds" from the
- *     previous account leaking into the new session.
+ * Auto-refund expired links owned by the connected wallet.
+ * Idempotent — reverted autoRefund calls (already claimed) are caught silently.
  */
 export function useAutoRefundExpiredLinks() {
   const { sendTransactionAsync } = useSendTransaction();
@@ -373,20 +333,10 @@ export function useAutoRefundExpiredLinks() {
   const [error, setError] = useState<string | null>(null);
   const [failedDepositIds, setFailedDepositIds] = useState<Set<string>>(new Set());
 
-  // HIGH-3: Ref-based mutex. Prevents two concurrent invocations from
-  // racing on wallet nonces (which would cause one to fail with a
-  // "nonce too low" error). The state-based `isProcessing` flag is
-  // insufficient because React batches state updates, so two synchronous
-  // calls to `processExpiredLinks` would both see `false` and proceed.
+  // Mutex ref — guards against concurrent invocations racing on wallet nonces.
   const isProcessingRef = useRef(false);
 
-  // MEDIUM-5: Reset state when the account changes or disconnects.
-  // Without this, a stale `refundedCount` from the previous account
-  // would persist into the new session.
-  // MEDIUM-10: We also abort any in-flight autoRefund batch when the
-  // account changes. Without this, a stale batch from the previous
-  // account would keep firing transactions after the wallet switched,
-  // which is wasteful at best and confusing at worst.
+  // Reset state and abort in-flight batch on disconnect.
   useEffect(() => {
     if (!address) {
       setIsProcessing(false);
@@ -394,7 +344,6 @@ export function useAutoRefundExpiredLinks() {
       setError(null);
       setFailedDepositIds(new Set());
       isProcessingRef.current = false;
-      // Abort any in-flight batch
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
@@ -402,22 +351,15 @@ export function useAutoRefundExpiredLinks() {
     }
   }, [address]);
 
-  // MEDIUM-10: AbortController for the current batch. Allows us to
-  // cancel the sequential loop early when the component unmounts or
-  // the account changes. Each call to processExpiredLinks creates a
-  // new controller and stores it here; the previous one (if any) is
-  // aborted first.
+  // AbortController for the current batch — cancelled on unmount or account change.
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const processExpiredLinks = useCallback(async () => {
     if (!address) return;
 
-    // HIGH-3: mutex guard — if already running, bail out.
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
-    // MEDIUM-10: Abort any prior batch (defensive — there shouldn't be one
-    // due to the mutex, but the abort-on-unmount effect may have raced).
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -454,12 +396,9 @@ export function useAutoRefundExpiredLinks() {
       const { waitForTransactionReceipt } = await import("wagmi/actions");
       const { wagmiConfig } = await import("@/config/wagmi");
 
-      // Process sequentially — parallel calls to sendTransactionAsync
-      // can cause nonce collisions in some wallets.
+      // Sequential — parallel sendTransactionAsync calls risk nonce collisions.
       for (const link of expiredLinks) {
-        // MEDIUM-10: bail out early if the batch was aborted (component
-        // unmounted or account switched). State updates after this point
-        // would either be no-ops (unmounted) or stale (account switched).
+        // Bail if aborted.
         if (controller.signal.aborted) return;
 
         try {
@@ -489,9 +428,7 @@ export function useAutoRefundExpiredLinks() {
             newFailedIds.add(link.depositId);
           }
         } catch {
-          // HIGH-5: Record per-link failure so the UI can flag it.
-          // Most common cause: the link was already claimed/refunded
-          // in a race, or the wallet rejected the tx.
+          // Per-link failure (race, wallet rejection, etc.) — surfaced via failedDepositIds.
           newFailedIds.add(link.depositId);
         }
       }
@@ -499,9 +436,7 @@ export function useAutoRefundExpiredLinks() {
       setRefundedCount(successCount);
       setFailedDepositIds(newFailedIds);
 
-      // Set a top-level error ONLY if all links failed (so the user
-      // gets a clear "nothing worked" message). Partial failures are
-      // surfaced via failedDepositIds instead.
+      // Top-level error only on full failure; partial failures use failedDepositIds.
       if (successCount === 0 && newFailedIds.size > 0) {
         setError(
           `Could not auto-refund ${newFailedIds.size} link${newFailedIds.size === 1 ? "" : "s"}. ` +
