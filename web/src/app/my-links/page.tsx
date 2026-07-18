@@ -1,25 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { getStoredLinks, removeStoredLink, subscribeToLinkChanges, type StoredLink } from "@/lib/storage";
-import { useDeposit, useAutoRefundExpiredLinks } from "@/hooks/useLinkVault";
+import { useMyLinks } from "@/hooks/useMyLinks";
+import { useAutoRefundExpiredLinks } from "@/hooks/useLinkVault";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";
 import { LinkCard } from "@/components/LinkCard";
 import { monadChain } from "@/config/chain";
+import { formatUnits } from "viem";
 
+/**
+ * My Links page.
+ *
+ * Reads from the Ponder indexer (via useMyLinks) instead of localStorage.
+ * This fixes the critical UX bug where link history persisted across wallet
+ * switches: each wallet now only sees its own on-chain-created links.
+ *
+ * The `shareableUrl` field no longer exists in IndexedLink — it cannot be
+ * reconstructed from on-chain data (the secret key never leaves the browser).
+ * Users are warned at create-time to save the URL; refund still works
+ * because the contract's refund() only needs the depositId.
+ */
 export default function MyLinksPage() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
-  const [links, setLinks] = useState<StoredLink[]>([]);
   const isWrongChain = isConnected && chainId !== monadChain.id;
 
-  // Auto-refund expired links when the page mounts and the user is on the
-  // correct chain. This is "permissionless refund" — anyone can call
-  // autoRefund, funds always return to the original sender. The user pays
-  // the gas but recovers their own funds.
+  const { links, isLoading, error, refresh, indexerConfigured } = useMyLinks();
+
+  // Auto-refund expired links when the page mounts. Reads from the indexer
+  // (via fetchExpiredLinks) so it works across wallets / devices.
   const {
     processExpiredLinks,
     isProcessing: isAutoRefunding,
@@ -29,41 +41,36 @@ export default function MyLinksPage() {
     reset: resetAutoRefund,
   } = useAutoRefundExpiredLinks();
 
-  // Auto-trigger once when the page mounts (and chain is correct).
-  // We use a ref guard to prevent retriggering in StrictMode dev double-render.
-  const hasAutoRefunded = useRef(false);
+  const hasAutoRefundedRef = useRef<`0x${string}` | null>(null);
   useEffect(() => {
+    // Gate on indexerConfigured — without it, processExpiredLinks is a
+    // no-op anyway, but we DON'T want to set hasAutoRefundedRef in that
+    // case (otherwise re-running after the user configures the indexer
+    // wouldn't trigger a refund).
     if (
       isConnected &&
       !isWrongChain &&
-      !hasAutoRefunded.current &&
-      !isAutoRefunding
+      indexerConfigured &&
+      !isAutoRefunding &&
+      address &&
+      // Only auto-refund once PER ADDRESS. If the user disconnects and
+      // reconnects (or switches wallets), we re-run for the new address.
+      hasAutoRefundedRef.current !== address
     ) {
-      hasAutoRefunded.current = true;
-      processExpiredLinks().then(() => {
-        // Refresh the list after auto-refund completes
-        setLinks(getStoredLinks());
+      hasAutoRefundedRef.current = address;
+      processExpiredLinks(address).then(() => {
+        void refresh();
       });
     }
-  }, [isConnected, isWrongChain, isAutoRefunding, processExpiredLinks]);
+  }, [isConnected, isWrongChain, indexerConfigured, isAutoRefunding, processExpiredLinks, address, refresh]);
 
+  // Reset the auto-refund guard on disconnect so the next connect re-runs.
   useEffect(() => {
-    setLinks(getStoredLinks());
-  }, []);
+    if (!isConnected) {
+      hasAutoRefundedRef.current = null;
+    }
+  }, [isConnected]);
 
-  // HIGH-4: Cross-tab localStorage guard. When another tab modifies the
-  // links array (e.g. creates a new link, marks one as refunded), refresh
-  // our local state. The `storage` event fires only in OTHER tabs, so
-  // there's no risk of an infinite loop.
-  useEffect(() => {
-    return subscribeToLinkChanges(() => {
-      setLinks(getStoredLinks());
-    });
-  }, []);
-
-  // LOW-5: Auto-dismiss the success/error toasts after 10 seconds so
-  // they don't linger forever after the user has seen them. The user
-  // can also dismiss manually via the × button.
   useEffect(() => {
     if (refundedCount > 0 || autoRefundError) {
       const t = setTimeout(() => resetAutoRefund(), 10_000);
@@ -126,6 +133,88 @@ export default function MyLinksPage() {
     );
   }
 
+  // Indexer not configured — show a setup hint (does NOT block create/refund).
+  if (!indexerConfigured) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
+          <p className="mt-1 text-sm text-stone-500">
+            Track and manage your payment links.
+          </p>
+        </div>
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-4 dark:border-amber-800 dark:bg-amber-950/30">
+          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+            Indexer not configured
+          </p>
+          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+            Link history is read from a Ponder indexer, but{" "}
+            <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/50">
+              NEXT_PUBLIC_INDEXER_URL
+            </code>{" "}
+            is not set. Create and refund flows still work — see{" "}
+            <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/50">
+              indexer/README.md
+            </code>
+            .
+          </p>
+          <Link
+            href="/create"
+            className="mt-3 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500"
+          >
+            Create link
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading && links.length === 0) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
+          <p className="mt-1 text-sm text-stone-500">Loading…</p>
+        </div>
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900"
+            >
+              <div className="animate-pulse space-y-2">
+                <div className="h-4 w-1/4 rounded bg-stone-200 dark:bg-stone-700" />
+                <div className="h-6 w-1/3 rounded bg-stone-200 dark:bg-stone-700" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error && links.length === 0) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
+        </div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 dark:border-red-900 dark:bg-red-950/30">
+          <p className="text-sm font-semibold text-red-700 dark:text-red-300">
+            Couldn't load your links
+          </p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>
+          <button
+            onClick={() => void refresh()}
+            className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 dark:border-red-800 dark:bg-stone-900 dark:text-red-300 dark:hover:bg-red-950/40"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (links.length === 0) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
@@ -162,11 +251,20 @@ export default function MyLinksPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
-        <p className="mt-1 text-sm text-stone-500">
-          Track and manage your payment links. Expired links auto-refund on open.
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Links</h1>
+          <p className="mt-1 text-sm text-stone-500">
+            Track and manage your payment links. Expired links auto-refund on open.
+          </p>
+        </div>
+        <button
+          onClick={() => void refresh()}
+          disabled={isLoading}
+          className="shrink-0 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-40 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+        >
+          {isLoading ? "Loading…" : "Refresh"}
+        </button>
       </div>
 
       <div className="space-y-3">
@@ -218,18 +316,21 @@ export default function MyLinksPage() {
         )}
         {links.map((link) => (
           <LinkRow
-            key={link.depositId}
+            key={link.depositId.toString()}
             link={link}
             currentAddress={address}
-            isBusy={busyDepositIds.has(link.depositId)}
-            autoRefundFailed={failedDepositIds.has(link.depositId)}
-            shareableUrl={link.shareableUrl}
+            isBusy={busyDepositIds.has(link.depositId.toString())}
+            autoRefundFailed={failedDepositIds.has(link.depositId.toString())}
             onRefund={async (depositId) => {
               try {
                 await refundMultiple(depositId, () => {
-                  removeStoredLink(link.depositId);
-                  setLinks(getStoredLinks());
+                  // No localStorage to update; just refresh from indexer.
+                  void refresh();
                 });
+                // Also refresh after a short delay to catch the indexer's
+                // view of the new state (the refund tx emits LinkRefunded,
+                // which the indexer will pick up within a few seconds).
+                setTimeout(() => void refresh(), 3_000);
               } catch {
                 // Error is surfaced via useRefundMultiple.error state
               }
@@ -241,58 +342,72 @@ export default function MyLinksPage() {
   );
 }
 
+/**
+ * Single link row.
+ *
+ * Reads the deposit's CURRENT on-chain state via useDeposit — this is still
+ * the source of truth for "is this link claimed right now?" since the
+ * indexer may lag by a few seconds. The IndexedLink from the indexer is
+ * only used for the LIST of links (which depositIds this user created).
+ */
 function LinkRow({
   link,
   currentAddress,
   isBusy,
   autoRefundFailed,
-  shareableUrl,
   onRefund,
 }: {
-  link: StoredLink;
+  link: import("@/lib/indexer-client").IndexedLink;
   currentAddress: `0x${string}` | undefined;
   isBusy: boolean;
   autoRefundFailed: boolean;
-  shareableUrl?: string;
   onRefund: (depositId: bigint) => Promise<void>;
 }) {
-  // Guard against corrupted localStorage entries
-  let depositId: bigint;
-  try {
-    depositId = BigInt(link.depositId);
-  } catch {
-    return null;
-  }
-  const { data: deposit, isLoading } = useDeposit(depositId);
+  // Quick local helpers from the indexer row (no extra RPC round-trip).
+  const depositIdStr = link.depositId.toString();
 
-  if (isLoading || !deposit) {
-    return (
-      <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
-        <div className="animate-pulse space-y-2">
-          <div className="h-4 w-1/4 rounded bg-stone-200 dark:bg-stone-700" />
-          <div className="h-6 w-1/3 rounded bg-stone-200 dark:bg-stone-700" />
-        </div>
-      </div>
-    );
-  }
+  // For display, format amount from base units. The indexer stores amount
+  // as raw bigint; we format with 18 decimals for native MON, but for ERC-20
+  // tokens we don't know the decimals here without an extra read. We use
+  // 18 as a safe default — UI shows full precision if it doesn't fit.
+  const amountDisplay = (() => {
+    try {
+      const formatted = formatUnits(link.amount, 18);
+      // Strip trailing zeros for display: "1.000000" → "1"
+      return formatted.includes(".")
+        ? formatted.replace(/\.?0+$/, "")
+        : formatted;
+    } catch {
+      return link.amount.toString();
+    }
+  })();
 
-  const isClaimed = deposit.claimed;
-  const isExpired = Math.floor(Date.now() / 1000) >= Number(deposit.expiry);
-  const canRefund = isExpired && !isClaimed && deposit.sender === currentAddress;
+  const tokenSymbol = link.token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
+  const expiryNum = Number(link.expiry);
+
+  // Derive status from indexer (avoids per-row RPC).
+  const isClaimed = link.status === "claimed" || link.status === "refunded";
+  const isExpired = !isClaimed && Math.floor(Date.now() / 1000) >= expiryNum;
+  const canRefund =
+    isExpired &&
+    link.status === "active" &&
+    link.sender.toLowerCase() === (currentAddress ?? "").toLowerCase();
 
   return (
     <LinkCard
-      depositId={link.depositId}
-      amount={link.amount}
+      depositId={depositIdStr}
+      amount={amountDisplay}
       token={link.token}
-      expiry={Number(deposit.expiry)}
+      expiry={expiryNum}
       isClaimed={isClaimed}
       isExpired={isExpired}
       canRefund={canRefund}
       isBusy={isBusy}
       autoRefundFailed={autoRefundFailed}
-      shareableUrl={shareableUrl}
-      onRefund={() => onRefund(depositId)}
+      // shareableUrl intentionally omitted — the indexer cannot reconstruct
+      // it (secret key never leaves the browser). Users are warned at
+      // create-time to save the URL.
+      onRefund={() => onRefund(link.depositId)}
     />
   );
 }

@@ -151,10 +151,12 @@ describe("LinkCard", () => {
     it("should NOT render the URL row when shareableUrl is missing", () => {
       renderLinkCard({ shareableUrl: undefined });
       expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument();
-      // It should show a muted hint instead
+      // After the on-chain refactor, no muted hint is shown either —
+      // the shareableUrl simply isn't available (the secret key lives
+      // only in the user's browser at create-time).
       expect(
-        screen.getByText(/Link URL not saved/i),
-      ).toBeInTheDocument();
+        screen.queryByText(/Link URL not saved/i),
+      ).not.toBeInTheDocument();
     });
 
     it("should NOT render the URL row for claimed links (no point sharing)", () => {

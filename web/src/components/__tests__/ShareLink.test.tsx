@@ -35,7 +35,9 @@ describe("ShareLink", () => {
 
   it("should render Copy button (in link view)", () => {
     render(<ShareLink url={mockUrl} onReset={mockReset} />);
-    expect(screen.getByText("Copy")).toBeInTheDocument();
+    // Use explicit role to disambiguate from the word "Copy" in the
+    // "Save this link now" warning bullet list.
+    expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
   });
 
   it("should render WhatsApp button", () => {
@@ -62,7 +64,7 @@ describe("ShareLink", () => {
 
   it("should copy URL to clipboard when Copy is clicked", async () => {
     render(<ShareLink url={mockUrl} onReset={mockReset} />);
-    fireEvent.click(screen.getByText("Copy"));
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(mockUrl);
     });
@@ -70,7 +72,7 @@ describe("ShareLink", () => {
 
   it("should show 'Copied!' after clicking Copy", async () => {
     render(<ShareLink url={mockUrl} onReset={mockReset} />);
-    fireEvent.click(screen.getByText("Copy"));
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
     await waitFor(() => {
       expect(screen.getByText("Copied!")).toBeInTheDocument();
     });

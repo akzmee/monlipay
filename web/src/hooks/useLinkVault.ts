@@ -10,7 +10,6 @@ import { parseUnits, type Hex } from "viem";
 import { linkVaultAbi } from "@/lib/abi";
 import { LINK_VAULT_ADDRESS } from "@/config/chain";
 import { generateSecretKey, privateKeyToClaimKey, buildShareableUrl } from "@/lib/crypto";
-import { addStoredLink } from "@/lib/storage";
 
 /**
  * Deposit data structure matching the contract's struct.
@@ -130,17 +129,10 @@ export function useCreateLink() {
                   const depositId = (decoded.args as { depositId: bigint }).depositId;
                   const url = buildShareableUrl(params.baseUrl, depositId, secretKey);
 
-                  // Persist locally — the URL fragment carries the secret key.
-                  addStoredLink({
-                    depositId: depositId.toString(),
-                    token: params.token,
-                    amount: params.amount,
-                    expiry: expiryTimestamp,
-                    createdAt: Math.floor(Date.now() / 1000),
-                    sender: address,
-                    shareableUrl: url,
-                  });
-
+                  // The indexer surfaces this link on the My Links page
+                  // via the LinkCreated event — no localStorage write needed.
+                  // The shareableUrl (with secret key) is only available
+                  // in-memory here; ShareLink warns the user to save it.
                   setResult({ depositId, shareableUrl: url });
                   return;
                 }
@@ -322,12 +314,19 @@ export function useRefundLink() {
 }
 
 /**
- * Auto-refund expired links owned by the connected wallet.
- * Idempotent — reverted autoRefund calls (already claimed) are caught silently.
+ * Auto-refund expired payment links.
+ * Pulls ACTIVE-but-expired links from the Ponder indexer (source of truth
+ * for which links this wallet owns), then calls `autoRefund(depositId)` for
+ * each. Idempotent — reverted autoRefund calls (already claimed) are caught
+ * silently.
+ *
+ * `address` is passed in by the caller rather than read from useAccount so
+ * the binding is explicit; useAccount is still used internally to reset
+ * state on disconnect.
  */
 export function useAutoRefundExpiredLinks() {
   const { sendTransactionAsync } = useSendTransaction();
-  const { address } = useAccount();
+  const { address: connectedAddress } = useAccount();
   const [isProcessing, setIsProcessing] = useState(false);
   const [refundedCount, setRefundedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -338,7 +337,7 @@ export function useAutoRefundExpiredLinks() {
 
   // Reset state and abort in-flight batch on disconnect.
   useEffect(() => {
-    if (!address) {
+    if (!connectedAddress) {
       setIsProcessing(false);
       setRefundedCount(0);
       setError(null);
@@ -349,14 +348,12 @@ export function useAutoRefundExpiredLinks() {
         abortControllerRef.current = null;
       }
     }
-  }, [address]);
+  }, [connectedAddress]);
 
   // AbortController for the current batch — cancelled on unmount or account change.
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const processExpiredLinks = useCallback(async () => {
-    if (!address) return;
-
+  const processExpiredLinks = useCallback(async (address: `0x${string}`) => {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
@@ -373,19 +370,18 @@ export function useAutoRefundExpiredLinks() {
     const newFailedIds = new Set<string>();
 
     try {
-      // Import dynamically to avoid SSR issues
-      const { getStoredLinks, updateStoredLinkStatus } = await import("@/lib/storage");
-      const links = getStoredLinks();
-      const now = Math.floor(Date.now() / 1000);
+      // Pull expired active links from the Ponder indexer.
+      // If the indexer is not configured, this returns [] silently and
+      // we exit with refundedCount=0 — the manual refund button on each
+      // LinkCard still works as a fallback.
+      const { fetchExpiredLinks, isIndexerConfigured } = await import("@/lib/indexer-client");
+      if (!isIndexerConfigured) {
+        setRefundedCount(0);
+        return;
+      }
 
-      // Filter to links owned by this user, expired, not yet refunded/claimed
-      const expiredLinks = links.filter(
-        (l) =>
-          l.sender.toLowerCase() === address.toLowerCase() &&
-          l.expiry <= now &&
-          l.status !== "refunded" &&
-          l.status !== "claimed",
-      );
+      const expiredLinks = await fetchExpiredLinks(address, controller.signal);
+      if (controller.signal.aborted) return;
 
       if (expiredLinks.length === 0) {
         setRefundedCount(0);
@@ -402,11 +398,10 @@ export function useAutoRefundExpiredLinks() {
         if (controller.signal.aborted) return;
 
         try {
-          const depositId = BigInt(link.depositId);
           const txData = encodeFunctionData({
             abi: linkVaultAbi,
             functionName: "autoRefund",
-            args: [depositId],
+            args: [link.depositId],
           });
 
           const hash = await sendTransactionAsync({
@@ -421,15 +416,17 @@ export function useAutoRefundExpiredLinks() {
           if (controller.signal.aborted) return;
 
           if (receipt.status === "success") {
-            updateStoredLinkStatus(link.depositId, "refunded");
+            // No local status to update — the indexer will pick up
+            // the LinkRefunded event and the next useMyLinks refresh
+            // will show the new state.
             successCount++;
           } else {
             // Reverted tx — surface as a per-link failure
-            newFailedIds.add(link.depositId);
+            newFailedIds.add(link.depositId.toString());
           }
         } catch {
-          // Per-link failure (race, wallet rejection, etc.) — surfaced via failedDepositIds.
-          newFailedIds.add(link.depositId);
+          // Per-link failure (race, wallet rejection) — surfaced via failedDepositIds.
+          newFailedIds.add(link.depositId.toString());
         }
       }
 
@@ -444,9 +441,10 @@ export function useAutoRefundExpiredLinks() {
         );
       }
     } catch (err) {
-      // Top-level error (not per-link)
+      // Top-level error (not per-link) — typically a fetch failure
+      // against the indexer. The manual refund button still works.
       setError(
-        err instanceof Error ? err.message : "Failed to auto-refund expired links",
+        err instanceof Error ? err.message : "Failed to load expired links from indexer",
       );
     } finally {
       // Only update state if this batch wasn't aborted. Aborted batches
@@ -459,7 +457,7 @@ export function useAutoRefundExpiredLinks() {
         abortControllerRef.current = null;
       }
     }
-  }, [address, sendTransactionAsync]);
+  }, [sendTransactionAsync]);
 
   const reset = useCallback(() => {
     setRefundedCount(0);

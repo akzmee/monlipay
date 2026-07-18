@@ -6,8 +6,8 @@ import React from "react";
 
 const mockSendTransactionAsync = vi.fn();
 const mockWaitForReceipt = vi.fn();
-const mockGetStoredLinks = vi.fn<() => unknown[]>(() => []);
-const mockUpdateStoredLinkStatus = vi.fn();
+const mockFetchExpiredLinks = vi.fn();
+const mockIsIndexerConfigured = vi.fn(() => true);
 
 vi.mock("wagmi", () => ({
   useAccount: () => ({
@@ -33,12 +33,13 @@ vi.mock("viem", () => ({
   encodeFunctionData: () => "0xencoded",
 }));
 
-vi.mock("@/lib/storage", () => ({
-  getStoredLinks: () => mockGetStoredLinks(),
-  updateStoredLinkStatus: (...args: unknown[]) =>
-    mockUpdateStoredLinkStatus(...args),
-  addStoredLink: vi.fn(),
-  removeStoredLink: vi.fn(),
+vi.mock("@/lib/indexer-client", () => ({
+  fetchExpiredLinks: (...args: unknown[]) => mockFetchExpiredLinks(...args),
+  // isIndexerConfigured must be a BOOLEAN (the real module exports a const bool,
+  // not a function) so the hook's `if (!isIndexerConfigured)` check works.
+  get isIndexerConfigured() {
+    return mockIsIndexerConfigured();
+  },
 }));
 
 vi.mock("@/config/chain", () => ({
@@ -48,16 +49,23 @@ vi.mock("@/config/chain", () => ({
 
 vi.mock("@/lib/abi", () => ({ linkVaultAbi: [] }));
 
-// Helper to build an expired link owned by the mocked address.
+// Helper: an active expired link owned by the mocked address.
+// Shape matches IndexedLink from @/lib/indexer-client (bigint fields,
+// status = "active").
 function expiredLink(overrides: Partial<Record<string, unknown>> = {}) {
   return {
-    depositId: "1",
-    token: "0x0000000000000000000000000000000000000000",
-    amount: "1.0",
-    // 1 hour ago → always expired
-    expiry: Math.floor(Date.now() / 1000) - 3600,
-    createdAt: Math.floor(Date.now() / 1000) - 7200,
+    depositId: 1n,
     sender: "0x1234567890123456789012345678901234567890",
+    token: "0x0000000000000000000000000000000000000000",
+    amount: 1_000_000_000_000_000_000n,
+    expiry: BigInt(Math.floor(Date.now() / 1000) - 3600),
+    status: "active" as const,
+    recipient: null,
+    createdAtBlock: 100,
+    createdAtTs: Math.floor(Date.now() / 1000) - 7200,
+    closedAtBlock: null,
+    closedAtTs: null,
+    chainId: 10143,
     ...overrides,
   };
 }
@@ -65,10 +73,10 @@ function expiredLink(overrides: Partial<Record<string, unknown>> = {}) {
 describe("useAutoRefundExpiredLinks", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetStoredLinks.mockReturnValue([]);
+    mockFetchExpiredLinks.mockResolvedValue([]);
+    mockIsIndexerConfigured.mockReturnValue(true);
     mockSendTransactionAsync.mockReset();
     mockWaitForReceipt.mockReset();
-    mockUpdateStoredLinkStatus.mockReset();
   });
 
   // -----------------------------------------------------------------
@@ -89,12 +97,14 @@ describe("useAutoRefundExpiredLinks", () => {
   // No expired links → no-op
   // -----------------------------------------------------------------
   it("should set refundedCount=0 and skip when no expired links", async () => {
-    mockGetStoredLinks.mockReturnValue([]);
+    mockFetchExpiredLinks.mockResolvedValue([]);
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
     expect(result.current.refundedCount).toBe(0);
@@ -104,8 +114,8 @@ describe("useAutoRefundExpiredLinks", () => {
   // -----------------------------------------------------------------
   // Happy path: one expired link → refunded
   // -----------------------------------------------------------------
-  it("should refund an expired link and update status", async () => {
-    mockGetStoredLinks.mockReturnValue([expiredLink()]);
+  it("should refund an expired link", async () => {
+    mockFetchExpiredLinks.mockResolvedValue([expiredLink()]);
     mockSendTransactionAsync.mockResolvedValue("0xhash");
     mockWaitForReceipt.mockResolvedValue({ status: "success", logs: [] });
 
@@ -113,20 +123,21 @@ describe("useAutoRefundExpiredLinks", () => {
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
     expect(result.current.refundedCount).toBe(1);
     expect(result.current.failedDepositIds.size).toBe(0);
     expect(result.current.error).toBeNull();
-    expect(mockUpdateStoredLinkStatus).toHaveBeenCalledWith("1", "refunded");
   });
 
   // -----------------------------------------------------------------
   // Reverted receipt → per-link failure
   // -----------------------------------------------------------------
   it("should record a per-link failure when receipt reverts", async () => {
-    mockGetStoredLinks.mockReturnValue([expiredLink()]);
+    mockFetchExpiredLinks.mockResolvedValue([expiredLink()]);
     mockSendTransactionAsync.mockResolvedValue("0xhash");
     mockWaitForReceipt.mockResolvedValue({ status: "reverted", logs: [] });
 
@@ -134,12 +145,13 @@ describe("useAutoRefundExpiredLinks", () => {
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
     expect(result.current.refundedCount).toBe(0);
     expect(result.current.failedDepositIds.has("1")).toBe(true);
-    // Top-level error appears because ALL links failed
     expect(result.current.error).toContain("Could not auto-refund");
   });
 
@@ -147,14 +159,16 @@ describe("useAutoRefundExpiredLinks", () => {
   // sendTransactionAsync throws → per-link failure
   // -----------------------------------------------------------------
   it("should record a per-link failure when sendTransaction throws", async () => {
-    mockGetStoredLinks.mockReturnValue([expiredLink()]);
+    mockFetchExpiredLinks.mockResolvedValue([expiredLink()]);
     mockSendTransactionAsync.mockRejectedValue(new Error("Nonce too low"));
 
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
     expect(result.current.refundedCount).toBe(0);
@@ -165,11 +179,10 @@ describe("useAutoRefundExpiredLinks", () => {
   // Partial failure: 1 success + 1 failure
   // -----------------------------------------------------------------
   it("should surface partial failures without top-level error", async () => {
-    mockGetStoredLinks.mockReturnValue([
-      expiredLink({ depositId: "1" }),
-      expiredLink({ depositId: "2" }),
+    mockFetchExpiredLinks.mockResolvedValue([
+      expiredLink({ depositId: 1n }),
+      expiredLink({ depositId: 2n }),
     ]);
-    // First tx succeeds, second throws
     mockSendTransactionAsync
       .mockResolvedValueOnce("0xhash1")
       .mockRejectedValueOnce(new Error("rejected"));
@@ -179,13 +192,14 @@ describe("useAutoRefundExpiredLinks", () => {
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
     expect(result.current.refundedCount).toBe(1);
     expect(result.current.failedDepositIds.has("2")).toBe(true);
     expect(result.current.failedDepositIds.has("1")).toBe(false);
-    // Partial failure → no top-level error
     expect(result.current.error).toBeNull();
   });
 
@@ -193,7 +207,7 @@ describe("useAutoRefundExpiredLinks", () => {
   // Mutex: second concurrent call is a no-op
   // -----------------------------------------------------------------
   it("should bail out if already processing (mutex guard)", async () => {
-    mockGetStoredLinks.mockReturnValue([expiredLink()]);
+    mockFetchExpiredLinks.mockResolvedValue([expiredLink()]);
     let releaseTx!: (hash: string) => void;
     mockSendTransactionAsync.mockReturnValue(
       new Promise<string>((r) => {
@@ -205,24 +219,24 @@ describe("useAutoRefundExpiredLinks", () => {
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
-    // Kick off the first call but don't release the tx hash yet.
     let firstCall: Promise<void> | undefined;
     act(() => {
-      firstCall = result.current.processExpiredLinks();
+      firstCall = result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
-    // Wait for the first call to hit the pending sendTransactionAsync
     await waitFor(() => {
       expect(mockSendTransactionAsync).toHaveBeenCalledTimes(1);
     });
 
-    // While the first is still in flight, invoke again — should be a no-op
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
     expect(mockSendTransactionAsync).toHaveBeenCalledTimes(1);
 
-    // Now release the tx hash so the first call can complete
     await act(async () => {
       releaseTx("0xhash");
       await firstCall;
@@ -232,70 +246,29 @@ describe("useAutoRefundExpiredLinks", () => {
   });
 
   // -----------------------------------------------------------------
-  // Filters: not-yet-expired, already-refunded, already-claimed, other sender
+  // Indexer not configured → no-op
   // -----------------------------------------------------------------
-  it("should skip not-yet-expired links", async () => {
-    mockGetStoredLinks.mockReturnValue([
-      expiredLink({ expiry: Math.floor(Date.now() / 1000) + 3600 }),
-    ]);
+  it("should no-op when the indexer is not configured", async () => {
+    mockIsIndexerConfigured.mockReturnValue(false);
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
-    expect(mockSendTransactionAsync).not.toHaveBeenCalled();
     expect(result.current.refundedCount).toBe(0);
-  });
-
-  it("should skip already-refunded links", async () => {
-    mockGetStoredLinks.mockReturnValue([
-      expiredLink({ status: "refunded" }),
-    ]);
-    const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
-    const { result } = renderHook(() => useAutoRefundExpiredLinks());
-
-    await act(async () => {
-      await result.current.processExpiredLinks();
-    });
-
     expect(mockSendTransactionAsync).not.toHaveBeenCalled();
-  });
-
-  it("should skip already-claimed links", async () => {
-    mockGetStoredLinks.mockReturnValue([
-      expiredLink({ status: "claimed" }),
-    ]);
-    const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
-    const { result } = renderHook(() => useAutoRefundExpiredLinks());
-
-    await act(async () => {
-      await result.current.processExpiredLinks();
-    });
-
-    expect(mockSendTransactionAsync).not.toHaveBeenCalled();
-  });
-
-  it("should skip links owned by a different sender", async () => {
-    mockGetStoredLinks.mockReturnValue([
-      expiredLink({ sender: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef" }),
-    ]);
-    const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
-    const { result } = renderHook(() => useAutoRefundExpiredLinks());
-
-    await act(async () => {
-      await result.current.processExpiredLinks();
-    });
-
-    expect(mockSendTransactionAsync).not.toHaveBeenCalled();
+    expect(mockFetchExpiredLinks).not.toHaveBeenCalled();
   });
 
   // -----------------------------------------------------------------
   // reset()
   // -----------------------------------------------------------------
   it("should reset refundedCount, error, and failedDepositIds", async () => {
-    mockGetStoredLinks.mockReturnValue([expiredLink()]);
+    mockFetchExpiredLinks.mockResolvedValue([expiredLink()]);
     mockSendTransactionAsync.mockResolvedValue("0xhash");
     mockWaitForReceipt.mockResolvedValue({ status: "reverted", logs: [] });
 
@@ -303,7 +276,9 @@ describe("useAutoRefundExpiredLinks", () => {
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
     expect(result.current.failedDepositIds.size).toBe(1);
 
@@ -317,37 +292,37 @@ describe("useAutoRefundExpiredLinks", () => {
   });
 
   // -----------------------------------------------------------------
-  // Top-level error path (e.g. dynamic import fails)
+  // Top-level error path (fetchExpiredLinks rejects)
   // -----------------------------------------------------------------
-  it("should surface a top-level error when an unexpected exception occurs", async () => {
-    // Force the inner try block to throw by making getStoredLinks throw.
-    // The hook wraps the whole batch in try/catch.
-    mockGetStoredLinks.mockImplementation(() => {
-      throw new Error("storage corrupted");
-    });
+  it("should surface a top-level error when fetchExpiredLinks rejects", async () => {
+    mockFetchExpiredLinks.mockRejectedValue(new Error("indexer down"));
 
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
-    expect(result.current.error).toBe("storage corrupted");
+    expect(result.current.error).toBe("indexer down");
   });
 
   it("should surface a generic message for non-Error throws", async () => {
-    mockGetStoredLinks.mockImplementation(() => {
-      throw "string error"; // eslint-disable-line no-throw-literal
-    });
+    mockFetchExpiredLinks.mockRejectedValue("string error");
 
     const { useAutoRefundExpiredLinks } = await import("@/hooks/useLinkVault");
     const { result } = renderHook(() => useAutoRefundExpiredLinks());
 
     await act(async () => {
-      await result.current.processExpiredLinks();
+      await result.current.processExpiredLinks(
+        "0x1234567890123456789012345678901234567890",
+      );
     });
 
-    expect(result.current.error).toBe("Failed to auto-refund expired links");
+    expect(result.current.error).toBe(
+      "Failed to load expired links from indexer",
+    );
   });
 });

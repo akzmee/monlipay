@@ -56,12 +56,6 @@ vi.mock("@/lib/crypto", () => ({
   signClaim: vi.fn().mockResolvedValue({ v: 27, r: "0xr", s: "0xs" }),
 }));
 
-vi.mock("@/lib/storage", () => ({
-  addStoredLink: vi.fn(),
-  getStoredLinks: vi.fn(() => []),
-  removeStoredLink: vi.fn(),
-}));
-
 vi.mock("@/config/chain", () => ({
   LINK_VAULT_ADDRESS: "0xvault" as `0x${string}`,
   monadChain: { id: 10143 },

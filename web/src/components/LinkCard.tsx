@@ -14,7 +14,11 @@ interface LinkCardProps {
   isBusy: boolean;
   /** True if autoRefund failed for this link; UI shows a manual-refund hint. */
   autoRefundFailed?: boolean;
-  /** Claim URL with secret key fragment; undefined for links created before the storage fix. */
+  /**
+   * Claim URL with #fragment for re-copying. Undefined for links on the
+   * My Links page — the indexer can't reconstruct the secret key, which
+   * only lives in the browser at creation time.
+   */
   shareableUrl?: string;
   onRefund: () => void;
 }
@@ -89,7 +93,7 @@ export function LinkCard({
             </p>
           )}
 
-          {/* Shareable URL row — for re-copying if the user forgot the link */}
+          {/* Shareable URL row — only renders when a caller passes shareableUrl. */}
           {canShare && (
             <div className="mt-3 flex items-center gap-2">
               <code className="min-w-0 flex-1 truncate rounded-md bg-stone-100 px-2 py-1.5 text-xs text-stone-600 dark:bg-stone-800 dark:text-stone-400">
@@ -131,11 +135,6 @@ export function LinkCard({
                 )}
               </button>
             </div>
-          )}
-          {!shareableUrl && !isClaimed && (
-            <p className="mt-2 text-xs italic text-stone-400 dark:text-stone-500">
-              Link URL not saved — created before the storage fix. Wait for expiry to refund.
-            </p>
           )}
         </div>
 

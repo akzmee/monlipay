@@ -1,0 +1,29 @@
+{
+  "name": "@monlipay/indexer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ponder indexer for MonliPay LinkVault — indexes all LinkCreated / LinkClaimed / LinkRefunded / RefundFailed events and exposes a GraphQL + REST API for the 'My Links' page.",
+  "scripts": {
+    "dev": "ponder dev",
+    "start": "ponder start",
+    "build": "ponder build",
+    "serve": "ponder serve",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "ponder": "^0.11.17",
+    "viem": "^2.55.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
