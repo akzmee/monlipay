@@ -48,28 +48,34 @@ Since the secret never appears in calldata, mempool watchers **cannot** front-ru
 
 ### Flow diagram
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor S as Sender
+    actor R as Recipient
+    participant C as LinkVault<br/>(contract)
+
+    Note over S: 1. Generate ephemeral keypair<br/>(claimKey + secret in browser)
+
+    S->>C: createLink(token, amount, claimKey, expiry)
+    Note over C: store deposit + claimKey
+    S-->>R: Share link via WhatsApp / Telegram<br/>(URL contains secret in #fragment)
+
+    Note over R: 4. Open link → wallet connects
+    Note over R: 5. sign(depositId, recipient)<br/>via EIP-712 with secret
+    R->>C: claim(depositId, recipient, v, r, s)
+    Note over C: ecrecover → matches claimKey<br/>transfer funds to recipient
+    C-->>R: ✅ MON received
+
+    alt Unclaimed after expiry
+        Note over S: 7. Open "My Links" page
+        S->>C: autoRefund(depositId)<br/>(permissionless — anyone can call)
+        Note over C: return funds to sender
+        C-->>S: 💰 MON refunded
+    end
 ```
-SENDER                                          RECIPIENT
-  │                                                │
-  │  1. Generate ephemeral keypair                 │
-  │  2. createLink(token, amount, claimKey, exp)   │
-  │  ──────────────► CONTRACT                      │
-  │                    stores deposit              │
-  │  3. Share link via WhatsApp                    │
-  │  ──────────────────────────────────────────────►│
-  │                                                │  4. Open link
-  │                                                │  5. sign(depositId, addr) with secret
-  │                                                │  6. claim(depositId, addr, v, r, s)
-  │                                                │  ──────────────► CONTRACT
-  │                                                │                    ecrecover → matches claimKey
-  │                                                │                    transfer funds to recipient
-  │                                                │  ◄─── MON received ──│
-  │                                                │
-  │  If unclaimed after expiry:                    │
-  │  7. autoRefund(depositId)  ← permissionless    │
-  │  ──────────────► CONTRACT                      │
-  │                    return funds to sender      │
-```
+
+**Why this is front-run resistant:** the secret key lives only in the URL fragment (`#`). Browsers never send the fragment to any server, so mempool watchers cannot see the signature before your transaction confirms.
 
 ---
 
