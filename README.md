@@ -113,7 +113,7 @@ A single contract with three core functions plus a permissionless auto-refund:
 | Network | Chain ID | Address | Explorer |
 |---|---|---|---|
 | **Monad Testnet** | 10143 | [`0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3`](https://testnet.monadscan.com/address/0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3) | Monadscan |
-| **Monad Mainnet** | 143 | _— deploy in progress, see `DEPLOY-VPS.md`_ | — |
+| **Monad Mainnet** | 143 | [`0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9`](https://monadscan.com/address/0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9) | Monadscan |
 
 The testnet contract has been live since July 2026 and is the recommended starting point for judges and reviewers. Try it at **https://testnet.monlipay.xyz** (testnet MON only — no real value at risk).
 
