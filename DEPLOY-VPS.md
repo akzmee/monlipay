@@ -82,7 +82,7 @@ nano .env.deploy
 Fill in real values:
 
 ```bash
-NEXT_PUBLIC_WC_PROJECT_ID=51b6811b42a9013acdff21814cdf58cb
+NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id_here
 TESTNET_LINK_VAULT_ADDRESS=0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3
 MAINNET_LINK_VAULT_ADDRESS=0x0000000000000000000000000000000000000000
 # Leave mainnet as zero until you deploy the contract to mainnet
