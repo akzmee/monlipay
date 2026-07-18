@@ -746,6 +746,12 @@ function ChainSelectModal({
       {open && (
         <motion.div
           className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center"
+          style={{
+            // Respect mobile browser chrome (home indicator on iOS,
+            // address bar on Android). See NetworkSwitcherModal.tsx.
+            paddingTop: "max(env(safe-area-inset-top), 0px)",
+            paddingBottom: "max(env(safe-area-inset-bottom), 0px)",
+          }}
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -753,7 +759,7 @@ function ChainSelectModal({
           transition={{ duration: 0.15 }}
         >
           <motion.div
-            className="flex max-h-[70vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:rounded-3xl"
+            className="flex max-h-[70dvh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: "100%", opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}

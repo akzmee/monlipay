@@ -63,7 +63,15 @@ export function QRPreviewModal({ open, onClose, url }: QRPreviewModalProps) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          style={{
+            // Respect mobile browser chrome (address bar, notch, home
+            // indicator). See NetworkSwitcherModal.tsx for full rationale.
+            paddingTop: "max(env(safe-area-inset-top), 1rem)",
+            paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
+            paddingLeft: "max(env(safe-area-inset-left), 1rem)",
+            paddingRight: "max(env(safe-area-inset-right), 1rem)",
+          }}
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -74,7 +82,7 @@ export function QRPreviewModal({ open, onClose, url }: QRPreviewModalProps) {
           aria-label="QR code"
         >
           <motion.div
-            className="flex w-full max-w-md flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900"
+            className="flex w-full max-w-md max-h-[85dvh] flex-col overflow-y-auto rounded-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: 8, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}

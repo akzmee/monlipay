@@ -189,11 +189,19 @@ export function ClaimForm({
           wallet. Closes on Escape and on recipient edit. */}
       {showOverrideConfirm && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          style={{
+            // Respect mobile browser chrome (address bar, notch, home
+            // indicator). See NetworkSwitcherModal.tsx for full rationale.
+            paddingTop: "max(env(safe-area-inset-top), 1rem)",
+            paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
+            paddingLeft: "max(env(safe-area-inset-left), 1rem)",
+            paddingRight: "max(env(safe-area-inset-right), 1rem)",
+          }}
           onClick={() => setShowOverrideConfirm(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-stone-700 dark:bg-stone-900"
+            className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-stone-700 dark:bg-stone-900"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"

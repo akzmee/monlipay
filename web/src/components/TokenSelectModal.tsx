@@ -147,6 +147,14 @@ export function TokenSelectModal({
       {open && (
         <motion.div
           className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center"
+          style={{
+            // Respect mobile browser chrome (home indicator on iOS,
+            // address bar on Android). On mobile the modal sits at the
+            // bottom (items-end) so we only need bottom padding; on
+            // desktop (sm:items-center) we add top too for symmetry.
+            paddingTop: "max(env(safe-area-inset-top), 0px)",
+            paddingBottom: "max(env(safe-area-inset-bottom), 0px)",
+          }}
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -154,7 +162,7 @@ export function TokenSelectModal({
           transition={{ duration: 0.15 }}
         >
           <motion.div
-            className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:rounded-3xl"
+            className="flex max-h-[85dvh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: "100%", opacity: 0.5, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}

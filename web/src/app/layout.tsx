@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   title: "MonliPay — Send any token via link on Monad",
   description:
     "Send tokens on Monad as easily as sharing a WhatsApp link. Recipient clicks, funds arrive. Unclaimed? Refund anytime.",
+};
+
+/**
+ * viewport-fit=cover enables env(safe-area-inset-*) on iOS so that
+ * fixed-position elements (modals, bottom sheets, the navbar) can pad
+ * themselves away from the notch / home indicator / dynamic address bar.
+ * Without this, env(safe-area-inset-*) always resolves to 0.
+ */
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
