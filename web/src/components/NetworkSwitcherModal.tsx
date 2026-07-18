@@ -126,7 +126,7 @@ export function NetworkSwitcherModal({ open, onClose }: NetworkSwitcherModalProp
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -137,12 +137,12 @@ export function NetworkSwitcherModal({ open, onClose }: NetworkSwitcherModalProp
           aria-label="Switch network"
         >
           <motion.div
-            className="flex w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:rounded-3xl"
+            className="flex w-full max-w-md flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl dark:border-stone-700 dark:bg-stone-900"
             onClick={(e) => e.stopPropagation()}
-            initial={{ y: "100%", opacity: 0.5, scale: 0.98 }}
+            initial={{ y: 8, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: "100%", opacity: 0, scale: 0.98 }}
-            transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            exit={{ y: 8, opacity: 0, scale: 0.96 }}
+            transition={{ type: "spring", damping: 28, stiffness: 320 }}
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3.5 dark:border-stone-700">
