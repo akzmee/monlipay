@@ -4,10 +4,9 @@ node_modules/
 .pnp.js
 
 # Foundry
-cache/
-out/
-broadcast/
-lib/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
 contracts/lcov.info
 
 # Skills (installed via npx skills add)
