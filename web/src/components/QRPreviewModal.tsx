@@ -63,10 +63,11 @@ export function QRPreviewModal({ open, onClose, url }: QRPreviewModalProps) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          // See NetworkSwitcherModal.tsx for the full rationale: we use
+          // `h-[100dvh]` instead of `inset-0` so the modal centers within
+          // the *visible* viewport on mobile (Android Chrome address bar).
+          className="fixed inset-x-0 top-0 z-[100] flex h-[100dvh] items-center justify-center bg-black/60 backdrop-blur-md"
           style={{
-            // Respect mobile browser chrome (address bar, notch, home
-            // indicator). See NetworkSwitcherModal.tsx for full rationale.
             paddingTop: "max(env(safe-area-inset-top), 1rem)",
             paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
             paddingLeft: "max(env(safe-area-inset-left), 1rem)",

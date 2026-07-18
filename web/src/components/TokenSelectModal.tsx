@@ -146,7 +146,12 @@ export function TokenSelectModal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center"
+          // See NetworkSwitcherModal.tsx for the full rationale: we use
+          // `h-[100dvh]` instead of `inset-0` so the modal centers within
+          // the *visible* viewport on mobile (Android Chrome address bar).
+          // On mobile this is a bottom sheet (`items-end`); on desktop a
+          // centered card (`sm:items-center`).
+          className="fixed inset-x-0 top-0 z-[100] flex h-[100dvh] items-end justify-center bg-black/60 backdrop-blur-md sm:items-center"
           style={{
             // Respect mobile browser chrome (home indicator on iOS,
             // address bar on Android). On mobile the modal sits at the

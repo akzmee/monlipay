@@ -126,16 +126,23 @@ export function NetworkSwitcherModal({ open, onClose }: NetworkSwitcherModalProp
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          // CRITICAL: We intentionally do NOT use `fixed inset-0` here.
+          // `inset-0` resolves against the *layout* viewport, which on
+          // mobile browsers includes the region occluded by the dynamic
+          // address bar. Centering with `items-center` against that larger
+          // box pushes the top of the modal (header + close button) under
+          // the address bar, making them unreachable.
+          //
+          // Instead we use `h-[100dvh]` — dynamic viewport height — which
+          // tracks the *visible* viewport and shrinks when the address
+          // bar is visible. This keeps the centered modal fully on-screen.
+          //
+          // The safe-area padding handles notches / home indicators on
+          // iOS (`viewport-fit: cover` is set in layout.tsx). On Android
+          // Chrome these resolve to 0, but the dvh fix already handles
+          // the address bar.
+          className="fixed inset-x-0 top-0 z-[100] flex h-[100dvh] items-center justify-center bg-black/60 backdrop-blur-md"
           style={{
-            // Respect mobile browser chrome (address bar, notch, home
-            // indicator). Without these paddings the centered modal can
-            // slide under the address bar — making the close button and
-            // header unreachable. `env(safe-area-inset-*)` resolves to 0
-            // on desktop and on browsers without viewport-fit=cover.
-            //
-            // The max() wrapper lets us keep a 16px floor — env values can
-            // be smaller on devices with a small home indicator.
             paddingTop: "max(env(safe-area-inset-top), 1rem)",
             paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
             paddingLeft: "max(env(safe-area-inset-left), 1rem)",

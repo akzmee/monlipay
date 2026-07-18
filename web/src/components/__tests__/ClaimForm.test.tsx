@@ -213,8 +213,11 @@ describe("ClaimForm", () => {
         recipientOverride: differentAddress,
       });
       fireEvent.click(screen.getByText("Claim Funds"));
-      // Click on the backdrop (the outermost fixed div)
-      const backdrop = container.querySelector(".fixed.inset-0");
+      // Click on the backdrop — the outermost fixed overlay. We identify
+      // it by its class signature (`fixed top-0` + `h-[100dvh]`). The
+      // inner card has `role="dialog"` and calls stopPropagation, so we
+      // must click the outer overlay to trigger the close handler.
+      const backdrop = container.querySelector(".fixed.top-0.h-\\[100dvh\\]");
       expect(backdrop).not.toBeNull();
       fireEvent.click(backdrop!);
       expect(
