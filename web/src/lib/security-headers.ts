@@ -1,29 +1,4 @@
-/**
- * Security headers for HTTP responses.
- *
- * Extracted from next.config.ts so they can be unit-tested.
- * The next.config.ts file lives outside src/ and isn't covered by vitest.
- *
- * Reference: https://docs.nextjs.org/app/api-reference/config/next-config-js/headers
- *
- * CSP notes:
- *   - We use a reasonably strict policy but must allow:
- *       • WalletConnect websocket + HTTP (wss:, https:)
- *       • RPC providers (Alchemy, public RPCs)
- *       • Trustwallet asset logos (raw.githubusercontent.com)
- *       • LI.FI API
- *       • Inline styles + scripts (Next.js runtime requires this in dev/prod)
- *       • data: URIs for SVG icons / inline images
- *       • blob: for dynamically-generated content
- *   - `frame-ancestors 'none'` blocks all iframing (anti-clickjacking).
- *     This supersedes X-Frame-Options but we set both for defense-in-depth.
- *   - Connect-src is intentionally permissive because the app talks to
- *     many user-configurable RPC endpoints. We restrict to https/wss
- *     which is the meaningful security boundary (no plaintext RPC leaks).
- *
- * If a future feature is blocked by CSP, the browser console will show
- * the exact directive to update.
- */
+/** CSP + security headers, extracted for unit tests. */
 
 export interface SecurityHeader {
   key: string;

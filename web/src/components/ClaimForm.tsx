@@ -38,18 +38,13 @@ export function ClaimForm({
   const canClaim = isConnected && !isWrongChain && !isBusy && !recipientError;
   const [showOverrideConfirm, setShowOverrideConfirm] = useState(false);
 
-  // If the user edits the recipient after the confirm modal opens, close it
-  // — they should re-read the new address before confirming again.
+  // Close the confirm modal if the recipient changes.
   useEffect(() => {
     setShowOverrideConfirm(false);
   }, [recipientOverride]);
 
   const handleClickClaim = () => {
-    // SECURITY: When the user overrides the recipient to a different address,
-    // require an explicit confirmation modal. This prevents phishing scenarios
-    // where a victim is given a tampered claim URL with an attacker's address
-    // pre-filled. The modal forces the user to acknowledge they are sending
-    // funds to a non-default address.
+    // Require explicit confirmation when overriding the recipient (anti-phishing).
     const trimmed = recipientOverride.trim();
     const hasOverride = trimmed.length > 0 && trimmed.toLowerCase() !== address?.toLowerCase();
     if (hasOverride) {
@@ -183,10 +178,7 @@ export function ClaimForm({
           : "Claiming requires a small gas fee in MON for the transaction."}
       </p>
 
-      {/* Recipient override confirmation modal.
-          SECURITY: This modal exists to make sure the user actively confirms
-          that funds will go to the address they typed, not the connected
-          wallet. Closes on Escape and on recipient edit. */}
+      {/* Recipient override confirmation modal. */}
       {showOverrideConfirm && (
         <div
           // See NetworkSwitcherModal.tsx for the full rationale: we use

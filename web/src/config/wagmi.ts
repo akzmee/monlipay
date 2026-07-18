@@ -10,18 +10,7 @@ import {
 } from "./chain";
 import { isValidWalletConnectId } from "@/lib/wallet-connect";
 
-/**
- * WalletConnect Cloud project ID.
- * Get one at https://cloud.walletconnect.com (free, takes 30 seconds).
- *
- * SECURITY: If the env var is missing or contains a known placeholder value,
- * we log a loud warning so the deployer notices. WalletConnect v2 will not
- * work without a real project ID — silently falling back to "dummy" makes
- * debugging painful and may even cause connection attempts to leak metadata
- * to whoever owns the placeholder project (if any).
- *
- * Validation logic lives in src/lib/wallet-connect.ts so it can be unit-tested.
- */
+/** WalletConnect project ID. Falls back to all-zeros if missing (WC will reject connections cleanly). */
 const RAW_WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "";
 
 if (!isValidWalletConnectId(RAW_WC_PROJECT_ID)) {
@@ -47,21 +36,7 @@ const { connectors } = getDefaultWallets({
   projectId: WC_PROJECT_ID,
 });
 
-/**
- * Wagmi configuration.
- *
- * SECURITY: Only the active chain is registered (single-chain mode).
- * Registering both testnet and mainnet simultaneously is dangerous —
- * it allows the user to send transactions to the wrong network, where
- * the contract either doesn't exist (funds lost) or where the deposit
- * id space overlaps with another network.
- *
- * The active chain is selected by NEXT_PUBLIC_NETWORK env var:
- *   "mainnet" → Monad Mainnet (chain ID 143)
- *   anything  → Monad Testnet (chain ID 10143)
- *
- * See `chain.ts` for the canonical chain definitions and contracts.
- */
+/** Wagmi config — single-chain per build (NEXT_PUBLIC_NETWORK: "mainnet" or "testnet"). */
 const activeChain = isMainnet ? monadMainnetChain : monadTestnetChain;
 
 export const wagmiConfig = createConfig({

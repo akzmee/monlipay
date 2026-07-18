@@ -134,17 +134,7 @@ function SceneContent() {
   );
 }
 
-/**
- * Full-screen 3D canvas background.
- *
- * Renders behind the hero section. Fixed position, pointer-events none so
- * it doesn't block interaction. Uses dpr clamp for performance.
- *
- * Usage:
- *   <Scene3D />
- *
- * Place it as the first child of the hero section with z-index behind content.
- */
+/** Fixed full-screen 3D background, pointer-events none. */
 export function Scene3D() {
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 opacity-70 dark:opacity-40">

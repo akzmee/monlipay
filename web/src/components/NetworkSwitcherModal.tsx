@@ -5,19 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { MonadLogo } from "./MonadLogo";
 import { isMainnet } from "@/config/chain";
 
-/**
- * Cross-domain network switcher URLs.
- *
- * Each deployment lives on its own subdomain and is built with a different
- * NEXT_PUBLIC_NETWORK env var, so "switching network" means redirecting to a
- * different origin. We hardcode the production URLs here because:
- *   1. They are stable for the foreseeable future (hackathon + early mainnet).
- *   2. Exposing them via NEXT_PUBLIC_* would add config ceremony without value.
- *
- * During local dev (localhost / 127.0.0.1) the modal opens but clicking the
- * "other" network just keeps you on the same origin — we don't want to bounce
- * a developer to production mid-debug.
- */
+/** Production subdomain URLs for the testnet/mainnet deployments. */
 const NETWORK_URLS = {
   testnet: "https://testnet.monlipay.xyz",
   mainnet: "https://monlipay.xyz",
@@ -68,18 +56,7 @@ interface NetworkSwitcherModalProps {
   onClose: () => void;
 }
 
-/**
- * Cross-domain network switcher modal.
- *
- * Each deployment of MonliPay is single-chain (configured at build time via
- * NEXT_PUBLIC_NETWORK), so "switching network" means redirecting to a
- * different subdomain rather than changing the active chain in the wallet.
- *
- * The modal lists both Testnet and Mainnet deployments, highlights the
- * current one, and redirects to the other on click. Style matches
- * TokenSelectModal (backdrop blur + slide-up sheet on mobile, centered card
- * on desktop, escape / outside-click to close).
- */
+/** Modal that lists both deployments; selecting the other one redirects. */
 export function NetworkSwitcherModal({ open, onClose }: NetworkSwitcherModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -126,21 +103,7 @@ export function NetworkSwitcherModal({ open, onClose }: NetworkSwitcherModalProp
     <AnimatePresence>
       {open && (
         <motion.div
-          // CRITICAL: We intentionally do NOT use `fixed inset-0` here.
-          // `inset-0` resolves against the *layout* viewport, which on
-          // mobile browsers includes the region occluded by the dynamic
-          // address bar. Centering with `items-center` against that larger
-          // box pushes the top of the modal (header + close button) under
-          // the address bar, making them unreachable.
-          //
-          // Instead we use `h-[100dvh]` — dynamic viewport height — which
-          // tracks the *visible* viewport and shrinks when the address
-          // bar is visible. This keeps the centered modal fully on-screen.
-          //
-          // The safe-area padding handles notches / home indicators on
-          // iOS (`viewport-fit: cover` is set in layout.tsx). On Android
-          // Chrome these resolve to 0, but the dvh fix already handles
-          // the address bar.
+          // h-[100dvh] (not inset-0) so the modal centers in the visible viewport on mobile.
           className="fixed inset-x-0 top-0 z-[100] flex h-[100dvh] items-center justify-center bg-black/60 backdrop-blur-md"
           style={{
             paddingTop: "max(env(safe-area-inset-top), 1rem)",

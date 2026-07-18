@@ -1,30 +1,6 @@
 "use client";
 
-/**
- * Client-side helper for gasless claims via EIP-2771 meta-transactions.
- *
- * Flow:
- *   1. Build the claim() calldata (same as the direct path)
- *   2. Read the forwarder's nonce for the user's account
- *   3. Build the EIP-712 ForwardRequest struct
- *   4. Sign the typed data with the link's secret key
- *   5. POST the struct to /api/sponsor/claim
- *   6. The server broadcasts forwarder.execute() from the sponsor wallet
- *   7. Return the tx hash on success
- *
- * If the server is not configured, rate-limited, or budget-exhausted,
- * callers fall back to the direct (user-pays-gas) claim path.
- *
- * SECURITY
- *   - The "from" field of the forwarder request is the link's claimKey
- *     (derived from the secret). This is the address whose nonce is
- *     consumed by the forwarder. The signature must be from this exact
- *     address — viem's signTypedData enforces that.
- *   - The forwarder enforces nonce monotonicity per-address, so a
- *     replay attack would have to use the same nonce and is rejected.
- *   - The request has a deadline (default 1 hour) — expired requests
- *     are rejected by the forwarder.
- */
+/** Build, sign, and POST an EIP-2771 ForwardRequest for gasless claim(). Callers fall back to direct claim on any failure. */
 
 import {
   type Address,
@@ -220,10 +196,7 @@ async function readForwarderNonce(from: Address): Promise<bigint> {
   return nonce as bigint;
 }
 
-/**
- * Sign the EIP-712 ForwardRequest struct.
- * Must match the forwarder's on-chain typehash EXACTLY.
- */
+// Sign the EIP-712 ForwardRequest struct.
 async function signForwarderRequest(params: {
   privateKey: Hex;
   request: Omit<ForwardRequestData, "signature">;
@@ -233,10 +206,7 @@ async function signForwarderRequest(params: {
 
   const chainId = getChainId();
 
-  // Pull the forwarder's domain (name, version) from eip712Domain().
-  // We could hardcode "MonliPay LinkVault" but reading the chain is
-  // safer — if someone deploys a renamed forwarder, signatures would
-  // break silently.
+  // Read domain (name, version) from eip712Domain() to match the deployed forwarder.
   const { name, version } = await readForwarderDomain();
 
   const signature = await account.signTypedData({

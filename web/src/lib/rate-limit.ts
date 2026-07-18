@@ -1,17 +1,4 @@
-/**
- * Simple in-memory rate limiter for API routes.
- *
- * Uses a sliding window per IP address. This is intentionally simple —
- * suitable for a single-server hackathon deployment. For production,
- * replace with Redis-backed rate limiting.
- *
- * Limits:
- *   - Default: 30 requests per minute per IP
- *   - Quote/balance routes: 20 per minute (heavier upstream calls)
- *
- * The limiter is conservative — it errs on the side of allowing requests
- * if the in-memory state is corrupted or unavailable.
- */
+/** In-memory sliding-window rate limiter per IP. */
 
 interface RateBucket {
   /** Timestamps (ms) of recent requests. */
@@ -74,31 +61,7 @@ export function rateLimit(key: string, max: number = DEFAULT_MAX): boolean {
   return true;
 }
 
-/**
- * Extract client IP from a Next.js Request.
- *
- * SECURITY:
- *   X-Forwarded-For (XFF) is trivially spoofable — an attacker can set this
- *   header to any value in their HTTP request. If we trust it blindly, an
- *   attacker gets a fresh "IP" on every request and bypasses rate limiting.
- *
- *   Mitigations implemented here:
- *     1. Validate that the first XFF entry looks like a real IPv4 or IPv6
- *        address. Random strings are rejected (falls through to "unknown").
- *     2. Cap the XFF header length we inspect (256 chars) to prevent
- *        pathological inputs.
- *     3. The ONLY way to be fully safe is to trust XFF only when the
- *        request came from a known reverse proxy. In a serverless
- *        deployment (Vercel, etc.) the platform sets XFF correctly —
- *        direct-to-app deployments behind no proxy should NOT rely on XFF.
- *        We expose `setTrustedProxyCheck` so callers can wire a platform
- *        check (e.g. verify `request.headers.get("host")` matches the
- *        expected domain, or use Vercel's `x-vercel-forwarded-for`).
- *
- * Returns "unknown" if no trustworthy IP can be determined. Callers should
- * still apply rate limiting to "unknown" — it just lumps unidentifiable
- * clients into one bucket.
- */
+/** Extract client IP. XFF is only trusted when setTrustedProxyCheck accepts the request; otherwise falls back to "unknown". */
 const XFF_MAX_LENGTH = 256;
 
 // Default: do not trust XFF blindly. Set via setTrustedProxyCheck at app

@@ -1,29 +1,6 @@
-/**
- * Server-side bridge configuration.
- *
- * This module reads API keys from environment variables and provides
- * a safe accessor for server-side API routes. These keys are NEVER
- * exposed to the client — only the /api/bridge/* routes import this file.
- *
- * Required env vars (in web/.env.local, WITHOUT NEXT_PUBLIC_ prefix):
- *   LIFI_API_KEY     — Get one at https://li.fi (free tier available)
- *   ALCHEMY_API_KEY  — Get one at https://alchemy.com (free tier available)
- *
- * If keys are not set, the API routes return helpful error messages
- * instead of crashing. This allows the app to build/deploy without
- * keys, and activate when keys are provided.
- *
- * SECURITY: This module must never be imported from client code.
- * Next.js API routes (app/api/*) are the only legitimate consumers.
- * The bundler prevents client imports automatically since this file
- * has no "use client" directive and is only imported from route handlers.
- */
+/** Server-only LI.FI and Alchemy API keys. Empty strings when not configured. */
 
-/**
- * Known placeholder values that indicate the user has not set a real key.
- * Rejecting these prevents accidental deployments with dummy values
- * (e.g. copying .env.example to .env.local without editing).
- */
+// Known placeholder values to reject.
 const PLACEHOLDER_VALUES = new Set([
   "",
   "your-lifi-api-key",

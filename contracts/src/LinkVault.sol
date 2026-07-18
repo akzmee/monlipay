@@ -3,33 +3,11 @@ pragma solidity 0.8.28;
 
 /**
  * @title LinkVault
- * @notice Send tokens via a shareable link. The recipient claims by proving they
- *         hold the link's secret key. Unclaimed funds can be refunded after expiry.
- *
- * @dev Flow:
- *      1. Sender generates an ephemeral keypair in the browser.
- *      2. Sender calls createLink(...) with claimKey = address(secretKey).
- *         The secretKey never leaves the browser — it is embedded in the URL fragment (#).
- *      3. Recipient opens the link, signs (depositId, recipient) with secretKey.
- *      4. Recipient calls claim(...) with the signature. The contract uses ecrecover
- *         to verify the signature matches claimKey. This prevents front-running because
- *         the secret never appears in calldata.
- *      5. If unclaimed past expiry, the sender can call refund(...).
- *
- *      EIP-712 domain separation prevents signature replay across chains and contracts.
- *
- *      EIP-2771 meta-transactions (gasless sponsor):
- *      ------------------------------------------------
- *      The contract inherits ERC2771Context. When called through the trusted forwarder,
- *      `_msgSender()` resolves to the user the forwarder is relaying for (so the user
- *      does not need gas — a relayer pays it). When called directly, `_msgSender()`
- *      falls back to `msg.sender`. This means createLink / refund / claimFailedRefund
- *      work both ways without branching code. claim() itself is signature-based and
- *      never used msg.sender for identity, so it is unaffected either way.
- *
- *      The forwarder is set at construction and cannot be changed. If meta-tx support
- *      is no longer desired, simply stop relaying through the forwarder — direct
- *      calls continue to work as before.
+ * @notice Send tokens via a shareable link. Recipient claims by signing with a secret key.
+ *         Unclaimed deposits are refundable by the sender after expiry.
+ * @dev    - Claim uses EIP-712 + ecrecover (no secret in calldata, no front-running).
+ *         - EIP-2771 meta-tx support via ERC2771Context (forwarder set at construction).
+ *         - ReentrancyGuardTransient (Cancun+) on all mutating external functions.
  */
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -55,8 +33,8 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
     error TransferFailed();
     error NativeValueMismatch();
     error NonNativeValueSent();
-    error NoFailedRefund(); // HIGH-2: pull fallback
-    error NotFailedRefundOwner(); // HIGH-2: pull fallback
+    error NoFailedRefund();
+    error NotFailedRefundOwner();
 
     // ---------------------------------------------------------------------
     // Events (indexer-friendly)
@@ -116,17 +94,7 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
     /// @notice Maps depositId => Deposit.
     mapping(uint256 => Deposit) public deposits;
 
-    /**
-     * @notice Maps depositId => amount held in escrow after a push-refund
-     *         failed (e.g. d.sender is a contract that reverts on receive).
-     *         The original sender (or anyone, who then pays gas) can pull
-     *         funds via `claimFailedRefund()`.
-     *
-     * @dev    HIGH-2 mitigation: prevents permanent fund-locking when a
-     *         well-intentioned keeper calls `autoRefund` on a deposit whose
-     *         sender is a contract that refuses ETH. Without this, the
-     *         `autoRefund` tx reverts and the deposit is stuck forever.
-     */
+    /// @notice Escrow for push-refunds that failed (recipient reverted on receive). Pulled via claimFailedRefund().
     mapping(uint256 => uint256) public failedRefunds;
 
     // ---------------------------------------------------------------------
@@ -193,26 +161,13 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
             if (msg.value != amount) revert NativeValueMismatch();
         } else {
             if (msg.value > 0) revert NonNativeValueSent();
-            // MEDIUM-1: Pull ERC-20 tokens from sender (requires prior approval).
-            // We snapshot our own balance before/after to handle fee-on-transfer
-            // and rebasing tokens. The deposit stores the ACTUAL received amount,
-            // not the requested amount — so payouts later never try to transfer
-            // more than we hold.
-            // SafeERC20 handles non-standard tokens (e.g. USDT) that don't return
-            // a bool, and bubbles up revert reasons from standard tokens.
-            //
-            // Note: `_msgSender()` is used so that meta-tx relays via the
-            // trusted forwarder attribute the deposit to the actual user, not
-            // to the relayer. For direct calls it falls back to msg.sender.
+            // Snapshot balance before/after to handle fee-on-transfer and rebasing tokens.
+            // _msgSender() resolves correctly for direct calls and meta-tx relays.
             address sender = _msgSender();
             uint256 balanceBefore = IERC20(token).balanceOf(address(this));
             IERC20(token).safeTransferFrom(sender, address(this), amount);
             uint256 balanceAfter = IERC20(token).balanceOf(address(this));
-            // Underflow protection: if a rebasing token decreased our balance
-            // mid-flight (very rare), this would revert. Acceptable trade-off.
             amount = balanceAfter - balanceBefore;
-            // Reject deposits where the fee eats the entire principal.
-            // (Cannot happen with sane fee tokens, but defensive.)
             if (amount == 0) revert ZeroAmount();
         }
 
@@ -259,11 +214,7 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
         // Verify the signature. The signer must be the claimKey.
         bytes32 digest = _hashClaim(depositId, recipient);
         address signer = ecrecover(digest, v, r, s);
-        // MEDIUM-2: explicit zero-address check (ecrecover returns address(0)
-        // on malformed input; since claimKey is enforced non-zero at create
-        // time, this check is belt-and-suspenders against future refactors
-        // that might allow claimKey = address(0)).
-        if (signer == address(0)) revert InvalidSignature();
+        if (signer == address(0)) revert InvalidSignature(); // ecrecover returns 0 on bad input.
         if (signer != d.claimKey) revert InvalidSignature();
 
         // Effects before interactions (reentrancy guard pattern)
@@ -302,27 +253,8 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
 
     /**
      * @notice Permissionless auto-refund for expired deposits.
-     *
-     * @dev Anyone can call this once a deposit's expiry has passed. Funds are
-     *      ALWAYS returned to `d.sender` (the original creator), never to the
-     *      caller. This enables:
-     *        - Frontends to auto-trigger refunds when a user opens "my links"
-     *          (no manual "Claim Refund" button needed)
-     *        - Future keeper/relayer services to batch-refund expired links
-     *          on behalf of users (no gas cost to the user)
-     *
-     *      Security: indistinguishable from `refund()` in effect — funds flow
-     *      to the same `d.sender`, with the same expiry and `!claimed` checks.
-     *      The only difference is the absence of the `msg.sender == d.sender`
-     *      check, which is safe because the caller never receives funds.
-     *
-     *      Expiry boundary: like `refund()`, this requires `block.timestamp >
-     *      d.expiry` (strictly after). At exactly `d.expiry`, only `claim()`
-     *      is allowed.
-     *
-     *      Reentrancy: guarded by `nonReentrant` (transient storage, Cancun+).
-     *      Effects-before-interactions: `d.claimed` is set before `_transfer`.
-     *
+     * @dev    Anyone can call; funds always return to d.sender (never msg.sender).
+     *         Same expiry boundary as refund().
      * @param depositId  The deposit to auto-refund.
      */
     function autoRefund(uint256 depositId) external nonReentrant {
@@ -341,18 +273,10 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
     }
 
     /**
-     * @notice Pull-pattern refund for deposits whose push-transfer failed
-     *         (e.g. d.sender is a contract that reverts on receive).
-     *
-     * @dev    HIGH-2 mitigation. When `_transfer` cannot push ETH/tokens to
-     *         `d.sender`, the amount is parked in `failedRefunds[depositId]`.
-     *         The original sender (or anyone they authorize) can then pull
-     *         the funds by calling this function with a fresh EOA address.
-     *
-     *         Permission: only the original `d.sender` can pull, and they
-     *         must specify a `recipient` that can actually receive funds
-     *         (typically an EOA they control).
-     *
+     * @notice Pull-pattern refund for deposits whose push-transfer failed.
+     * @dev    When `_transfer` cannot push ETH/tokens to `d.sender` (e.g. sender is
+     *         a contract that reverts on receive), the amount is parked in
+     *         `failedRefunds[depositId]` and pulled here.
      * @param depositId  The deposit whose refund failed.
      * @param recipient  An EOA or receiver-capable contract to pull to.
      */
@@ -365,25 +289,14 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
         if (amount == 0) revert NoFailedRefund();
         delete failedRefunds[depositId];
 
-        // Use raw send for the pull — if even THIS fails, the user has
-        // bigger problems (their recipient address is also broken).
-        // We revert here so the user notices and picks a better recipient.
+        // Raw call — revert on failure so the user picks a better recipient.
         (bool ok,) = recipient.call{value: amount}("");
         if (!ok) revert TransferFailed();
 
         emit LinkRefunded(depositId, d.sender, d.token, amount);
     }
 
-    /**
-     * @notice Sweep residual contract balance (from fee-on-transfer tokens
-     *         or accidental transfers) to a specified recipient.
-     * @dev    Only callable by a designated owner (currently the contract
-     *         has no owner role; this is a placeholder for future deployment
-     *         configuration). For now, this is intentionally unimplemented
-     *         and reverts — fee-on-transfer residuals remain locked but
-     *         visible via RefundFailed events. This is a conscious trade-off:
-     *         we prefer a known residual over an arbitrary sweep surface.
-     */
+    /// @notice Stub — reverts. Residual recovery (fee-on-transfer tokens) is not exposed as a sweep surface.
     function sweep(address /* token */, address /* to */, uint256 /* amount */) external pure {
         revert("sweep: not implemented");
     }
@@ -449,48 +362,27 @@ contract LinkVault is ERC2771Context, ReentrancyGuardTransient {
 
     /**
      * @notice Transfer native or ERC-20 tokens to `to`.
-     *
-     * @dev NATIVE ETH (HIGH-2 mitigation):
-     *      If the push-transfer fails (e.g. `to` is a contract that reverts
-     *      on receive), the amount is NOT lost — it is parked in
-     *      `failedRefunds[depositId]` and the caller can recover it via
-     *      `claimFailedRefund()`. This prevents permanent fund-locking.
-     *
-     *      The `depositId` parameter is required for this reason; pass 0 for
-     *      non-deposit-scoped transfers (none currently exist).
-     *
-     * @dev ERC-20 (MEDIUM-1 mitigation):
-     *      For fee-on-transfer / rebasing tokens, we measure the actual
-     *      received balance by querying the recipient before and after the
-     *      transfer. The deposit's stored `amount` is always the originally
-     *      deposited amount; for fee-on-transfer tokens this means the
-     *      contract may hold a small residual that the owner can recover
-     *      via `sweep()`.
+     * @dev    On a failed native push (recipient reverted on receive), the amount is
+     *         parked in `failedRefunds[depositId]` (recoverable via claimFailedRefund).
+     *         For fee-on-transfer / rebasing ERC-20s, we measure the actual received
+     *         balance; any residual is reported via RefundFailed.
      */
     function _transfer(address token, address to, uint256 amount, uint256 depositId) internal {
         if (token == address(0)) {
             (bool ok,) = payable(to).call{value: amount}("");
             if (!ok) {
-                // HIGH-2: park funds for pull-refund instead of reverting.
-                // Without this, a `d.sender` that is a contract refusing ETH
-                // would brick the deposit (autoRefund reverts forever).
+                // Park funds for pull-refund instead of reverting.
                 failedRefunds[depositId] = amount;
                 emit RefundFailed(depositId, to, token, amount);
             }
         } else {
-            // MEDIUM-1: snapshot recipient balance before transfer to handle
-            // fee-on-transfer / rebasing tokens. We transfer whatever was
-            // actually moved (could be less than `amount` for fee tokens).
+            // Snapshot recipient balance to handle fee-on-transfer / rebasing tokens.
             uint256 balanceBefore = IERC20(token).balanceOf(to);
             IERC20(token).safeTransfer(to, amount);
             uint256 balanceAfter = IERC20(token).balanceOf(to);
             uint256 actuallyTransferred = balanceAfter - balanceBefore;
 
-            // For fee-on-transfer tokens, `actuallyTransferred < amount`.
-            // The recipient receives what they receive; the contract keeps
-            // the residual. This residual is recoverable via sweep().
-            // We do NOT revert — reverting would brick all fee-token deposits.
-            // (Silent residual is preferable to lock-up.)
+            // Residual (fee-on-transfer) stays in-contract; reported via RefundFailed.
             if (actuallyTransferred < amount) {
                 emit RefundFailed(depositId, to, token, amount - actuallyTransferred);
             }

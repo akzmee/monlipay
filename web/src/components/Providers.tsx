@@ -8,22 +8,7 @@ import { wagmiConfig } from "@/config/wagmi";
 import { useState, useEffect, type ReactNode, useMemo } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 
-/**
- * Server-side default theme (used during SSR and the very first client render).
- *
- * Why: next-themes reads `resolvedTheme` from localStorage which is undefined on
- * the server. If we naively use it to pick a RainbowKit theme, the server and
- * the first client render will disagree ("system" vs "dark"/"light"), and
- * RainbowKit will inject two different `<style>` CSS-variable blobs — causing
- * a React hydration mismatch warning.
- *
- * The fix is to pin a single theme for SSR + first render, then swap to the
- * resolved theme after `useEffect` runs (post-hydration).
- *
- * Default is DARK: MonliPay's brand identity is the deep-indigo Monad palette
- * and the hero scene + gradients were designed for dark surfaces. Light mode
- * remains available via the toggle ( ThemeToggle.tsx ).
- */
+/** Pinned SSR theme to avoid hydration mismatch with next-themes; dark by default. */
 const SSR_THEME = darkTheme({
   accentColor: "#8b73ff",
   accentColorForeground: "#fafaf9",
@@ -81,11 +66,6 @@ export function Providers({ children }: { children: ReactNode }) {
       }),
   );
 
-  // defaultTheme="dark" — MonliPay ships dark-first. The brand identity
-  // (Monad electric-violet on deep indigo) was designed for dark surfaces.
-  // Light mode is still available via the toggle in the navbar, and once a
-  // user explicitly picks one, next-themes persists it in localStorage so
-  // the default only applies on first visit.
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
       <WagmiProvider config={wagmiConfig}>

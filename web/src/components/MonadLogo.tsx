@@ -3,23 +3,7 @@
 import Image from "next/image";
 import { useTheme } from "next-themes";
 
-/**
- * MonadLogo — reusable component for the official Monad brand mark.
- *
- * Assets live in /public/monad/ and are sourced directly from the
- * official Monad Brand & Media Kit (no third-party sources).
- *
- * Variants:
- *   - "mark"        → just the violet hexagon logomark (square aspect)
- *   - "full"        → logomark + "MONAD" wordmark (wide aspect)
- *   - "wordmark"    → just the "MONAD" wordmark
- *
- * The "full" and "wordmark" variants auto-switch between black/white
- * text based on the active theme. The "mark" variant is identical
- * in both themes (it's always violet on transparent).
- *
- * Use `inverted` to force the white-text version (e.g. over violet bg).
- */
+/** Monad logo. Variants: "mark" (logomark), "full" (logo + wordmark), "wordmark". Auto-switches text color on theme. */
 type MonadLogoVariant = "mark" | "full" | "wordmark";
 
 interface MonadLogoProps {

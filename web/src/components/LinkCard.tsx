@@ -12,18 +12,9 @@ interface LinkCardProps {
   isExpired: boolean;
   canRefund: boolean;
   isBusy: boolean;
-  /**
-   * HIGH-5: True when this link failed during the autoRefund batch (e.g.
-   * race with another caller, or the wallet rejected the tx). Surfaces
-   * a per-link warning so the user knows which link needs manual action.
-   */
+  /** True if autoRefund failed for this link; UI shows a manual-refund hint. */
   autoRefundFailed?: boolean;
-  /**
-   * Full claim URL (with #fragment) for the user to re-copy and reshare.
-   * Only present for links created after the storage fix (commit d37890f).
-   * Older links created before that fix have no recoverable secret key —
-   * the shareableUrl was lost. In those cases we show a muted hint.
-   */
+  /** Claim URL with secret key fragment; undefined for links created before the storage fix. */
   shareableUrl?: string;
   onRefund: () => void;
 }
