@@ -223,6 +223,7 @@ export default function MyLinksPage() {
             currentAddress={address}
             isBusy={busyDepositIds.has(link.depositId)}
             autoRefundFailed={failedDepositIds.has(link.depositId)}
+            shareableUrl={link.shareableUrl}
             onRefund={async (depositId) => {
               try {
                 await refundMultiple(depositId, () => {
@@ -245,12 +246,14 @@ function LinkRow({
   currentAddress,
   isBusy,
   autoRefundFailed,
+  shareableUrl,
   onRefund,
 }: {
   link: StoredLink;
   currentAddress: `0x${string}` | undefined;
   isBusy: boolean;
   autoRefundFailed: boolean;
+  shareableUrl?: string;
   onRefund: (depositId: bigint) => Promise<void>;
 }) {
   // Guard against corrupted localStorage entries
@@ -288,6 +291,7 @@ function LinkRow({
       canRefund={canRefund}
       isBusy={isBusy}
       autoRefundFailed={autoRefundFailed}
+      shareableUrl={shareableUrl}
       onRefund={() => onRefund(depositId)}
     />
   );

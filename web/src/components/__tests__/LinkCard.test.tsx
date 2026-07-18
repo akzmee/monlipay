@@ -89,4 +89,60 @@ describe("LinkCard", () => {
     // Combined text: "50 TOKEN"
     expect(screen.getByText(/TOKEN/)).toBeInTheDocument();
   });
+
+  // ---------------------------------------------------------------
+  // shareableUrl — for re-copying if the user forgot the link
+  // ---------------------------------------------------------------
+  describe("shareableUrl", () => {
+    it("should render the shareable URL and Copy button when provided", () => {
+      const url = "https://monlipay.app/claim#1-0xabc";
+      renderLinkCard({ shareableUrl: url });
+      expect(screen.getByText(url)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /copy/i })).toBeInTheDocument();
+    });
+
+    it("should NOT render the URL row when shareableUrl is missing", () => {
+      renderLinkCard({ shareableUrl: undefined });
+      expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument();
+      // It should show a muted hint instead
+      expect(
+        screen.getByText(/Link URL not saved/i),
+      ).toBeInTheDocument();
+    });
+
+    it("should NOT render the URL row for claimed links (no point sharing)", () => {
+      const url = "https://monlipay.app/claim#1-0xabc";
+      renderLinkCard({ shareableUrl: url, isClaimed: true });
+      expect(screen.queryByText(url)).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /copy/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should copy URL to clipboard and show 'Copied' state when Copy is clicked", async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { clipboard: { writeText } });
+
+      const url = "https://monlipay.app/claim#1-0xabc";
+      renderLinkCard({ shareableUrl: url });
+
+      fireEvent.click(screen.getByRole("button", { name: /copy/i }));
+      // Wait for the async clipboard call and state update
+      await screen.findByText("Copied");
+      expect(writeText).toHaveBeenCalledWith(url);
+    });
+
+    it("should gracefully handle clipboard API rejection (no crash)", async () => {
+      const writeText = vi.fn().mockRejectedValue(new Error("denied"));
+      Object.assign(navigator, { clipboard: { writeText } });
+
+      const url = "https://monlipay.app/claim#1-0xabc";
+      renderLinkCard({ shareableUrl: url });
+
+      // Should not throw
+      fireEvent.click(screen.getByRole("button", { name: /copy/i }));
+      // Button should remain "Copy" (no "Copied")
+      expect(screen.getByRole("button", { name: /copy/i })).toBeInTheDocument();
+    });
+  });
 });
