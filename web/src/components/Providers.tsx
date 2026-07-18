@@ -19,9 +19,13 @@ import "@rainbow-me/rainbowkit/styles.css";
  *
  * The fix is to pin a single theme for SSR + first render, then swap to the
  * resolved theme after `useEffect` runs (post-hydration).
+ *
+ * Default is DARK: MonliPay's brand identity is the deep-indigo Monad palette
+ * and the hero scene + gradients were designed for dark surfaces. Light mode
+ * remains available via the toggle ( ThemeToggle.tsx ).
  */
-const SSR_THEME = lightTheme({
-  accentColor: "#6E54FF",
+const SSR_THEME = darkTheme({
+  accentColor: "#8b73ff",
   accentColorForeground: "#fafaf9",
   borderRadius: "medium",
   overlayBlur: "small",
@@ -44,13 +48,13 @@ function useRainbowKitTheme() {
   return useMemo(
     () =>
       isDark
-        ? darkTheme({
-            accentColor: "#8b73ff",
+        ? SSR_THEME
+        : lightTheme({
+            accentColor: "#6E54FF",
             accentColorForeground: "#fafaf9",
             borderRadius: "medium",
             overlayBlur: "small",
-          })
-        : SSR_THEME,
+          }),
     [isDark],
   );
 }
@@ -77,8 +81,13 @@ export function Providers({ children }: { children: ReactNode }) {
       }),
   );
 
+  // defaultTheme="dark" — MonliPay ships dark-first. The brand identity
+  // (Monad electric-violet on deep indigo) was designed for dark surfaces.
+  // Light mode is still available via the toggle in the navbar, and once a
+  // user explicitly picks one, next-themes persists it in localStorage so
+  // the default only applies on first visit.
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitWrapper>{children}</RainbowKitWrapper>
