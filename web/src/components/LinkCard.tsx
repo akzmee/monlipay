@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { QRPreviewModal } from "./QRPreviewModal";
 
 interface LinkCardProps {
   depositId: string;
@@ -42,6 +43,7 @@ export function LinkCard({
 }: LinkCardProps) {
   const tokenSymbol = token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const status: { label: string; color: string } = isClaimed
     ? { label: "Claimed", color: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400" }
@@ -104,6 +106,19 @@ export function LinkCard({
               </code>
               <button
                 type="button"
+                onClick={() => setShowQr(true)}
+                className="flex shrink-0 items-center gap-1 rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700"
+                title="Show QR code"
+                aria-label="Show QR code"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                </svg>
+                QR
+              </button>
+              <button
+                type="button"
                 onClick={handleCopy}
                 className="flex shrink-0 items-center gap-1 rounded-md border border-violet-300 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/60"
                 title="Copy link"
@@ -156,6 +171,16 @@ export function LinkCard({
           )}
         </div>
       </div>
+
+      {/* QR preview modal — opened by the QR button above. Renders the
+          claim URL as a scannable QR with PNG/SVG download. */}
+      {canShare && shareableUrl && (
+        <QRPreviewModal
+          open={showQr}
+          onClose={() => setShowQr(false)}
+          url={shareableUrl}
+        />
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
+import { downloadQrPng, downloadQrSvg } from "@/lib/qr-download";
 
 interface ShareLinkProps {
   url: string;
@@ -57,70 +58,23 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
   /**
    * Download the QR code as a PNG image.
    *
-   * We render QRCodeCanvas (hidden in DOM but accessible via ref) and pull
-   * its canvas via toDataURL(). The image is high-resolution (512x512) so
+   * We render QRCodeCanvas (hidden in DOM but accessible via ref) and let
+   * the shared qr-download helper produce a 512×512 white-padded PNG so
    * it scans reliably when printed or shown on a phone screen.
-   *
-   * We wrap the QR in a white padding so it scans against any background
-   * (dark mode, colored chat bubbles, etc).
    */
   const handleDownloadPng = useCallback(() => {
-    const canvas = qrCanvasRef.current?.querySelector("canvas");
-    if (!canvas) return;
-
-    // Render at 512×512 with white padding for scan reliability.
-    const SIZE = 512;
-    const PADDING = 32;
-    const out = document.createElement("canvas");
-    out.width = SIZE;
-    out.height = SIZE;
-    const ctx = out.getContext("2d");
-    if (!ctx) return;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, SIZE, SIZE);
-    ctx.drawImage(canvas, PADDING, PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
-
-    const dataUrl = out.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = "monlipay-claim.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const canvas = qrCanvasRef.current?.querySelector("canvas") ?? null;
+    downloadQrPng(canvas);
   }, []);
 
   /**
    * Download the QR code as an SVG (vector format for print / scaling).
-   * Pulls the rendered QRCodeSVG markup and wraps it in a standalone
-   * <svg> document with white background.
+   * Delegates to the shared qr-download helper which clones the rendered
+   * QRCodeSVG and wraps it in a standalone <svg> document.
    */
   const handleDownloadSvg = useCallback(() => {
-    const svgEl = qrCanvasRef.current?.querySelector("svg");
-    if (!svgEl) return;
-
-    // Clone so we can add background rect without mutating the displayed SVG.
-    const clone = svgEl.cloneNode(true) as SVGElement;
-    const xmlns = "http://www.w3.org/2000/svg";
-
-    // Add background rect as the first child so it sits behind the QR.
-    const bg = document.createElementNS(xmlns, "rect");
-    bg.setAttribute("width", "100%");
-    bg.setAttribute("height", "100%");
-    bg.setAttribute("fill", "#ffffff");
-    clone.insertBefore(bg, clone.firstChild);
-
-    const svgString = new XMLSerializer().serializeToString(clone);
-    const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`], {
-      type: "image/svg+xml",
-    });
-    const urlObj = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = urlObj;
-    link.download = "monlipay-claim.svg";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(urlObj);
+    const svgEl = qrCanvasRef.current?.querySelector("svg") ?? null;
+    downloadQrSvg(svgEl);
   }, []);
 
   return (
