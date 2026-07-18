@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
+import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 
 interface ShareLinkProps {
   url: string;
   onReset: () => void;
 }
 
+type ShareView = "link" | "qr";
+
 export function ShareLink({ url, onReset }: ShareLinkProps) {
   const [copied, setCopied] = useState(false);
+  const [view, setView] = useState<ShareView>("link");
+  const qrCanvasRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = async () => {
     try {
@@ -49,6 +54,75 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
     );
   };
 
+  /**
+   * Download the QR code as a PNG image.
+   *
+   * We render QRCodeCanvas (hidden in DOM but accessible via ref) and pull
+   * its canvas via toDataURL(). The image is high-resolution (512x512) so
+   * it scans reliably when printed or shown on a phone screen.
+   *
+   * We wrap the QR in a white padding so it scans against any background
+   * (dark mode, colored chat bubbles, etc).
+   */
+  const handleDownloadPng = useCallback(() => {
+    const canvas = qrCanvasRef.current?.querySelector("canvas");
+    if (!canvas) return;
+
+    // Render at 512×512 with white padding for scan reliability.
+    const SIZE = 512;
+    const PADDING = 32;
+    const out = document.createElement("canvas");
+    out.width = SIZE;
+    out.height = SIZE;
+    const ctx = out.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.drawImage(canvas, PADDING, PADDING, SIZE - PADDING * 2, SIZE - PADDING * 2);
+
+    const dataUrl = out.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "monlipay-claim.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
+
+  /**
+   * Download the QR code as an SVG (vector format for print / scaling).
+   * Pulls the rendered QRCodeSVG markup and wraps it in a standalone
+   * <svg> document with white background.
+   */
+  const handleDownloadSvg = useCallback(() => {
+    const svgEl = qrCanvasRef.current?.querySelector("svg");
+    if (!svgEl) return;
+
+    // Clone so we can add background rect without mutating the displayed SVG.
+    const clone = svgEl.cloneNode(true) as SVGElement;
+    const xmlns = "http://www.w3.org/2000/svg";
+
+    // Add background rect as the first child so it sits behind the QR.
+    const bg = document.createElementNS(xmlns, "rect");
+    bg.setAttribute("width", "100%");
+    bg.setAttribute("height", "100%");
+    bg.setAttribute("fill", "#ffffff");
+    clone.insertBefore(bg, clone.firstChild);
+
+    const svgString = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`], {
+      type: "image/svg+xml",
+    });
+    const urlObj = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = urlObj;
+    link.download = "monlipay-claim.svg";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(urlObj);
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Success header */}
@@ -72,24 +146,141 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
 
       {/* Link box */}
       <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
-          Payment link
-        </p>
-        <div className="flex items-center gap-2">
-          <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-stone-700 dark:bg-stone-800 dark:text-stone-300">
-            {url}
-          </code>
-          <button
-            onClick={handleCopy}
-            className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              copied
-                ? "bg-green-600 text-white"
-                : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500"
-            }`}
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+            Payment link
+          </p>
+          {/* Tab toggle: Link / QR */}
+          <div
+            role="tablist"
+            aria-label="Share format"
+            className="inline-flex items-center rounded-lg bg-stone-200 p-0.5 dark:bg-stone-800"
           >
-            {copied ? "Copied!" : "Copy"}
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === "link"}
+              onClick={() => setView("link")}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                view === "link"
+                  ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100"
+                  : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+              }`}
+            >
+              Link
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === "qr"}
+              onClick={() => setView("qr")}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                view === "qr"
+                  ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100"
+                  : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+              }`}
+            >
+              QR Code
+            </button>
+          </div>
         </div>
+
+        {view === "link" ? (
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              {url}
+            </code>
+            <button
+              onClick={handleCopy}
+              className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                copied
+                  ? "bg-green-600 text-white"
+                  : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500"
+              }`}
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3">
+            {/* QR preview + hidden source elements for download.
+                The preview uses QRCodeSVG (crisp at any size, looks better
+                on screen). The hidden QRCodeCanvas is only used by the PNG
+                download handler. */}
+            <div
+              ref={qrCanvasRef}
+              className="rounded-2xl bg-white p-4 shadow-sm"
+              aria-label={`QR code for ${url}`}
+            >
+              <QRCodeSVG
+                value={url}
+                size={200}
+                level="M"
+                fgColor="#0c0a09"
+                bgColor="#ffffff"
+                marginSize={1}
+              />
+              {/* Hidden canvas — only exists for PNG export. */}
+              <div className="hidden" aria-hidden="true">
+                <QRCodeCanvas
+                  value={url}
+                  size={256}
+                  level="M"
+                  fgColor="#0c0a09"
+                  bgColor="#ffffff"
+                  marginSize={1}
+                />
+              </div>
+            </div>
+
+            {/* Download buttons */}
+            <div className="flex w-full gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadPng}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:from-violet-500 hover:to-indigo-500"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                  />
+                </svg>
+                PNG
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadSvg}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                  />
+                </svg>
+                SVG
+              </button>
+            </div>
+            <p className="text-center text-[11px] text-stone-400 dark:text-stone-500">
+              Scan to claim · SVG is best for printing
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Share buttons */}
