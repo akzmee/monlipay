@@ -8,11 +8,6 @@ import { SECURITY_HEADERS } from "./src/lib/security-headers";
  * can be unit-tested. See that file for documentation.
  */
 const nextConfig: NextConfig = {
-  // `standalone` produces a self-contained .next/standalone directory
-  // that includes only the node_modules actually used at runtime.
-  // This is the recommended output for Docker — image stays small
-  // (~150MB vs ~1.5GB) and cold-start is fast.
-  // See: https://nextjs.org/docs/app/api-reference/config/next-config-js/output
   output: "standalone",
   async headers() {
     return [
@@ -22,6 +17,17 @@ const nextConfig: NextConfig = {
           key: h.key,
           value: h.value,
         })),
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        // Proxy indexer API requests through Next.js to avoid CORS issues.
+        // Browser calls /indexer/v1/links/:address → Next.js proxies to
+        // http://indexer:42069/v1/links/:address (Docker internal network)
+        source: "/indexer/:path*",
+        destination: `${process.env.INDEXER_INTERNAL_URL ?? "http://127.0.0.1:42069"}/:path*`,
       },
     ];
   },

@@ -1,8 +1,14 @@
-/** Fetch wrapper for the Ponder indexer API. Converts string-encoded bigints to native bigint. */
+/**
+ * Fetch wrapper for the Ponder indexer API.
+ *
+ * The indexer is proxied through Next.js rewrites (/indexer/* → indexer:42069/*)
+ * to avoid CORS issues. In production, NEXT_PUBLIC_INDEXER_URL should be set
+ * to the full URL. If not set, defaults to /indexer (Next.js rewrite proxy).
+ */
 
-const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "";
+const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "/indexer";
 
-/** True if the indexer URL is configured (so we should bother fetching). */
+/** Always true now — we default to /indexer rewrite proxy. */
 export const isIndexerConfigured = INDEXER_URL !== "";
 
 /** Normalized indexer base URL (no trailing slash). */

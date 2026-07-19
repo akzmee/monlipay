@@ -1,31 +1,29 @@
 # =============================================================================
-# docker-compose.yml — MonliPay dual deployment (testnet + mainnet)
+# docker-compose.yml — MonliPay dual deployment (testnet + mainnet) + indexer
 # =============================================================================
-#
-# Runs two instances of the frontend on the same VPS:
-#
-#   - monlipay-testnet  → http://127.0.0.1:3000  → testnet.monlipay.xyz
-#   - monlipay-mainnet  → http://127.0.0.1:4000  → monlipay.xyz
-#
-# Both containers share the same repo checkout but are built with different
-# NEXT_PUBLIC_NETWORK build-args (which Next.js bakes into the client bundle
-# at build time — runtime env vars alone won't flip a built image).
-#
-# Secrets (LIFI_API_KEY, ALCHEMY_API_KEY) are read from a .env.deploy file
-# at the repo root — never commit it. See DEPLOY-VPS.md.
-#
-# Usage:
-#   1. cp .env.deploy.example .env.deploy  && fill in secrets
-#   2. docker compose build
-#   3. docker compose up -d
-#   4. nginx (or caddy) reverse-proxies :80/:443 to :3000 and :4000
-# =============================================================================
-
-# docker compose auto-loads .env.deploy if named .env, so we use the
-# default_config mechanism: rename .env.deploy.example to .env on the VPS.
-# (See DEPLOY-VPS.md for the rationale — keeps secrets out of git history.)
 
 services:
+  # ---------------------------------------------------------------
+  # PONDER INDEXER — indexes LinkVault events, serves API on :42069
+  # ---------------------------------------------------------------
+  indexer:
+    container_name: monlipay-indexer
+    build:
+      context: ./indexer
+      dockerfile: Dockerfile
+    ports:
+      - "0.0.0.0:42069:42069"
+    restart: unless-stopped
+    environment:
+      DATABASE_SCHEMA: monlipay
+      PORT: "42069"
+      PONDER_MONAD_MAINNET_VAULT: ${MAINNET_LINK_VAULT_ADDRESS}
+      PONDER_MONAD_TESTNET_VAULT: ${TESTNET_LINK_VAULT_ADDRESS:-}
+      PONDER_RPC_MAINNET: https://monad-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+      PONDER_RPC_TESTNET: https://testnet-rpc.monad.xyz
+    networks:
+      - monlipay
+
   # ---------------------------------------------------------------
   # TESTNET — chain ID 10143
   # ---------------------------------------------------------------
@@ -38,13 +36,19 @@ services:
         NEXT_PUBLIC_NETWORK: testnet
         NEXT_PUBLIC_LINK_VAULT_ADDRESS: ${TESTNET_LINK_VAULT_ADDRESS}
         NEXT_PUBLIC_WC_PROJECT_ID: ${NEXT_PUBLIC_WC_PROJECT_ID}
+        NEXT_PUBLIC_GAS_SPONSOR_ENABLED: "true"
+        NEXT_PUBLIC_GAS_FORWARDER_ADDRESS: ${NEXT_PUBLIC_GAS_FORWARDER_ADDRESS:-}
     ports:
-      - "127.0.0.1:3000:3000"   # bind to loopback only — nginx proxies public
+      - "0.0.0.0:3100:3000"
     restart: unless-stopped
+    depends_on:
+      - indexer
     environment:
-      # Server-side secrets (read from .env.deploy)
       LIFI_API_KEY: ${LIFI_API_KEY:-}
       ALCHEMY_API_KEY: ${ALCHEMY_API_KEY:-}
+      GAS_SPONSOR_PRIVATE_KEY: ${GAS_SPONSOR_PRIVATE_KEY:-}
+      GAS_SPONSOR_DAILY_BUDGET_MON: ${GAS_SPONSOR_DAILY_BUDGET_MON:-5}
+      INDEXER_INTERNAL_URL: http://indexer:42069
     networks:
       - monlipay
 
@@ -60,12 +64,19 @@ services:
         NEXT_PUBLIC_NETWORK: mainnet
         NEXT_PUBLIC_LINK_VAULT_ADDRESS: ${MAINNET_LINK_VAULT_ADDRESS}
         NEXT_PUBLIC_WC_PROJECT_ID: ${NEXT_PUBLIC_WC_PROJECT_ID}
+        NEXT_PUBLIC_GAS_SPONSOR_ENABLED: "true"
+        NEXT_PUBLIC_GAS_FORWARDER_ADDRESS: ${NEXT_PUBLIC_GAS_FORWARDER_ADDRESS:-}
     ports:
-      - "127.0.0.1:4000:3000"   # bind to loopback only — nginx proxies public
+      - "0.0.0.0:4100:3000"
     restart: unless-stopped
+    depends_on:
+      - indexer
     environment:
       LIFI_API_KEY: ${LIFI_API_KEY:-}
       ALCHEMY_API_KEY: ${ALCHEMY_API_KEY:-}
+      GAS_SPONSOR_PRIVATE_KEY: ${GAS_SPONSOR_PRIVATE_KEY:-}
+      GAS_SPONSOR_DAILY_BUDGET_MON: ${GAS_SPONSOR_DAILY_BUDGET_MON:-5}
+      INDEXER_INTERNAL_URL: http://indexer:42069
     networks:
       - monlipay
 
