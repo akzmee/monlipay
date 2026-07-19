@@ -9,7 +9,7 @@ import { ShareLink } from "@/components/ShareLink";
 
 export default function CreatePage() {
   const { isConnected } = useAccount();
-  const { create, result, error, isSending, isConfirming, reset } = useCreateLink();
+  const { create, result, error, isSending, isConfirming, txHash, reset } = useCreateLink();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
 
@@ -24,7 +24,7 @@ export default function CreatePage() {
     return (
       <div className="hero-gradient">
         <div className="mx-auto max-w-md px-4 py-8 pb-24 sm:py-12 sm:pb-12">
-          <ShareLink url={result.shareableUrl} onReset={reset} />
+          <ShareLink url={result.shareableUrl} txHash={txHash ?? undefined} onReset={reset} />
         </div>
       </div>
     );

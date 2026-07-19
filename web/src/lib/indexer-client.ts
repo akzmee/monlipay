@@ -15,6 +15,27 @@ export const isIndexerConfigured = INDEXER_URL !== "";
 export const indexerBaseUrl = INDEXER_URL.replace(/\/+$/, "");
 
 /**
+ * Returns the origin to use as base for `new URL()` when the indexer URL
+ * is relative (e.g. "/indexer"). On the server there's no window, so we
+ * return an empty string — but those code paths use `fetch` with relative
+ * URLs directly and never hit `new URL`.
+ */
+function getUrlBase(): string {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return "http://localhost";
+}
+
+/**
+ * Build a full URL from a path, handling both absolute and relative indexer URLs.
+ * Uses `new URL(path, base)` to avoid "Invalid URL" on relative paths.
+ */
+function buildUrl(path: string): URL {
+  return new URL(`${indexerBaseUrl}${path}`, getUrlBase());
+}
+
+/**
  * Shape of a link row returned by the indexer.
  *
  * This matches the `stringifyLinkRow` function in indexer/src/api/index.ts.
@@ -88,9 +109,7 @@ export async function fetchLinks(
   signal?: AbortSignal,
 ): Promise<IndexedLink[]> {
   if (!isIndexerConfigured) return [];
-  const url = new URL(
-    `${indexerBaseUrl}/v1/links/${address.toLowerCase()}`,
-  );
+  const url = buildUrl(`/v1/links/${address.toLowerCase()}`);
   if (status) url.searchParams.set("status", status);
   url.searchParams.set("limit", "200");
 
@@ -108,9 +127,7 @@ export async function fetchExpiredLinks(
   signal?: AbortSignal,
 ): Promise<IndexedLink[]> {
   if (!isIndexerConfigured) return [];
-  const url = new URL(
-    `${indexerBaseUrl}/v1/links/${address.toLowerCase()}/expired`,
-  );
+  const url = buildUrl(`/v1/links/${address.toLowerCase()}/expired`);
   const res = await fetch(url, { signal });
   if (!res.ok) {
     throw new Error(`Indexer responded ${res.status}`);
@@ -134,9 +151,7 @@ export async function fetchStats(
   if (!isIndexerConfigured) {
     return { active: 0, claimed: 0, refunded: 0, refund_failed: 0 };
   }
-  const url = new URL(
-    `${indexerBaseUrl}/v1/stats/${address.toLowerCase()}`,
-  );
+  const url = buildUrl(`/v1/stats/${address.toLowerCase()}`);
   const res = await fetch(url, { signal });
   if (!res.ok) {
     throw new Error(`Indexer responded ${res.status}`);

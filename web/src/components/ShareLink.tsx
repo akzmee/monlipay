@@ -3,15 +3,19 @@
 import { useState, useRef, useCallback } from "react";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { downloadQrPng, downloadQrSvg } from "@/lib/qr-download";
+import { monadChain } from "@/config/chain";
+
+const explorerBaseUrl = monadChain.blockExplorers?.default.url ?? "https://monadscan.com";
 
 interface ShareLinkProps {
   url: string;
+  txHash?: `0x${string}`;
   onReset: () => void;
 }
 
 type ShareView = "link" | "qr";
 
-export function ShareLink({ url, onReset }: ShareLinkProps) {
+export function ShareLink({ url, txHash, onReset }: ShareLinkProps) {
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<ShareView>("link");
   const qrCanvasRef = useRef<HTMLDivElement>(null);
@@ -258,6 +262,21 @@ export function ShareLink({ url, onReset }: ShareLinkProps) {
           Telegram
         </button>
       </div>
+
+      {/* Transaction receipt link */}
+      {txHash && (
+        <a
+          href={`${explorerBaseUrl}/tx/${txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          View transaction
+        </a>
+      )}
 
       {/* WARNING — save link now (shown only once) */}
       <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 dark:border-amber-800 dark:bg-amber-950/40">

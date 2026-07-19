@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
         // Browser calls /indexer/v1/links/:address → Next.js proxies to
         // http://indexer:42069/v1/links/:address (Docker internal network)
         source: "/indexer/:path*",
-        destination: `${process.env.INDEXER_INTERNAL_URL ?? "http://127.0.0.1:42069"}/:path*`,
+        destination: `http://indexer:42069/:path*`,
       },
     ];
   },

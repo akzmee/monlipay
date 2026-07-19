@@ -29,7 +29,7 @@ function ClaimPageContent() {
   const secretKey = parsed?.secretKey ?? null;
 
   const { data: deposit, isLoading: depositLoading } = useDeposit(depositId);
-  const { claim, error, isSending, isConfirming, isSuccess, reset } = useClaimLink();
+  const { claim, error, isSending, isConfirming, isSuccess, txHash, reset } = useClaimLink();
   const [recipientOverride, setRecipientOverride] = useState("");
 
   // Sponsor-claim state. When the user clicks claim, we try the sponsor
@@ -39,11 +39,13 @@ function ClaimPageContent() {
   const [sponsorBusy, setSponsorBusy] = useState(false);
   const [sponsorSuccess, setSponsorSuccess] = useState(false);
   const [sponsorError, setSponsorError] = useState<string | null>(null);
+  const [sponsorTxHash, setSponsorTxHash] = useState<`0x${string}` | null>(null);
 
   // Combined busy/success/error across both paths.
   const isBusy = isSending || isConfirming || sponsorBusy;
   const isSuccessOverall = isSuccess || sponsorSuccess;
   const errorOverall = error ?? sponsorError;
+  const successTxHash = txHash ?? sponsorTxHash;
 
   // Reset sponsor state when the user changes the recipient
   useEffect(() => {
@@ -197,6 +199,19 @@ function ClaimPageContent() {
           <p className="mt-2 text-sm text-stone-500">
             {deposit && formatEther(deposit.amount)} MON has been sent to your wallet.
           </p>
+          {successTxHash && (
+            <a
+              href={`${monadChain.blockExplorers?.default.url ?? "https://monadscan.com"}/tx/${successTxHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+              View transaction
+            </a>
+          )}
         </div>
       </div>
     );
@@ -278,6 +293,7 @@ function ClaimPageContent() {
                 });
                 if (result.ok) {
                   setSponsorSuccess(true);
+                  setSponsorTxHash(result.txHash);
                   return;
                 }
                 // If the failure is "rate_limited" or "budget_exhausted",
