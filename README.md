@@ -1,8 +1,14 @@
-# MonliPay — Send MON via a link
+> **Metropolis extension:** Lucky Links adds random group distributions and private wallet contacts. The separate LuckyVault is deployed on Monad mainnet and testnet, with exact source verification on Sourcify. See [implementation and deployment notes](docs/lucky-links.md) and [deployment receipts](contracts/deployments). The real Pyth draw, collection, and refund flow has been exercised on testnet.
+
+The reviewed visual system is recorded in [DESIGN.md](DESIGN.md), with reusable component previews in [.impeccable/design.json](.impeccable/design.json).
+
+The updated mainnet and testnet sites, backup location, configuration, and verification results are recorded in [VPS deployment notes](docs/vps-deployment.md).
+
+# MonliPay — Send tokens via a link
 
 > Send tokens on Monad as easily as sharing a WhatsApp link. Recipient clicks, funds arrive. Unclaimed? Auto-refunded.
 
-Built for the **BuildAnything "Spark"** hackathon on Monad.
+Originally built for the **BuildAnything "Spark"** hackathon on Monad. The **Metropolis** extension adds Lucky Links and private contacts; the [build-window disclosure](docs/lucky-links.md#what-is-new-for-metropolis) distinguishes this work from the existing foundation.
 
 ---
 
@@ -24,7 +30,7 @@ MonliPay turns token transfers into a shareable link:
 1. **Create** — deposit MON (or any ERC-20) into the LinkVault contract
 2. **Share** — send the link via WhatsApp, Telegram, or any messenger
 3. **Claim** — recipient opens the link, connects their wallet, claims with one click
-4. **Auto-refund** — if nobody claims before expiry, the funds return to the sender automatically the next time the sender opens "My Links"
+4. **Manage** — reopen saved links with a passkey in My Links or explicitly refund expired, unclaimed links with wallet confirmation
 
 No address swapping. No chain confusion. One link is all you need.
 
@@ -39,12 +45,14 @@ The core trick: the sender generates an **ephemeral keypair** in the browser usi
 ```
 https://monlipay.app/claim#42-5Kd3NBU5...
                           └─────────────┘
-                          URL fragment — never sent to any server
+                          URL fragment — omitted from ordinary HTTP requests
 ```
 
 When the recipient claims, their browser signs `(depositId, recipient)` via **EIP-712 typed data** with the secret key. The contract verifies the signature with `ecrecover` against `claimKey`.
 
-Since the secret never appears in calldata, mempool watchers **cannot** front-run the claim transaction.
+The secret never appears in calldata. The visible claim signature binds the deposit and recipient, so copying it cannot redirect funds to another address.
+
+[Saved links](docs/encrypted-link-backups.md) use browser encryption and a passkey, with no manual recovery-key setup for new users. The server stores ciphertext and public identifiers; WebAuthn PRF key material stays on the client. Existing recovery-key profiles can migrate once without changing their links. Passkey/provider support varies, and losing access to the passkey cannot be reset by MonliPay. The public [privacy page](https://monlipay.xyz/privacy) distinguishes protected claim secrets from public onchain activity. Optional [Private Payment](https://monlipay.xyz/create/private) uses AnomaPay on Monad mainnet, with passkey-encrypted account and link recovery. The [funded WMON pilot](docs/anoma-private-payment-readiness.json) passed. Transfers inside the pool are shielded from public chain observers; deposits, withdrawals, provider witness access and timing correlation remain privacy limits. This is a beta, not complete anonymity or an independently audited implementation.
 
 ### Flow diagram
 
@@ -68,14 +76,14 @@ sequenceDiagram
     C-->>R: ✅ MON received
 
     alt Unclaimed after expiry
-        Note over S: 7. Open "My Links" page
-        S->>C: autoRefund(depositId)<br/>(permissionless — anyone can call)
+        Note over S: 7. Choose Refund in My Links<br/>and confirm in the wallet
+        S->>C: refund transaction<br/>(contract also supports permissionless autoRefund)
         Note over C: return funds to sender
         C-->>S: 💰 MON refunded
     end
 ```
 
-**Why this is front-run resistant:** the secret key lives only in the URL fragment (`#`). Browsers never send the fragment to any server, so mempool watchers cannot see the signature before your transaction confirms.
+**Why copying a claim cannot redirect funds:** its EIP-712 signature binds the recipient and deposit to the chain and verifying contract. The signature is visible in calldata; the ephemeral private key is not. URL fragments are excluded from ordinary HTTP requests, but deliberately sharing a complete URL still gives its holder the claim capability.
 
 ---
 
@@ -132,20 +140,22 @@ All contracts are verified on Monadscan. The testnet deployment is the recommend
 
 ### Pages
 
-- **`/`** — Create a payment link (select token, amount, expiry → get shareable URL)
+- **`/`** — Payment-first landing and product demo
+- **`/create`** — Create a payment link (select token, amount, expiry → get shareable URL)
 - **`/claim`** — Claim a payment link (parse secret from URL hash → sign → claim)
-- **`/my-links`** — Track created links; expired links auto-refund on page open
+- **`/my-links`** — Track Payment and Lucky Links, reopen passkey-protected links, explicitly refund expired payments
 - **`/bridge`** — Bridge tokens from 9+ chains into Monad via LI.FI aggregator
 
 ### Features
 
 - **RainbowKit wallet modal** — branded popup with MetaMask, WalletConnect, Coinbase, and more
 - **Dark mode** — system-aware with manual toggle (sun/moon icon)
-- **3D landing hero** — animated three.js scene with the Monad violet palette
+- **Prismatic envelope** — original artwork in the Monad-inspired ink/lilac visual system
 - **Wrong-chain guard** — detects when wallet is on the wrong network and prompts switch
 - **WhatsApp / Telegram share** — one-click share with pre-filled message
-- **Cross-tab sync** — links created in one tab appear immediately in other tabs
-- **Permissionless auto-refund** — opening "My Links" refunds all expired links in one batch
+- **Indexed history** — visible tabs periodically refresh public payment status
+- **Private saved links** — browser encryption, passkey access, device retry queue, manual and idle locking
+- **Explicit refunds** — My Links asks for a deliberate refund action and wallet confirmation
 - **Per-link failure surfacing** — if auto-refund skips a link (e.g. race), the UI flags it individually
 - **Bridge integration** — bring tokens from Ethereum, Base, Arbitrum, Optimism, Polygon, BNB, Avalanche → Monad
 - **Real token/chain logos** — pulled from trustwallet/assets, with official Monad brand-kit SVG

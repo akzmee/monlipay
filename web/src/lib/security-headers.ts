@@ -12,7 +12,7 @@ export interface SecurityHeader {
 export const CSP_DIRECTIVES: readonly string[] = [
   "default-src 'self'",
   // Allow Next.js inline runtime + eval (needed for Next.js dev/hmr; safe in prod)
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
   // Allow Next.js injected styles + Tailwind + style attributes
   "style-src 'self' 'unsafe-inline'",
   // Images: self + data: URIs + trustwallet assets + any https (logos from various CDNs)
@@ -32,8 +32,6 @@ export const CSP_DIRECTIVES: readonly string[] = [
   "base-uri 'self'",
   // Object/embed/flash blocked entirely
   "object-src 'none'",
-  // WebAssembly allowed (viem / crypto libs may use it)
-  "wasm-unsafe-eval",
 ] as const;
 
 /**

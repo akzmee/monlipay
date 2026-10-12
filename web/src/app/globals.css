@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./lucky.css";
 
 /* Enable class-based dark mode for next-themes (attribute="class") */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -22,27 +23,27 @@
  */
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: var(--mp-ground);
+  --foreground: var(--mp-ink);
   --surface: #ffffff;
   --surface-elevated: #ffffff;
   --border: #e7e5e4;
 
   /* === Monad official palette (verbatim from Brand Kit) === */
   /* Primary */
-  --monad-primary: #6E54FF;
-  --monad-lavender: #DDD7FE;
-  --monad-indigo: #0E091C;
+  --monad-primary: #6e54ff;
+  --monad-lavender: #ddd7fe;
+  --monad-indigo: #0e091c;
   --monad-black: #000000;
-  --monad-white: #FFFFFF;
+  --monad-white: #ffffff;
   /* Secondary */
-  --monad-cyan: #85E6FF;
-  --monad-cyan-light: #B9E3F9;
-  --monad-pink: #FF8EE4;
-  --monad-orange: #FFAE45;
+  --monad-cyan: #85e6ff;
+  --monad-cyan-light: #b9e3f9;
+  --monad-pink: #ff8ee4;
+  --monad-orange: #ffae45;
   /* Derived (not in palette doc, but sourced from official assets) */
-  --monad-primary-hover: #5a3fe0;        /* darkened #6E54FF */
-  --monad-deep-violet: #391B97;          /* WMON token background */
+  --monad-primary-hover: #5a3fe0; /* darkened #6E54FF */
+  --monad-deep-violet: #391b97; /* WMON token background */
 
   /* === Semantic tokens === */
   --primary: var(--monad-primary);
@@ -50,20 +51,32 @@
   --primary-light: #f1ecff;
   --accent: var(--monad-cyan);
   --accent-light: #ecfdff;
-  --accent-2: var(--monad-pink);         /* tertiary accent (pink) */
-  --accent-3: var(--monad-orange);       /* tertiary accent (orange) */
+  --accent-2: var(--monad-pink); /* tertiary accent (pink) */
+  --accent-3: var(--monad-orange); /* tertiary accent (orange) */
   --success: #16a34a;
   --success-light: #f0fdf4;
   --warning: #d97706;
   --warning-light: #fffbeb;
   --danger: #dc2626;
   --danger-light: #fef2f2;
-  --text-muted: #78716c;
+  --text-muted: var(--mp-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @theme inline {
+  --color-stone-50: #f7f6fb;
+  --color-stone-100: #f0eef7;
+  --color-stone-200: #dedbe8;
+  --color-stone-300: #c8c3d5;
+  --color-stone-400: #aaa3bb;
+  --color-stone-500: #756b86;
+  --color-stone-600: #5d556c;
+  --color-stone-700: #423b50;
+  --color-stone-800: #302c3a;
+  --color-stone-900: #19191f;
+  --color-stone-950: #111116;
+  --font-display: var(--font-chakra);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -99,39 +112,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0a09;
-    --foreground: #fafaf9;
-    --surface: #1c1917;
-    --surface-elevated: #292524;
-    --border: #44403c;
-    --primary: #8b73ff;
-    --primary-hover: #6E54FF;
-    --primary-light: #1a1530;
-    --accent: #85E6FF;
-    --accent-light: #0a1f25;
-    --success: #22c55e;
-    --success-light: #0a1f10;
-    --warning: #f59e0b;
-    --warning-light: #2a1f08;
-    --danger: #ef4444;
-    --danger-light: #2a1212;
-    --text-muted: #a8a29e;
-  }
-}
-
 /* next-themes dark mode: triggered by class="dark" on <html> */
 .dark {
-  --background: #0c0a09;
-  --foreground: #fafaf9;
-  --surface: #1c1917;
-  --surface-elevated: #292524;
-  --border: #44403c;
+  --background: var(--mp-ground);
+  --foreground: var(--mp-ink);
+  --surface: var(--mp-panel);
+  --surface-elevated: #26242e;
+  --border: var(--mp-line);
   --primary: #8b73ff;
-  --primary-hover: #6E54FF;
+  --primary-hover: #6e54ff;
   --primary-light: #1a1530;
-  --accent: #85E6FF;
+  --accent: #85e6ff;
   --accent-light: #0a1f25;
   --success: #22c55e;
   --success-light: #0a1f10;
@@ -139,7 +130,7 @@
   --warning-light: #2a1f08;
   --danger: #ef4444;
   --danger-light: #2a1212;
-  --text-muted: #a8a29e;
+  --text-muted: var(--mp-muted);
 }
 
 body {
@@ -165,7 +156,8 @@ a,
 input,
 select,
 textarea {
-  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-property:
+    color, background-color, border-color, box-shadow, opacity, transform;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -188,58 +180,30 @@ textarea {
   background: var(--text-muted);
 }
 
-/*
- * Hero gradient — full Monad palette glow.
- * Layer order (back → front): indigo base, violet primary, cyan+pink+orange
- * accents. Low opacity so it never overwhelms content.
- */
 .hero-gradient {
-  background:
-    radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.06), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.05), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.10), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.06), transparent 60%);
+  background: var(--background);
 }
-
-@media (prefers-color-scheme: dark) {
-  .hero-gradient {
-    background:
-      radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.10), transparent 60%),
-      radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.08), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.18), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.08), transparent 60%);
-  }
-}
-
-.dark .hero-gradient {
-  background:
-    radial-gradient(ellipse 60% 50% at 18% 10%, rgba(255, 142, 228, 0.10), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255, 174, 69, 0.08), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(110, 84, 255, 0.18), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(133, 230, 255, 0.08), transparent 60%);
-}
-
-/* Logo mark — uses the three brand primary stops */
 .logo-mark {
-  background: linear-gradient(135deg, #6E54FF 0%, #DDD7FE 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Press feedback for buttons */
-button:active:not(:disabled) {
-  transform: scale(0.98);
+  color: var(--foreground);
 }
 
 /* Smooth skeleton loading shimmer */
 @keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-elevated) 50%, var(--surface) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-elevated) 50%,
+    var(--surface) 75%
+  );
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }

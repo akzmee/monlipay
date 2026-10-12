@@ -43,16 +43,13 @@ export function CreateForm({
   );
 
   return (
-    <div className="space-y-5">
+    <div className="mp-payment-form">
       {/* Amount + Token selector — DeFi style */}
-      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 transition-colors focus-within:border-violet-400 focus-within:bg-white dark:border-stone-700 dark:bg-stone-800/50 dark:focus-within:border-violet-500 dark:focus-within:bg-stone-800">
-        <label
-          htmlFor="amount"
-          className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400"
-        >
+      <div>
+        <label htmlFor="amount" className="mp-label">
           Amount
         </label>
-        <div className="flex items-center gap-3">
+        <div className="mp-payment-amount">
           <input
             id="amount"
             type="number"
@@ -61,14 +58,14 @@ export function CreateForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isBusy}
-            className="min-w-0 flex-1 bg-transparent text-3xl font-bold text-stone-900 outline-none placeholder:text-stone-300 dark:text-stone-100 dark:placeholder:text-stone-600"
+            className="mp-payment-amount-input"
           />
           {/* Token selector button */}
           <button
             type="button"
             onClick={() => setShowTokenModal(true)}
             disabled={isBusy}
-            className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100"
+            className="mp-payment-token"
           >
             {/* Token avatar — uses logoURI when available, gradient fallback otherwise */}
             <TokenAvatar token={selectedToken} size={28} />
@@ -93,46 +90,52 @@ export function CreateForm({
       </div>
 
       {/* Expiry */}
-      <div>
-        <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
-          Expires in
-        </label>
-        <div className="flex flex-wrap gap-2">
+      <fieldset>
+        <legend className="mp-label">Expires in</legend>
+        <div className="mp-expiry-options">
           {EXPIRY_PRESETS.map((preset) => (
             <button
               key={preset.value}
               type="button"
               onClick={() => setExpirySeconds(preset.value)}
               disabled={isBusy}
-              className={`rounded-xl border px-3.5 py-2 text-xs font-medium transition-all active:scale-95 ${
-                expirySeconds === preset.value
-                  ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300"
-                  : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:border-stone-600 dark:hover:bg-stone-700/50"
-              }`}
+              aria-pressed={expirySeconds === preset.value}
             >
               {preset.label}
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+        <div className="mp-error" role="alert">
           {error}
         </div>
       )}
+
+      <p className="mp-hint">
+        You deposit {amount || "0"} {selectedToken.symbol}, plus network gas
+        paid in MON.
+        {!selectedToken.isNative &&
+          " Your wallet may first ask you to approve this token, which also uses gas."}{" "}
+        Review the exact network fee in your wallet before confirming.
+      </p>
 
       {/* Submit */}
       <button
         type="button"
         onClick={onCreate}
         disabled={!isAmountValid || isBusy}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:from-stone-400 disabled:to-stone-400 disabled:shadow-none disabled:hover:from-stone-400 disabled:hover:to-stone-400"
+        className="mp-button mp-payment-submit"
       >
         {isBusy ? (
           <>
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <svg
+              className="h-4 w-4 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
               <circle
                 className="opacity-25"
                 cx="12"
@@ -151,8 +154,18 @@ export function CreateForm({
           </>
         ) : (
           <>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
             </svg>
             Create Payment Link
           </>

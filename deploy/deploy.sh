@@ -4,11 +4,11 @@
 # =============================================================================
 #
 # Pulls the latest code from git, rebuilds both Docker images (testnet +
-# mainnet), and restarts the containers with zero downtime.
+# mainnet), and recreates changed containers after the build succeeds.
 #
 # Designed to be run on the VPS. Assumes:
 #   - git repo cloned to ~/monlipay (or wherever)
-#   - .env.deploy exists in repo root with real secrets
+#   - .env (or .env.deploy) exists in repo root with real configuration
 #   - docker + docker compose plugin installed
 #   - nginx OR caddy already configured (see deploy/nginx/ or deploy/caddy/)
 #
@@ -24,6 +24,11 @@
 # =============================================================================
 
 set -euo pipefail
+
+DEPLOY_ENV_FILE="${MONLIPAY_ENV_FILE:-.env}"
+if [[ ! -f "$DEPLOY_ENV_FILE" && -z "${MONLIPAY_ENV_FILE:-}" && -f .env.deploy ]]; then
+    DEPLOY_ENV_FILE=.env.deploy
+fi
 
 # --- Pretty output -----------------------------------------------------------
 RED='\033[0;31m'
@@ -51,9 +56,8 @@ preflight() {
         missing=1
     fi
 
-    if [[ ! -f .env.deploy ]]; then
-        err ".env.deploy not found. Create it from .env.deploy.example first:"
-        err "  cp .env.deploy.example .env.deploy && nano .env.deploy"
+    if [[ ! -f "$DEPLOY_ENV_FILE" ]]; then
+        err "$DEPLOY_ENV_FILE not found. Create it from .env.deploy.example first."
         missing=1
     fi
 
@@ -111,7 +115,7 @@ main() {
     fi
 
     # --- Sanity check: env.deploy must have non-empty values for required keys ---
-    log "Validating .env.deploy..."
+    log "Validating $DEPLOY_ENV_FILE..."
     local required_keys=(
         NEXT_PUBLIC_WC_PROJECT_ID
         TESTNET_LINK_VAULT_ADDRESS
@@ -119,64 +123,47 @@ main() {
     )
     for key in "${required_keys[@]}"; do
         local val
-        val=$(grep -E "^${key}=" .env.deploy | cut -d= -f2-)
+        val=$(grep -E "^${key}=" "$DEPLOY_ENV_FILE" | cut -d= -f2- || true)
         if [[ -z "$val" || "$val" == *"your_"* || "$val" == "0x0000000000000000000000000000000000000000" ]]; then
             if [[ "$key" == "MAINNET_LINK_VAULT_ADDRESS" ]]; then
                 warn "$key is empty/placeholder — mainnet container will render 'contract not deployed'. Deploy the contract first."
             else
-                err "$key is empty or placeholder in .env.deploy. Fix and rerun."
+                err "$key is empty or placeholder in $DEPLOY_ENV_FILE. Fix and rerun."
                 exit 1
             fi
         fi
     done
-    ok ".env.deploy validated"
+    docker compose --env-file "$DEPLOY_ENV_FILE" config --quiet
+    ok "$DEPLOY_ENV_FILE validated"
 
     # --- Build images ---
     log "Building Docker images (this takes 2-5 min the first time)..."
     # Use --build to force rebuild, since NEXT_PUBLIC_* is baked at build time.
     # Buildkit cache makes subsequent builds much faster.
-    DOCKER_BUILDKIT=1 docker compose build --pull
+    DOCKER_BUILDKIT=1 COMPOSE_PARALLEL_LIMIT=1 docker compose --env-file "$DEPLOY_ENV_FILE" build --pull
     ok "Images built"
 
-    # --- Start / restart containers with zero downtime ---
+    # --- Recreate changed containers; a brief restart window is expected ---
     log "Starting containers..."
     # `up -d` recreates only containers whose image or config changed.
     # Other containers stay running during the rebuild.
-    docker compose up -d
+    docker compose --env-file "$DEPLOY_ENV_FILE" up -d --wait --wait-timeout 120
     ok "Containers up"
-
-    # --- Wait for healthchecks ---
-    log "Waiting for containers to become healthy (up to 30s)..."
-    local health_timeout=30
-    local elapsed=0
-    while [[ $elapsed -lt $health_timeout ]]; do
-        local unhealthy
-        unhealthy=$(docker compose ps --format json 2>/dev/null \
-            | grep -c '"Health":"unhealthy"' || true)
-        local starting
-        starting=$(docker compose ps --format json 2>/dev/null \
-            | grep -c '"Health":"starting"' || true)
-        if [[ "$unhealthy" -eq 0 && "$starting" -eq 0 ]]; then
-            break
-        fi
-        sleep 2
-        elapsed=$((elapsed + 2))
-    done
 
     # --- Final status ---
     log "Container status:"
-    docker compose ps
+    docker compose --env-file "$DEPLOY_ENV_FILE" ps
 
     ok "Deploy complete."
     echo ""
     log "Endpoints:"
-    echo -e "  ${GREEN}http://localhost:3000${NC}  → testnet (internal only, nginx proxies :80/:443)"
-    echo -e "  ${GREEN}http://localhost:4000${NC}  → mainnet (internal only, nginx proxies :80/:443)"
+    echo -e "  ${GREEN}http://localhost:3100${NC}  → testnet"
+    echo -e "  ${GREEN}http://localhost:4100${NC}  → mainnet"
     echo ""
     if [[ -n "$(command -v curl)" ]]; then
         log "Smoke test:"
-        curl -sI http://localhost:3000/ | head -1 || warn "testnet container not responding on :3000"
-        curl -sI http://localhost:4000/ | head -1 || warn "mainnet container not responding on :4000"
+        curl -fsSI http://localhost:3100/ | head -1 || warn "testnet container not responding on :3100"
+        curl -fsSI http://localhost:4100/ | head -1 || warn "mainnet container not responding on :4100"
     fi
 }
 

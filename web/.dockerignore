@@ -3,6 +3,7 @@
 out/
 coverage/
 node_modules/
+data/
 
 # Environment files — passed at runtime via docker-compose, not baked in.
 # IMPORTANT: never bake .env.local into an image (would leak the WC project

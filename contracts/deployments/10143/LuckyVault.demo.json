@@ -1,0 +1,45 @@
+{
+  "chainId": 10143,
+  "packetId": "2",
+  "contract": "0xd7846dc6fd8c159cf59957c532173d828f7b5bbc",
+  "wallet": "0x027E30721878B16a8514991903b38FA0C8F4606e",
+  "packet": {
+    "sender": "0x027E30721878B16a8514991903b38FA0C8F4606e",
+    "token": "0x0000000000000000000000000000000000000000",
+    "total": "100000000000000000",
+    "remaining": "67554844869352161",
+    "expiry": 1791817891,
+    "slots": 2,
+    "requested": 1,
+    "settled": 1,
+    "closed": false,
+    "title": "Something for the team"
+  },
+  "claim": [
+    true,
+    "4116",
+    "32445155130647839",
+    true
+  ],
+  "receipts": [
+    {
+      "transactionHash": "0xa5cd7685d54accfd32d609e885809d3b29d42300fc788cc8fd6d5d3a24c5b51a",
+      "status": "success",
+      "blockNumber": "70417997",
+      "selector": "0x84895f1f"
+    },
+    {
+      "transactionHash": "0xa8e7c06d14bb90bf89301d3a1c3e596c04b7f411cb3652c61e0a0cac85387b10",
+      "status": "success",
+      "blockNumber": "70418224",
+      "selector": "0x817178c0"
+    },
+    {
+      "transactionHash": "0x6961f269d07686f7cc4c4b76ec01b6d0e0a178f415cce3a70d3f085ba5142466",
+      "status": "success",
+      "blockNumber": "70418412",
+      "selector": "0x400259ef"
+    }
+  ],
+  "notice": "Real testnet recording. Second slot remains unallocated until expiry/refund; not a completed two-recipient distribution."
+}

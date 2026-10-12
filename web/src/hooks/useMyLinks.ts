@@ -41,6 +41,7 @@ export function useMyLinks(options?: {
   const pollIntervalMs = options?.pollIntervalMs ?? 15_000;
   const status = options?.status;
 
+  const [resultAddress, setResultAddress] = useState<string>();
   const [links, setLinks] = useState<IndexedLink[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +89,7 @@ export function useMyLinks(options?: {
       // (a newer fetch took over).
       if (controller.signal.aborted) return;
       if (loadingAddressRef.current !== address) return;
+      setResultAddress(address);
       setLinks(rows);
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -111,7 +113,14 @@ export function useMyLinks(options?: {
 
   // Initial load + reload on account / status change.
   useEffect(() => {
-    void refresh();
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active) void refresh();
+    });
+    return () => {
+      active = false;
+      abortRef.current?.abort();
+    };
   }, [refresh]);
 
   // Polling — only when we have an address, indexer is configured, and
@@ -133,13 +142,13 @@ export function useMyLinks(options?: {
     if (!address) {
       abortRef.current?.abort();
       abortRef.current = null;
-      setLinks([]);
     }
   }, [address]);
 
   return {
-    links,
-    isLoading,
+    links: resultAddress === address ? links : [],
+    isLoading:
+      Boolean(address) && (isLoading || (!error && resultAddress !== address)),
     error,
     refresh,
     /** True if the indexer URL is set in env. Use to gate UI hints. */

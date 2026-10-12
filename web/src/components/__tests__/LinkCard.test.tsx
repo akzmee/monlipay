@@ -40,7 +40,7 @@ const ctxStub = {
 } as unknown as CanvasRenderingContext2D;
 
 beforeEach(() => {
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ctxStub);
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(ctxStub);
   HTMLCanvasElement.prototype.toDataURL = vi.fn(
     () => "data:image/png;base64,FAKE",
   );

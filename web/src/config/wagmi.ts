@@ -1,7 +1,11 @@
 "use client";
 
 import { http, createConfig, createStorage } from "wagmi";
-import { getDefaultWallets } from "@rainbow-me/rainbowkit";
+import {
+  connectorsForWallets,
+  getDefaultWallets,
+} from "@rainbow-me/rainbowkit";
+import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import {
   monadChain,
   monadTestnetChain,
@@ -10,31 +14,28 @@ import {
 } from "./chain";
 import { isValidWalletConnectId } from "@/lib/wallet-connect";
 
-/** WalletConnect project ID. Falls back to all-zeros if missing (WC will reject connections cleanly). */
+/** Without a valid project ID, offer browser wallets without starting WalletConnect. */
 const RAW_WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "";
 
 if (!isValidWalletConnectId(RAW_WC_PROJECT_ID)) {
   if (typeof window !== "undefined") {
     console.warn(
       "[wagmi] NEXT_PUBLIC_WC_PROJECT_ID is missing or invalid. " +
-        "WalletConnect v2 connections will not work. " +
-        "Get a free project ID at https://cloud.walletconnect.com",
+        "Only browser wallets are enabled. " +
+        "Configure a project from https://dashboard.reown.com for WalletConnect.",
     );
   }
 }
 
-const WC_PROJECT_ID = isValidWalletConnectId(RAW_WC_PROJECT_ID)
-  ? RAW_WC_PROJECT_ID
-  : "00000000000000000000000000000000"; // 32 zero chars — WalletConnect will reject cleanly
-
-/**
- * RainbowKit default wallets — includes MetaMask, WalletConnect, Coinbase, etc.
- * The connectors are passed to wagmi's createConfig.
- */
-const { connectors } = getDefaultWallets({
-  appName: "MonliPay",
-  projectId: WC_PROJECT_ID,
-});
+const connectors = isValidWalletConnectId(RAW_WC_PROJECT_ID)
+  ? getDefaultWallets({
+      appName: "MonliPay",
+      projectId: RAW_WC_PROJECT_ID,
+    }).connectors
+  : connectorsForWallets(
+      [{ groupName: "Browser wallets", wallets: [injectedWallet] }],
+      { appName: "MonliPay", projectId: "" },
+    );
 
 /** Wagmi config — single-chain per build (NEXT_PUBLIC_NETWORK: "mainnet" or "testnet"). */
 const activeChain = isMainnet ? monadMainnetChain : monadTestnetChain;

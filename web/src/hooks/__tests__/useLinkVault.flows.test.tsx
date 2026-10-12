@@ -6,6 +6,7 @@ import React from "react";
 
 const mockSendTransactionAsync = vi.fn();
 const mockWaitForReceipt = vi.fn();
+const mockReadContract = vi.fn();
 
 // Helper to create a log entry
 function createLog(eventName: string, args: Record<string, unknown> = {}) {
@@ -36,7 +37,9 @@ vi.mock("wagmi", () => ({
 }));
 
 vi.mock("wagmi/actions", () => ({
-  waitForTransactionReceipt: (...args: unknown[]) => mockWaitForReceipt(...args),
+  readContract: (...args: unknown[]) => mockReadContract(...args),
+  waitForTransactionReceipt: (...args: unknown[]) =>
+    mockWaitForReceipt(...args),
 }));
 
 vi.mock("@/config/wagmi", () => ({
@@ -44,10 +47,14 @@ vi.mock("@/config/wagmi", () => ({
 }));
 
 vi.mock("viem", () => ({
+  erc20Abi: [],
   parseEther: (v: string) => BigInt(Math.floor(parseFloat(v) * 1e18)),
   parseUnits: (v: string, decimals: number) =>
     BigInt(Math.floor(parseFloat(v) * 10 ** decimals)),
-  encodeFunctionData: () => "0xencoded",
+  encodeFunctionData: (args: { functionName: string; args: unknown[] }) =>
+    args.functionName === "approve"
+      ? `approve:${String(args.args[1])}`
+      : "0xencoded",
   decodeEventLog: vi.fn((args: { topics: string[] }) => {
     // Return different event based on topic[0]
     const topic0 = args.topics?.[0] ?? "";
@@ -86,6 +93,52 @@ vi.mock("@/lib/abi", () => ({
 describe("useCreateLink - transaction flow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("approves exact six-decimal units before funding an ERC-20 link", async () => {
+    mockReadContract.mockResolvedValue(1n);
+    mockSendTransactionAsync.mockResolvedValue("0xhash");
+    mockWaitForReceipt.mockResolvedValue({
+      status: "success",
+      logs: [createLog("LinkCreated")],
+    });
+    const { useCreateLink } = await import("@/hooks/useLinkVault");
+    const { result } = renderHook(() => useCreateLink());
+    await act(async () => {
+      await result.current.create({
+        token: "0xtoken",
+        amount: "12.34",
+        decimals: 6,
+        isNative: false,
+        expirySeconds: 3600,
+        baseUrl: "https://test.app",
+      });
+    });
+    expect(
+      mockSendTransactionAsync.mock.calls.map((call) => call[0].data),
+    ).toEqual(["approve:0", "approve:12340000", "0xencoded"]);
+    expect(result.current.result?.depositId).toBe(42n);
+  });
+
+  it("stops before deposit if token approval reverts", async () => {
+    mockReadContract.mockResolvedValue(0n);
+    mockSendTransactionAsync.mockResolvedValue("0xhash");
+    mockWaitForReceipt.mockResolvedValue({ status: "reverted", logs: [] });
+    const { useCreateLink } = await import("@/hooks/useLinkVault");
+    const { result } = renderHook(() => useCreateLink());
+    await act(async () => {
+      await result.current.create({
+        token: "0xtoken",
+        amount: "12.34",
+        decimals: 6,
+        isNative: false,
+        expirySeconds: 3600,
+        baseUrl: "https://test.app",
+      });
+    });
+    expect(mockSendTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(result.current.result).toBeNull();
+    expect(result.current.error).toContain("Token approval failed");
   });
 
   it("should complete full create flow on success", async () => {
@@ -235,7 +288,8 @@ describe("useClaimLink - transaction flow", () => {
         depositId: 42n,
         secretKey:
           "0x0000000000000000000000000000000000000000000000000000000000000001" as `0x${string}`,
-        recipient: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+        recipient:
+          "0x1234567890123456789012345678901234567890" as `0x${string}`,
         chainId: 10143,
       });
     });
@@ -260,7 +314,8 @@ describe("useClaimLink - transaction flow", () => {
         depositId: 42n,
         secretKey:
           "0x0000000000000000000000000000000000000000000000000000000000000001" as `0x${string}`,
-        recipient: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+        recipient:
+          "0x1234567890123456789012345678901234567890" as `0x${string}`,
         chainId: 10143,
       });
     });
@@ -280,7 +335,8 @@ describe("useClaimLink - transaction flow", () => {
         depositId: 42n,
         secretKey:
           "0x0000000000000000000000000000000000000000000000000000000000000001" as `0x${string}`,
-        recipient: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+        recipient:
+          "0x1234567890123456789012345678901234567890" as `0x${string}`,
         chainId: 10143,
       });
     });
@@ -299,7 +355,8 @@ describe("useClaimLink - transaction flow", () => {
         depositId: 42n,
         secretKey:
           "0x0000000000000000000000000000000000000000000000000000000000000001" as `0x${string}`,
-        recipient: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+        recipient:
+          "0x1234567890123456789012345678901234567890" as `0x${string}`,
         chainId: 10143,
       });
     });

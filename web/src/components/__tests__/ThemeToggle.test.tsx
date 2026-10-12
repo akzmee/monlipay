@@ -77,10 +77,10 @@ describe("ThemeToggle", () => {
     expect(screen.getByLabelText("Toggle theme")).toBeInTheDocument();
   });
 
-  it("should have a square button shape (h-9 w-9)", () => {
+  it("should have a 44px square touch target (h-11 w-11)", () => {
     render(<ThemeToggle />);
     const button = screen.getByRole("button");
-    expect(button.className).toContain("h-9");
-    expect(button.className).toContain("w-9");
+    expect(button.className).toContain("h-11");
+    expect(button.className).toContain("w-11");
   });
 });

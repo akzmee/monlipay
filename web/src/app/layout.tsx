@@ -1,23 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { NavBar } from "@/components/NavBar";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: "./fonts/geist-Geist[wght].ttf",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  display: "swap",
 });
-
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/geistmono-GeistMono[wght].ttf",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
+});
+const displayFont = localFont({
+  src: "./fonts/chakrapetch-ChakraPetch-SemiBold.ttf",
+  weight: "600",
+  variable: "--font-chakra",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MonliPay — Send any token via link on Monad",
+  title: "MonliPay — Send tokens with a link",
   description:
-    "Send tokens on Monad as easily as sharing a WhatsApp link. Recipient clicks, funds arrive. Unclaimed? Refund anytime.",
+    "Create a payment link and send MON or tokens through any chat. Send to one person, or choose a Lucky Link to share with a group on Monad.",
 };
 
 /**
@@ -39,9 +46,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-stone-900 dark:bg-stone-950 dark:text-stone-100">
+      <body className="min-h-full flex flex-col">
         <Providers>
           <NavBar />
           <main className="flex-1">{children}</main>

@@ -64,6 +64,18 @@ describe("useMyLinks", () => {
     mockFetchLinks.mockResolvedValue([]);
   });
 
+  it("hides the old account immediately while the next wallet loads", async () => {
+    CURRENT_ADDRESS.current = ADDR_A;
+    mockFetchLinks.mockResolvedValueOnce([makeLink()]);
+    const { result, rerender } = renderHook(() => useMyLinks());
+    await waitFor(() => expect(result.current.links).toHaveLength(1));
+    mockFetchLinks.mockImplementation(() => new Promise(() => {}));
+    CURRENT_ADDRESS.current = ADDR_B;
+    rerender();
+    expect(result.current.links).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
+  });
+
   // -------------------------------------------------------------------
   // Initial state — no address
   // -------------------------------------------------------------------

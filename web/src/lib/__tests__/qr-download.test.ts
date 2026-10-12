@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { downloadQrPng, downloadQrSvg } from "@/lib/qr-download";
 
 // jsdom doesn't implement CanvasRenderingContext2D — stub a permissive one.
@@ -51,7 +51,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ctxStub);
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(ctxStub);
   HTMLCanvasElement.prototype.toDataURL = vi.fn(
     () => "data:image/png;base64,FAKE",
   );

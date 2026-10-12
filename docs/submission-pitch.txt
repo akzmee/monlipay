@@ -1,0 +1,19 @@
+MonliPay — Send tokens with a link
+Track: Consumer Products & Payments
+
+Sending a payment should start with the conversation, not a wallet-address exchange. MonliPay lets you fund a link, share it in a chat, and let the recipient claim it.
+
+Three modes share one payment flow. Payment Links send one amount. Lucky Links distribute a pool among selected wallets with Pyth Entropy randomness. Private Payment transfers through AnomaPay on Monad mainnet before the recipient withdraws. Contacts save repeat recipients. My Links opens encrypted claim records with a passkey, without a manual recovery-file setup.
+
+We built on an existing LinkVault project and disclose that baseline. The Metropolis work adds LuckyVault, contacts, the unified interface, token fixes, passkey recovery and private payments. We exercised real testnet payments and random draws, and completed an authorized 1 MON private mainnet pilot through deposit, private transfer, claim and recovery.
+
+Privacy is specific, not absolute: claim secrets are encrypted in the browser; transfers inside AnomaPay are shielded from public chain observers. Deposits, withdrawals, timing correlation and the proving operator remain privacy limits. Private Payment is a beta and the implementation has not had an independent security audit.
+
+Try: https://monlipay.xyz
+Testnet: https://testnet.monlipay.xyz
+Video: https://monlipay.xyz/demo
+Source: https://github.com/akzmee/monlipay/tree/metropolis
+Pilot evidence: https://github.com/akzmee/monlipay/blob/metropolis/docs/anoma-private-payment-readiness.json
+
+Portal fields: docs/metropolis-submission.json
+Final account/team/contact fields must match the entrant's own hackathon account.

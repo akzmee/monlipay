@@ -1,0 +1,65 @@
+{
+  "durationSeconds": 80,
+  "resolution": "1440x900",
+  "fps": 25,
+  "audio": "none",
+  "captions": "English, burned in; optional VTT",
+  "origin": "Real browser capture of a local MonliPay build connected to Monad testnet; automated dedicated demo wallet; confirmation waits shortened.",
+  "scenes": [
+    {
+      "source": "00-home.webm",
+      "duration": 6,
+      "caption": "Send tokens with a link. Real Monad testnet demo. Wallet confirmations are automated.",
+      "sourceSha256": "f75cb77fdf4de0e614ad30f2e29e772f6d58cd26a70a4f8726e05600125c8d6d"
+    },
+    {
+      "source": "01-payment.webm",
+      "duration": 14,
+      "caption": "Choose a token. Set the amount. Fund the link. 12.34 DEMOUSD: a six-decimal test token with no monetary value.",
+      "sourceSha256": "d4873a0d021c0413aa15b0b67a35661a4a89ee83175b012bbc11c9bf5ee0c066"
+    },
+    {
+      "source": "02-claim.webm",
+      "duration": 11,
+      "caption": "Open the link and claim the payment. The transaction receipt confirms the token transfer.",
+      "sourceSha256": "f51b564b051bf77ef8dabc446c659d994502af22494c258afdf8e1b2acc322c2"
+    },
+    {
+      "source": "03-contacts.webm",
+      "duration": 8,
+      "caption": "Save the wallets you send to. Contacts are private. Unlock them with a wallet signature.",
+      "sourceSha256": "c7badcf12b79b1cf31e3a785289532b8ca8988dcd79208d37180f6c0c0261413"
+    },
+    {
+      "source": "04-lucky.webm",
+      "duration": 12,
+      "caption": "Sharing with a group? Choose Lucky Link. Set the pool, recipient slots, and eligible wallets.",
+      "sourceSha256": "cfbd25251d23b014506b6172ca358b7cd6797faa7e55e1bf2778faa0ccb318eb"
+    },
+    {
+      "source": "05-draw.webm",
+      "duration": 10,
+      "caption": "One random share per eligible wallet. Pyth Entropy settles the draw. Fees and gas are paid in MON.",
+      "sourceSha256": "8e4ce350bfa01ef00d0e7db83727c722c8704eff1d7df1f0f72cf4ef89814553"
+    },
+    {
+      "source": "06-collect.webm",
+      "duration": 6,
+      "caption": "Reveal the amount. Collect your share. This is a real testnet withdrawal. Confirmation waits are shortened.",
+      "sourceSha256": "d9f2a4c6718d4c17f65fba1dbc9709c8156e9771bd7ac22fe74321ee0d5d30ce"
+    },
+    {
+      "source": "07-history.webm",
+      "duration": 8,
+      "caption": "Every link, in one place. Track Payment and Lucky Links. Refund available funds after expiry.",
+      "sourceSha256": "94a98a52225a3912cd3d2c4f9f7f9b9337742217fc0f16215d62bcc67d174b71"
+    },
+    {
+      "source": "00-home.webm",
+      "duration": 5,
+      "caption": "Create a link. Send it in a chat. Try MonliPay at monlipay.xyz",
+      "sourceSha256": "f75cb77fdf4de0e614ad30f2e29e772f6d58cd26a70a4f8726e05600125c8d6d"
+    }
+  ],
+  "videoSha256": "23efbfc02adf93b4a2040104af2960d7e622f7556f3519462200927d04eb52aa"
+}

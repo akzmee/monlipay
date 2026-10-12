@@ -76,7 +76,9 @@ describe("security-headers", () => {
     });
 
     it("should allow wasm-unsafe-eval for crypto libs", () => {
-      expect(CSP_DIRECTIVES).toContain("wasm-unsafe-eval");
+      const scriptSrc = CSP_DIRECTIVES.find((d) => d.startsWith("script-src"));
+      expect(scriptSrc).toContain("'wasm-unsafe-eval'");
+      expect(CSP_DIRECTIVES).not.toContain("wasm-unsafe-eval");
     });
 
     it("should allow https/wss connections (for RPC providers)", () => {
@@ -112,9 +114,7 @@ describe("security-headers", () => {
     it("should NOT contain 'unsafe-inline' for script-src without also restricting default-src", () => {
       // Next.js requires 'unsafe-inline' for script-src. We document this
       // is intentional and verify default-src is 'self'.
-      const scriptSrc = CSP_DIRECTIVES.find((d) =>
-        d.startsWith("script-src"),
-      );
+      const scriptSrc = CSP_DIRECTIVES.find((d) => d.startsWith("script-src"));
       expect(scriptSrc).toBeDefined();
       // 'unsafe-inline' is allowed for script-src (Next.js requirement)
       expect(scriptSrc).toContain("'unsafe-inline'");

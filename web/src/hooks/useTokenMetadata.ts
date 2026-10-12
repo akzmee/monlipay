@@ -2,6 +2,7 @@
 
 import { useReadContracts } from "wagmi";
 import { erc20Abi } from "@/lib/abi";
+import { monadChain } from "@/config/chain";
 import { isAddress, type Address } from "viem";
 
 /**
@@ -33,9 +34,24 @@ export function useTokenMetadata(tokenAddress: string | null) {
   const { data, isLoading, isError, error } = useReadContracts({
     contracts: addr
       ? [
-          { address: addr, abi: erc20Abi, functionName: "name" },
-          { address: addr, abi: erc20Abi, functionName: "symbol" },
-          { address: addr, abi: erc20Abi, functionName: "decimals" },
+          {
+            address: addr,
+            abi: erc20Abi,
+            chainId: monadChain.id,
+            functionName: "name",
+          },
+          {
+            address: addr,
+            abi: erc20Abi,
+            chainId: monadChain.id,
+            functionName: "symbol",
+          },
+          {
+            address: addr,
+            abi: erc20Abi,
+            chainId: monadChain.id,
+            functionName: "decimals",
+          },
         ]
       : undefined,
     query: {
@@ -44,7 +60,13 @@ export function useTokenMetadata(tokenAddress: string | null) {
   });
 
   let metadata: TokenMetadata | null = null;
-  if (data && addr && data[0].status === "success" && data[1].status === "success" && data[2].status === "success") {
+  if (
+    data &&
+    addr &&
+    data[0].status === "success" &&
+    data[1].status === "success" &&
+    data[2].status === "success"
+  ) {
     metadata = {
       address: addr,
       name: data[0].result as string,

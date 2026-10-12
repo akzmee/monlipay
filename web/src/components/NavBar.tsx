@@ -11,6 +11,7 @@ import { isMainnet } from "@/config/chain";
 
 const navLinks = [
   { href: "/create", label: "Create" },
+  { href: "/contacts", label: "Contacts" },
   { href: "/bridge", label: "Bridge" },
   { href: "/my-links", label: "My Links" },
 ];
@@ -20,27 +21,35 @@ export function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
 
-  // Close menu on route change
-  useEffect(() => {
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Lock body scroll when menu open
   useEffect(() => {
     if (!menuOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", closeOnEscape);
+    };
   }, [menuOpen]);
 
   const currentNetworkLabel = isMainnet ? "Mainnet" : "Testnet";
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-stone-200 bg-stone-50/80 backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/80">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-4">
+      <header className="sticky top-0 z-50 border-b border-stone-200 bg-stone-50 dark:border-stone-800 dark:bg-stone-950">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
           {/* Left: Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex min-h-11 items-center gap-2 shrink-0">
             <MonadLogo variant="mark" size={28} priority />
             <span className="text-lg font-bold tracking-tight">
               <span className="logo-mark">Monli</span>
@@ -49,14 +58,19 @@ export function NavBar() {
           </Link>
 
           {/* Center: Desktop nav links */}
-          <nav className="hidden sm:flex items-center gap-1">
+          <nav
+            className="hidden lg:flex items-center gap-1"
+            aria-label="Main navigation"
+          >
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex min-h-11 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
                       : "text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
@@ -69,8 +83,8 @@ export function NavBar() {
           </nav>
 
           {/* Right: Actions — wallet always visible, hamburger only on mobile */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:block">
+          <div className="flex min-h-11 items-center gap-2 shrink-0">
+            <div className="hidden lg:block">
               <ThemeToggle />
             </div>
             <ConnectButton />
@@ -80,15 +94,35 @@ export function NavBar() {
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
               aria-expanded={menuOpen}
-              className="sm:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+              className="lg:hidden flex h-11 w-11 items-center justify-center rounded-lg border border-stone-300 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
             >
               {menuOpen ? (
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
                 </svg>
               )}
             </button>
@@ -99,7 +133,7 @@ export function NavBar() {
       {/* Mobile menu — rendered OUTSIDE header to escape stacking context */}
       {menuOpen && (
         <div
-          className="sm:hidden fixed inset-0 top-14 z-[60] overflow-y-auto bg-stone-50 dark:bg-stone-950"
+          className="lg:hidden fixed inset-0 top-16 z-[60] overflow-y-auto bg-stone-50 dark:bg-stone-950"
           onClick={() => setMenuOpen(false)}
         >
           <div
@@ -108,11 +142,13 @@ export function NavBar() {
           >
             {/* Nav links */}
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={`rounded-xl px-4 py-3 text-base font-medium transition-colors ${
                     isActive
                       ? "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
@@ -140,8 +176,18 @@ export function NavBar() {
                 <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 Monad {currentNetworkLabel}
               </span>
-              <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              <svg
+                className="h-4 w-4 text-stone-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
               </svg>
             </button>
 

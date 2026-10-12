@@ -1,0 +1,43 @@
+{
+  "network": "Monad testnet",
+  "chainId": 10143,
+  "token": {
+    "transactionHash": "0x7ff62c2a119f6b2bf052236165d48da58294d2390fea8b85c926bc708977eeb4",
+    "address": "0xa1f12195a5fe9bd23873a98d23166f650fff4cea",
+    "chainId": 10143,
+    "decimals": 6,
+    "symbol": "DEMOUSD",
+    "name": "Demo USD (testnet only)",
+    "isNative": false,
+    "logoURI": "",
+    "status": "success"
+  },
+  "wallet": "0x027E30721878B16a8514991903b38FA0C8F4606e",
+  "paymentDepositId": "13",
+  "amount": "12.34",
+  "amountBaseUnits": "12340000",
+  "finalBalance": "1000",
+  "remainingAllowance": "0",
+  "receipts": [
+    {
+      "hash": "0x7619ec06cdb1d12a1f74a913f8357b9b72be9b946c41c28384db8a29488b5064",
+      "status": "success",
+      "blockNumber": "70417089",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "hash": "0x88a83e8c8303c54972cc72ce29ed66fa3bbb7c0c204e1e0705fe5b070a38d4cb",
+      "status": "success",
+      "blockNumber": "70417095",
+      "selector": "0x11ebd832"
+    },
+    {
+      "hash": "0xc19cc7721930b1dfc025cd2d0f120c86701a896342a294eb5f93af93a1fc2e94",
+      "status": "success",
+      "blockNumber": "70417374",
+      "selector": "0xf7121490"
+    }
+  ],
+  "notice": "DEMOUSD has no monetary value; this is not a mainnet stablecoin payment.",
+  "verifiedAt": "2026-10-12T14:11:25.683Z"
+}

@@ -38,6 +38,7 @@ export const KNOWN_PLACEHOLDER_IDS: ReadonlySet<string> = new Set([
 export function isValidWalletConnectId(id: string): boolean {
   if (typeof id !== "string") return false;
   if (KNOWN_PLACEHOLDER_IDS.has(id.trim().toLowerCase())) return false;
+  if (/^0+$/.test(id)) return false;
   // WalletConnect project IDs are 32 hex chars (UUID without dashes).
   // Some legacy IDs may be different lengths; we accept 8-64 hex chars.
   return /^[0-9a-fA-F]{8,64}$/.test(id);

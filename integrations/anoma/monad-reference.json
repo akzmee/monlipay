@@ -1,0 +1,60 @@
+{
+  "chain": "monad",
+  "chainId": 143,
+  "enabled": true,
+  "testnet": false,
+  "protocolAdapterAddress": "0x2D2Fa19aFdbb20DC73737ca5f075cfAE00Cd90C2",
+  "trivialLogicVerifyingKey": "21fcc2fc2c07f9753405d3070f2488c67389f7d797b6f6e20a9f2529fe4a0bff",
+  "transferLogicVerifyingKey": "bc12323668c37c3d381ca798f11116f35fb1639d12239b29da7810df3985e7ad",
+  "forwarderAddress": "0x23dc44e1a1c3d5432eec8a1c027e22ccdc0a8f54",
+  "percentageFee": 0,
+  "baseFee": 390000,
+  "resourceFee": 78000,
+  "feeDiscoveryPk": "02fd2a878febe36d6f57169e690bcaf8a928c677e41c6e6217a605d6a4b89a960d",
+  "feeEncryptionPk": "023b99eaf171f57ff084294bdaf344b38b432a33b3e1398d750b3ce37ff3f269dd",
+  "feeAuthorityPk": "03686d8de6a67b1a968341f0905262a14390ed15fe3cd162ceb81b3d4fdf47fd5c",
+  "feeNullifierKeyCommitment": "74df491f5ab2a755887cb75e4c6d6562d237bd13a9ae72f9539e6cd290de994b",
+  "genericCallForwarderAddress": "0x354cd903169af664e03afdd07df7e8913d48f064",
+  "genericCallLogicVerifyingKey": "de1d88738d93b2c67bcd7d2515e22a093bbf7f08ecd88ab24030c301a416621a",
+  "tokens": [
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "address": "0x754704bc059f8c67012fed69bc8a327a5aafb603",
+      "feeEnabled": true,
+      "swapProviders": [],
+      "kind": "token"
+    },
+    {
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18,
+      "address": "0xee8c0e9f1bffb4eb878d8f15f368a02a35481242",
+      "feeEnabled": true,
+      "swapProviders": [],
+      "kind": "token"
+    },
+    {
+      "symbol": "USDT0",
+      "name": "USDT0",
+      "decimals": 6,
+      "address": "0xe7cd86e13ac4309349f30b3435a9d337750fc82d",
+      "feeEnabled": true,
+      "swapProviders": [],
+      "kind": "token"
+    },
+    {
+      "symbol": "WMON",
+      "name": "Wrapped MON",
+      "decimals": 18,
+      "address": "0x3bd359c1119da7da1d913d1c4d2b7c461115433a",
+      "feeEnabled": true,
+      "swapProviders": [],
+      "kind": "token"
+    }
+  ],
+  "settings": {
+    "maxResources": 50
+  }
+}

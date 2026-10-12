@@ -1,0 +1,32 @@
+import type { Address, Hex, PublicClient, TransactionReceipt, TypedDataDefinition } from 'viem';
+import type { UserKeyring, UserPublicKeys, Parameters, EncodedResource } from '@anomaorg/anoma-app-sdk';
+export { initSdk, createUserKeyringFromIkm, extractUserPublicKeys, encodePayAddress } from '@anomaorg/anoma-app-sdk';
+export type { UserKeyring, Parameters };
+export type PrivateToken = { address: Address; symbol: string; name: string; decimals: number; network: string; feeEnabled: boolean };
+export type Configuration = { chainId: number; network: string; enabled: boolean; testnet: boolean; tokens: PrivateToken[]; protocolAdapterAddress: Address; forwarderAddress: Address; transferLogicVerifyingKey: string; trivialLogicVerifyingKey: string; feePublicKeys: UserPublicKeys };
+export type PrivateResource = EncodedResource & { chainId: number; network: string; forwarder: Address; erc20TokenAddress: Address; transactionHash: string };
+export type Draft = { parameters: Parameters; authorize(): Parameters; summary: Readonly<Record<string, string | number>> };
+type BaseOptions = { keyring: UserKeyring; chain: Configuration; token: PrivateToken; amount: bigint; fee: bigint; resources: PrivateResource[] };
+export const reference: Record<string, unknown>;
+export const PERMIT2: Address;
+export const adapterAbi: readonly unknown[];
+export class AnomaClient {
+  constructor(reference: Record<string, unknown>, options?: { fetchImpl?: typeof fetch });
+  configuration(): Promise<Configuration>;
+  registerDiscovery(keyring: UserKeyring): Promise<void>;
+  discover(keyring: UserKeyring): Promise<unknown>;
+  estimateFee(parameters: Parameters, token: string): Promise<{ total: bigint; baseFee: string; percentageFee: string }>;
+  submit(parameters: Parameters): Promise<string>;
+  transactionResult(id: string): Promise<{ requestId: string; status: string; transactionHash?: Hex }>;
+  verifyCompletion(id: string, rpc: PublicClient, adapter: Address, root: Hex): Promise<TransactionReceipt>;
+}
+export function actionRoot(parameters: Parameters): Hex;
+export function confirmAction(receipt: TransactionReceipt, adapter: Address, root: Hex): void;
+export function confirmedResources(options: { response: unknown; keyring: UserKeyring; chain: Configuration; token: PrivateToken; rpc: PublicClient }): Promise<PrivateResource[]>;
+export function newPrivateLink(token: Address, origin?: string): { seed: Uint8Array; url: string; payAddress: string };
+export function keyringForLink(seed: Uint8Array): UserKeyring;
+export function encodePrivateLink(seed: Uint8Array, token: Address, origin?: string): string;
+export function decodePrivateLink(url: string): { chainId: 143; token: Address; seed: Uint8Array };
+export function preparePrivateSend(options: BaseOptions & { payAddress: string }): Promise<Draft>;
+export function prepareWithdrawal(options: BaseOptions & { recipient: Address }): Promise<Draft>;
+export function prepareDeposit(options: { keyring: UserKeyring; chain: Configuration; token: PrivateToken; amount: bigint; owner: Address }): Promise<{ typedData: TypedDataDefinition; parameters: Parameters; attachPermit(signature: Hex): Parameters }>;

@@ -2,6 +2,13 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
+// Backup lifecycle is covered with real encryption in LinkBackupProvider.test.tsx.
+vi.mock("@/components/LinkBackupProvider", () => ({
+  LinkBackupProvider: ({ children }: { children: ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 // Mock wagmi
 vi.mock("wagmi", () => ({
   WagmiProvider: ({ children }: { children: ReactNode }) => (
@@ -14,11 +21,9 @@ vi.mock("@tanstack/react-query", () => ({
   QueryClient: class MockQueryClient {
     constructor() {}
   },
-  QueryClientProvider: ({
-    children,
-  }: {
-    children: ReactNode;
-  }) => <div data-testid="query-provider">{children}</div>,
+  QueryClientProvider: ({ children }: { children: ReactNode }) => (
+    <div data-testid="query-provider">{children}</div>
+  ),
 }));
 
 // Mock RainbowKit

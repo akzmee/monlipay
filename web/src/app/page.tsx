@@ -1,227 +1,144 @@
-"use client";
-
 import Link from "next/link";
-import { useAccount } from "wagmi";
-import { Scene3D } from "@/components/Scene3D";
-import { MonadLogo } from "@/components/MonadLogo";
-import { isContractDeployed } from "@/config/chain";
+import { ArrowIcon } from "@/components/ArrowIcon";
+import { LuckyArtwork } from "@/components/LuckyArtwork";
+import { DemoVideo } from "@/components/DemoVideo";
 
-/**
- * Landing page — marketing hero with 3D background.
- *
- * The actual create-payment-link flow lives at /create.
- */
 export default function HomePage() {
-  const { isConnected } = useAccount();
-
   return (
-    <div className="relative overflow-hidden">
-      {/* 3D background */}
-      <Scene3D />
-
-      <div className="mx-auto max-w-4xl px-4 py-20 sm:py-28">
-        {/* Hero */}
-        <div className="text-center">
-          {/* Monad logomark — hero brand anchor */}
-          <div className="mb-6 flex justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 -z-10 animate-pulse rounded-full bg-[#6E54FF]/30 blur-3xl" />
-              <MonadLogo variant="mark" size={72} priority />
-            </div>
-          </div>
-
-          {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50/80 px-3 py-1 text-xs font-medium text-violet-700 backdrop-blur dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300">
-            <MonadLogo variant="mark" size={14} />
-            <span>Live on Monad</span>
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-stone-900 dark:text-stone-50 sm:text-5xl md:text-6xl">
-            Send any token
+    <div className="mp-home">
+      <section className="mp-hero" aria-labelledby="home-title">
+        <div className="mp-hero-grid" aria-hidden="true" />
+        <div className="mp-hero-copy">
+          <h1 id="home-title">
+            SEND
             <br />
-            <span className="bg-gradient-to-r from-monad-primary via-monad-pink to-monad-orange bg-clip-text text-transparent">
-              via a link
-            </span>
+            TOKENS.
+            <br />
+            <span>BY LINK.</span>
           </h1>
-
-          {/* Subheadline */}
-          <p className="mx-auto mb-8 max-w-xl text-base text-stone-600 dark:text-stone-400 sm:text-lg">
-            MonliPay lets you send tokens on Monad as easily as sharing a
-            WhatsApp link. Recipient claims with one tap. Unclaimed funds
-            refund automatically.
+          <p>
+            Create a link. Send MON or tokens through any chat. Your recipient
+            opens it, connects a wallet, and claims.
           </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            {!isContractDeployed ? (
-              <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
-                Contract not deployed. Set address in <code>.env.local</code>.
-              </div>
-            ) : (
-              <Link
-                href="/create"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-monad-primary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-monad-primary/25 transition-all hover:bg-monad-primary-hover hover:shadow-monad-primary/40 active:scale-95 sm:w-auto"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-                Create a payment link
-              </Link>
-            )}
-
-            <Link
-              href="/bridge"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white/70 px-6 py-3 text-base font-semibold text-stone-800 backdrop-blur transition-all hover:bg-white hover:shadow-md dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-200 dark:hover:bg-stone-900 sm:w-auto"
-            >
-              Bridge to Monad
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                />
-              </svg>
+          <div className="mp-hero-actions">
+            <Link className="mp-button mp-button-primary" href="/create">
+              Create a link <ArrowIcon direction="up-right" />
             </Link>
-          </div>
-
-          {/* Wallet hint */}
-          {!isConnected && isContractDeployed && (
-            <p className="mt-6 text-xs text-stone-500 dark:text-stone-500">
-              You&apos;ll need to connect a wallet on the next page.
-            </p>
-          )}
-        </div>
-
-        {/* Feature cards */}
-        <div className="mt-20 grid gap-6 sm:grid-cols-3">
-          {/* Feature 1 — violet (primary) */}
-          <div className="rounded-2xl border border-stone-200 bg-white/70 p-6 backdrop-blur transition-shadow hover:shadow-md dark:border-stone-800 dark:bg-stone-900/70">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-monad-primary/10 text-monad-primary dark:bg-monad-primary/20">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-              </svg>
-            </div>
-            <h3 className="mb-2 text-base font-semibold text-stone-900 dark:text-stone-100">
-              One-tap claim
-            </h3>
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              Recipient doesn&apos;t need an account. They click the link,
-              connect a wallet, and the tokens land instantly.
-            </p>
-          </div>
-
-          {/* Feature 2 — cyan (secondary) */}
-          <div className="rounded-2xl border border-stone-200 bg-white/70 p-6 backdrop-blur transition-shadow hover:shadow-md dark:border-stone-800 dark:bg-stone-900/70">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-monad-cyan/15 text-[#0e7490] dark:bg-monad-cyan/20 dark:text-monad-cyan">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-            </div>
-            <h3 className="mb-2 text-base font-semibold text-stone-900 dark:text-stone-100">
-              Auto-refund
-            </h3>
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              Set an expiry on every link. If no one claims in time, the
-              funds return to you automatically. No support tickets.
-            </p>
-          </div>
-
-          {/* Feature 3 — pink (tertiary) */}
-          <div className="rounded-2xl border border-stone-200 bg-white/70 p-6 backdrop-blur transition-shadow hover:shadow-md dark:border-stone-800 dark:bg-stone-900/70">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-monad-pink/10 text-[#a21caf] dark:bg-monad-pink/20 dark:text-monad-pink">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-              </svg>
-            </div>
-            <h3 className="mb-2 text-base font-semibold text-stone-900 dark:text-stone-100">
-              Any ERC-20
-            </h3>
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              Send MON, USDC, WETH, WMON, or import any contract address.
-              Recipient gets the same token you sent.
-            </p>
+            <a className="mp-button mp-button-secondary" href="#demo">
+              Watch demo
+            </a>
           </div>
         </div>
-
-        {/* How it works */}
-        <div className="mt-20">
-          <h2 className="mb-8 text-center text-2xl font-bold text-stone-900 dark:text-stone-100 sm:text-3xl">
-            How it works
+        <div className="mp-hero-art" aria-hidden="true">
+          <LuckyArtwork />
+        </div>
+        <div className="mp-hero-foot">
+          <span>Built for Monad</span>
+          <span>From your wallet to their inbox.</span>
+        </div>
+      </section>
+      <section className="mp-home-guide" aria-labelledby="guide-title">
+        <div>
+          <h2 id="guide-title">
+            Your tokens.
+            <br /> One simple link.
           </h2>
-          <div className="grid gap-8 sm:grid-cols-3">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-monad-primary text-sm font-bold text-white">
-                1
-              </div>
-              <h4 className="mb-1 font-semibold text-stone-900 dark:text-stone-100">
-                Create a link
-              </h4>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                Pick a token, amount, and expiry. Sign one transaction.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-monad-cyan text-sm font-bold text-monad-indigo">
-                2
-              </div>
-              <h4 className="mb-1 font-semibold text-stone-900 dark:text-stone-100">
-                Share it anywhere
-              </h4>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                WhatsApp, Telegram, email, QR code — whatever works.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-monad-orange text-sm font-bold text-monad-indigo">
-                3
-              </div>
-              <h4 className="mb-1 font-semibold text-stone-900 dark:text-stone-100">
-                Recipient claims
-              </h4>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                They tap the link, connect a wallet, and tokens arrive.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="mt-20 text-center">
-          <Link
-            href="/create"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-monad-primary px-8 py-4 text-base font-semibold text-white shadow-lg shadow-monad-primary/25 transition-all hover:bg-monad-primary-hover hover:shadow-monad-primary/40 active:scale-95"
-          >
-            Get started
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-            </svg>
-          </Link>
-          <p className="mt-3 text-xs text-stone-500">
-            Free to use · No signup · Self-custodial
+          <p>
+            Send to one person with a payment link. Sharing with a group? Choose
+            Lucky Link when you create your link to split a pool into random
+            shares.
           </p>
+          <Link className="mp-text-button" href="/create">
+            Choose your link type <ArrowIcon direction="up-right" />
+          </Link>
         </div>
-      </div>
+        <ol className="mp-home-steps">
+          <li>
+            <span aria-hidden="true">1</span>
+            <div>
+              <h3>Create your link</h3>
+              <p>
+                Choose a token, enter an amount, and set when the link expires.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span aria-hidden="true">2</span>
+            <div>
+              <h3>Send it in a chat</h3>
+              <p>
+                Copy your funded link and send it through the apps you already
+                use. Keep payment links private: anyone with the link can claim.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span aria-hidden="true">3</span>
+            <div>
+              <h3>They open it and claim</h3>
+              <p>
+                Your recipient connects a wallet to receive the tokens on Monad.
+                Track your payment links in My Links.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section
+        className="mp-home-guide mp-home-privacy"
+        aria-labelledby="privacy-title"
+      >
+        <div>
+          <h2 id="privacy-title">
+            Saved links. <br />
+            Encrypted on your device.
+          </h2>
+          <p>
+            Open your saved payment links with a passkey. No recovery file to
+            manage.
+          </p>
+          <Link className="mp-text-button" href="/privacy">
+            How we protect your links <ArrowIcon direction="up-right" />
+          </Link>
+        </div>
+        <div className="mp-privacy-explanation">
+          <h3>Your passkey opens your links</h3>
+          <p>
+            Claim secrets are encrypted in your browser before they are saved.
+            Your passkey protects the key that opens them.
+          </p>
+          <h3>Choose a private payment</h3>
+          <p>
+            An optional mode on Monad mainnet transfers through AnomaPay.
+            Transfers inside its pool are shielded. Deposits and withdrawals
+            remain public, and the proving service can see transfer details.
+          </p>
+          <Link className="mp-text-button" href="/create/private">
+            Explore private payments <ArrowIcon direction="up-right" />
+          </Link>
+        </div>
+      </section>
+      <DemoVideo />
+      <section className="mp-home-details" aria-label="About payment links">
+        <p>
+          Payment links carry one amount for one recipient. Lucky Links add a
+          selected group, a recipient limit, and random shares. Both start with
+          Create a link.
+        </p>
+        <p>
+          Creating a link requires network gas. Lucky Link recipients also pay a
+          draw fee. After expiry, unclaimed or unallocated funds can be
+          refunded.
+        </p>
+      </section>
+      <footer className="mp-home-footer">
+        <Link href="/">MonliPay</Link>
+        <span>Tokens to go. Just share the link.</span>
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/bridge">
+          Bridge to Monad <ArrowIcon direction="up-right" />
+        </Link>
+      </footer>
     </div>
   );
 }

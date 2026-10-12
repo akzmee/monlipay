@@ -8,7 +8,8 @@ vi.mock("wagmi", () => ({
 }));
 
 // Mock isAddress from viem
-vi.mock("viem", () => ({
+vi.mock("viem", async (original) => ({
+  ...(await original<typeof import("viem")>()),
   isAddress: (addr: string) => /^0x[0-9a-fA-F]{40}$/.test(addr),
 }));
 

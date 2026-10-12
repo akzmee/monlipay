@@ -14,7 +14,8 @@ import {
  * Secret mechanism:
  * 1. Sender generates a random private key in the browser.
  * 2. claimKey = address derived from that private key, stored on-chain.
- * 3. The private key goes into the URL fragment (#) so it never hits a server.
+ * 3. The private key goes into the URL fragment (#), omitted from HTTP requests.
+ *    Optional backups encrypt it locally before uploading ciphertext.
  * 4. Recipient signs (depositId, recipient) with the private key.
  * 5. Contract verifies via ecrecover — prevents front-running.
  */

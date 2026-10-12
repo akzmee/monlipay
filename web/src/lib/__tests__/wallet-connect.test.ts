@@ -141,12 +141,9 @@ describe("wallet-connect", () => {
         expect(isValidWalletConnectId(id)).toBe(true);
       });
 
-      it("should accept an all-zero 32-char ID (programmatic fallback)", () => {
-        // We use this as the fallback when no ID is configured. WalletConnect
-        // will reject it cleanly. The validator itself should accept the
-        // format (the fallback value bypasses validation in wagmi.ts).
+      it("should reject an all-zero ID instead of starting unauthorized requests", () => {
         const id = "0".repeat(32);
-        expect(isValidWalletConnectId(id)).toBe(true);
+        expect(isValidWalletConnectId(id)).toBe(false);
       });
     });
   });

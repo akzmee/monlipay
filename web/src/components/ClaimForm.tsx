@@ -36,19 +36,17 @@ export function ClaimForm({
   onClaim,
 }: ClaimFormProps) {
   const canClaim = isConnected && !isWrongChain && !isBusy && !recipientError;
-  const [showOverrideConfirm, setShowOverrideConfirm] = useState(false);
-
-  // Close the confirm modal if the recipient changes.
-  useEffect(() => {
-    setShowOverrideConfirm(false);
-  }, [recipientOverride]);
+  const [confirmationFor, setConfirmationFor] = useState<string | null>(null);
+  const showOverrideConfirm =
+    confirmationFor !== null && confirmationFor === recipientOverride;
 
   const handleClickClaim = () => {
     // Require explicit confirmation when overriding the recipient (anti-phishing).
     const trimmed = recipientOverride.trim();
-    const hasOverride = trimmed.length > 0 && trimmed.toLowerCase() !== address?.toLowerCase();
+    const hasOverride =
+      trimmed.length > 0 && trimmed.toLowerCase() !== address?.toLowerCase();
     if (hasOverride) {
-      setShowOverrideConfirm(true);
+      setConfirmationFor(recipientOverride);
       return;
     }
     onClaim();
@@ -58,7 +56,7 @@ export function ClaimForm({
   useEffect(() => {
     if (!showOverrideConfirm) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowOverrideConfirm(false);
+      if (e.key === "Escape") setConfirmationFor(null);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -84,7 +82,8 @@ export function ClaimForm({
         </div>
         <h3 className="text-sm font-semibold">Connect wallet to claim</h3>
         <p className="mt-1 text-xs text-stone-500">
-          Click <strong>Connect Wallet</strong> at the top right to receive your funds.
+          Click <strong>Connect Wallet</strong> at the top right to receive your
+          funds.
         </p>
       </div>
     );
@@ -93,16 +92,15 @@ export function ClaimForm({
   return (
     <div className="space-y-4">
       {/* Recipient display */}
-      <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
+      <div className="mp-panel p-4">
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
           Receiving wallet
         </label>
         {address && !recipientOverride && (
-          <div className="font-mono text-sm break-all">
-            {address}
-          </div>
+          <div className="font-mono text-sm break-all">{address}</div>
         )}
         <input
+          aria-label="Different receiving wallet (optional)"
           type="text"
           placeholder="Or enter a different address..."
           value={recipientOverride}
@@ -115,7 +113,9 @@ export function ClaimForm({
           }`}
         />
         {recipientError && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{recipientError}</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            {recipientError}
+          </p>
         )}
       </div>
 
@@ -153,12 +153,23 @@ export function ClaimForm({
         type="button"
         onClick={handleClickClaim}
         disabled={!canClaim}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-indigo-500 active:from-violet-700 active:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mp-button mp-button-primary w-full"
       >
         {isBusy ? (
           <>
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <svg
+              className="h-4 w-4 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
@@ -172,7 +183,7 @@ export function ClaimForm({
         )}
       </button>
 
-      <p className="text-center text-xs text-stone-400">
+      <p className="mp-hint text-center">
         {isGasSponsorAvailable
           ? "No MON needed — the sponsor covers the gas fee."
           : "Claiming requires a small gas fee in MON for the transaction."}
@@ -191,7 +202,7 @@ export function ClaimForm({
             paddingLeft: "max(env(safe-area-inset-left), 1rem)",
             paddingRight: "max(env(safe-area-inset-right), 1rem)",
           }}
-          onClick={() => setShowOverrideConfirm(false)}
+          onClick={() => setConfirmationFor(null)}
         >
           <div
             className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-stone-700 dark:bg-stone-900"
@@ -222,8 +233,8 @@ export function ClaimForm({
               Send to a different address?
             </h3>
             <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-              You are about to claim these funds to a wallet that is not the
-              one you are currently connected with. Please verify the address
+              You are about to claim these funds to a wallet that is not the one
+              you are currently connected with. Please verify the address
               carefully — funds sent to the wrong address cannot be recovered.
             </p>
             <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800">
@@ -240,7 +251,7 @@ export function ClaimForm({
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
-                onClick={() => setShowOverrideConfirm(false)}
+                onClick={() => setConfirmationFor(null)}
                 disabled={isBusy}
                 className="flex-1 rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
               >
@@ -249,7 +260,7 @@ export function ClaimForm({
               <button
                 type="button"
                 onClick={() => {
-                  setShowOverrideConfirm(false);
+                  setConfirmationFor(null);
                   onClaim();
                 }}
                 disabled={isBusy}

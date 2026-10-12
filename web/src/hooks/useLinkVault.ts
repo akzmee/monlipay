@@ -1,15 +1,15 @@
 "use client";
 
-import {
-  useAccount,
-  useReadContract,
-  useSendTransaction,
-} from "wagmi";
+import { useAccount, useReadContract, useSendTransaction } from "wagmi";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { parseUnits, type Hex } from "viem";
 import { linkVaultAbi } from "@/lib/abi";
-import { LINK_VAULT_ADDRESS } from "@/config/chain";
-import { generateSecretKey, privateKeyToClaimKey, buildShareableUrl } from "@/lib/crypto";
+import { LINK_VAULT_ADDRESS, monadChain } from "@/config/chain";
+import {
+  generateSecretKey,
+  privateKeyToClaimKey,
+  buildShareableUrl,
+} from "@/lib/crypto";
 
 /**
  * Deposit data structure matching the contract's struct.
@@ -30,6 +30,7 @@ export function useDeposit(depositId: bigint | null) {
   return useReadContract({
     address: LINK_VAULT_ADDRESS,
     abi: linkVaultAbi,
+    chainId: monadChain.id,
     functionName: "getDeposit",
     args: depositId !== null ? [depositId] : undefined,
     query: {
@@ -58,12 +59,17 @@ export function useDepositExists(depositId: bigint | null) {
  */
 export function useCreateLink() {
   const { address } = useAccount();
-  const { sendTransactionAsync, isPending: isSending, data: txHash } = useSendTransaction();
+  const {
+    sendTransactionAsync,
+    isPending: isSending,
+    data: txHash,
+  } = useSendTransaction();
   const [isConfirming, setIsConfirming] = useState(false);
   const [result, setResult] = useState<{
     depositId: bigint;
     shareableUrl: string;
   } | null>(null);
+  const creating = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   const create = useCallback(
@@ -75,6 +81,7 @@ export function useCreateLink() {
       decimals?: number; // defaults to 18 (native MON)
       baseUrl: string;
     }) => {
+      if (creating.current) return;
       setError(null);
       setResult(null);
 
@@ -82,6 +89,8 @@ export function useCreateLink() {
         setError("Wallet not connected");
         return;
       }
+      creating.current = true;
+      setIsConfirming(true);
 
       try {
         // 1. Generate ephemeral keypair
@@ -89,9 +98,49 @@ export function useCreateLink() {
         const claimKey = privateKeyToClaimKey(secretKey);
 
         // 2. Prepare the transaction
-        const expiryTimestamp = Math.floor(Date.now() / 1000) + params.expirySeconds;
+        const expiryTimestamp =
+          Math.floor(Date.now() / 1000) + params.expirySeconds;
         const decimals = params.decimals ?? 18;
         const amountWei = parseUnits(params.amount, decimals);
+
+        // An ERC-20 deposit needs allowance before the vault can transferFrom.
+        // Approve exactly this deposit; reset nonzero allowance for USDT-style tokens.
+        const { waitForTransactionReceipt } = await import("wagmi/actions");
+        const { wagmiConfig } = await import("@/config/wagmi");
+        if (!params.isNative) {
+          const { readContract } = await import("wagmi/actions");
+          const { erc20Abi, encodeFunctionData } = await import("viem");
+          const allowance = await readContract(wagmiConfig, {
+            address: params.token,
+            abi: erc20Abi,
+            functionName: "allowance",
+            args: [address, LINK_VAULT_ADDRESS],
+            chainId: monadChain.id,
+          });
+          const approve = async (value: bigint) => {
+            const hash = await sendTransactionAsync({
+              to: params.token,
+              chainId: monadChain.id,
+              data: encodeFunctionData({
+                abi: erc20Abi,
+                functionName: "approve",
+                args: [LINK_VAULT_ADDRESS, value],
+              }),
+            });
+            const receipt = await waitForTransactionReceipt(wagmiConfig, {
+              hash,
+              chainId: monadChain.id,
+            });
+            if (receipt.status !== "success")
+              throw new Error(
+                "Token approval failed. Your payment link was not funded.",
+              );
+          };
+          if (allowance < amountWei) {
+            if (allowance > 0n) await approve(0n);
+            await approve(amountWei);
+          }
+        }
 
         // Encode the createLink call
         const { encodeFunctionData } = await import("viem");
@@ -104,21 +153,22 @@ export function useCreateLink() {
         // 3. Send transaction
         const hash = await sendTransactionAsync({
           to: LINK_VAULT_ADDRESS,
+          chainId: monadChain.id,
           data: txData,
           value: params.isNative ? amountWei : 0n,
         });
 
         // 4. Wait for receipt
         setIsConfirming(true);
-        const { waitForTransactionReceipt } = await import("wagmi/actions");
-        const { wagmiConfig } = await import("@/config/wagmi");
         const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
 
         // 5. Extract deposit ID from the LinkCreated event log.
         if (receipt.status === "success") {
           const { decodeEventLog } = await import("viem");
           for (const log of receipt.logs) {
-            if (log.address.toLowerCase() === LINK_VAULT_ADDRESS.toLowerCase()) {
+            if (
+              log.address.toLowerCase() === LINK_VAULT_ADDRESS.toLowerCase()
+            ) {
               try {
                 const decoded = decodeEventLog({
                   abi: linkVaultAbi,
@@ -126,13 +176,17 @@ export function useCreateLink() {
                   topics: log.topics,
                 });
                 if (decoded.eventName === "LinkCreated") {
-                  const depositId = (decoded.args as { depositId: bigint }).depositId;
-                  const url = buildShareableUrl(params.baseUrl, depositId, secretKey);
+                  const depositId = (decoded.args as { depositId: bigint })
+                    .depositId;
+                  const url = buildShareableUrl(
+                    params.baseUrl,
+                    depositId,
+                    secretKey,
+                  );
 
-                  // The indexer surfaces this link on the My Links page
-                  // via the LinkCreated event — no localStorage write needed.
-                  // The shareableUrl (with secret key) is only available
-                  // in-memory here; ShareLink warns the user to save it.
+                  // Public history comes from LinkCreated. The creation success
+                  // screen separately encrypts the claim key when backups are
+                  // unlocked; this URL itself is held only in memory.
                   setResult({ depositId, shareableUrl: url });
                   return;
                 }
@@ -141,13 +195,18 @@ export function useCreateLink() {
               }
             }
           }
-          setError("Transaction succeeded but could not find deposit ID in logs");
+          setError(
+            "Transaction succeeded but could not find deposit ID in logs",
+          );
         } else {
           setError("Transaction reverted");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to create payment link");
+        setError(
+          err instanceof Error ? err.message : "Failed to create payment link",
+        );
       } finally {
+        creating.current = false;
         setIsConfirming(false);
       }
     },
@@ -175,7 +234,11 @@ export function useCreateLink() {
  * Signs the claim message with the secret key and submits to the contract.
  */
 export function useClaimLink() {
-  const { sendTransactionAsync, isPending: isSending, data: txHash } = useSendTransaction();
+  const {
+    sendTransactionAsync,
+    isPending: isSending,
+    data: txHash,
+  } = useSendTransaction();
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -227,7 +290,9 @@ export function useClaimLink() {
           setError("Claim transaction reverted");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to claim payment link");
+        setError(
+          err instanceof Error ? err.message : "Failed to claim payment link",
+        );
       } finally {
         setIsConfirming(false);
       }
@@ -255,7 +320,11 @@ export function useClaimLink() {
  * Refund an expired payment link.
  */
 export function useRefundLink() {
-  const { sendTransactionAsync, isPending: isSending, data: txHash } = useSendTransaction();
+  const {
+    sendTransactionAsync,
+    isPending: isSending,
+    data: txHash,
+  } = useSendTransaction();
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -289,7 +358,9 @@ export function useRefundLink() {
           setError("Refund transaction reverted");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to refund payment link");
+        setError(
+          err instanceof Error ? err.message : "Failed to refund payment link",
+        );
       } finally {
         setIsConfirming(false);
       }
@@ -330,7 +401,9 @@ export function useAutoRefundExpiredLinks() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [refundedCount, setRefundedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [failedDepositIds, setFailedDepositIds] = useState<Set<string>>(new Set());
+  const [failedDepositIds, setFailedDepositIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Mutex ref — guards against concurrent invocations racing on wallet nonces.
   const isProcessingRef = useRef(false);
@@ -353,111 +426,122 @@ export function useAutoRefundExpiredLinks() {
   // AbortController for the current batch — cancelled on unmount or account change.
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const processExpiredLinks = useCallback(async (address: `0x${string}`) => {
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
+  const processExpiredLinks = useCallback(
+    async (address: `0x${string}`) => {
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
 
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    setIsProcessing(true);
-    setError(null);
-    setFailedDepositIds(new Set());
-    let successCount = 0;
-    const newFailedIds = new Set<string>();
-
-    try {
-      // Pull expired active links from the Ponder indexer.
-      // If the indexer is not configured, this returns [] silently and
-      // we exit with refundedCount=0 — the manual refund button on each
-      // LinkCard still works as a fallback.
-      const { fetchExpiredLinks, isIndexerConfigured } = await import("@/lib/indexer-client");
-      if (!isIndexerConfigured) {
-        setRefundedCount(0);
-        return;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
-      const expiredLinks = await fetchExpiredLinks(address, controller.signal);
-      if (controller.signal.aborted) return;
+      setIsProcessing(true);
+      setError(null);
+      setFailedDepositIds(new Set());
+      let successCount = 0;
+      const newFailedIds = new Set<string>();
 
-      if (expiredLinks.length === 0) {
-        setRefundedCount(0);
-        return;
-      }
+      try {
+        // Pull expired active links from the Ponder indexer.
+        // If the indexer is not configured, this returns [] silently and
+        // we exit with refundedCount=0 — the manual refund button on each
+        // LinkCard still works as a fallback.
+        const { fetchExpiredLinks, isIndexerConfigured } =
+          await import("@/lib/indexer-client");
+        if (!isIndexerConfigured) {
+          setRefundedCount(0);
+          return;
+        }
 
-      const { encodeFunctionData } = await import("viem");
-      const { waitForTransactionReceipt } = await import("wagmi/actions");
-      const { wagmiConfig } = await import("@/config/wagmi");
-
-      // Sequential — parallel sendTransactionAsync calls risk nonce collisions.
-      for (const link of expiredLinks) {
-        // Bail if aborted.
+        const expiredLinks = await fetchExpiredLinks(
+          address,
+          controller.signal,
+        );
         if (controller.signal.aborted) return;
 
-        try {
-          const txData = encodeFunctionData({
-            abi: linkVaultAbi,
-            functionName: "autoRefund",
-            args: [link.depositId],
-          });
+        if (expiredLinks.length === 0) {
+          setRefundedCount(0);
+          return;
+        }
 
-          const hash = await sendTransactionAsync({
-            to: LINK_VAULT_ADDRESS,
-            data: txData,
-          });
+        const { encodeFunctionData } = await import("viem");
+        const { waitForTransactionReceipt } = await import("wagmi/actions");
+        const { wagmiConfig } = await import("@/config/wagmi");
 
+        // Sequential — parallel sendTransactionAsync calls risk nonce collisions.
+        for (const link of expiredLinks) {
+          // Bail if aborted.
           if (controller.signal.aborted) return;
 
-          const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+          try {
+            const txData = encodeFunctionData({
+              abi: linkVaultAbi,
+              functionName: "autoRefund",
+              args: [link.depositId],
+            });
 
-          if (controller.signal.aborted) return;
+            const hash = await sendTransactionAsync({
+              to: LINK_VAULT_ADDRESS,
+              data: txData,
+            });
 
-          if (receipt.status === "success") {
-            // No local status to update — the indexer will pick up
-            // the LinkRefunded event and the next useMyLinks refresh
-            // will show the new state.
-            successCount++;
-          } else {
-            // Reverted tx — surface as a per-link failure
+            if (controller.signal.aborted) return;
+
+            const receipt = await waitForTransactionReceipt(wagmiConfig, {
+              hash,
+            });
+
+            if (controller.signal.aborted) return;
+
+            if (receipt.status === "success") {
+              // No local status to update — the indexer will pick up
+              // the LinkRefunded event and the next useMyLinks refresh
+              // will show the new state.
+              successCount++;
+            } else {
+              // Reverted tx — surface as a per-link failure
+              newFailedIds.add(link.depositId.toString());
+            }
+          } catch {
+            // Per-link failure (race, wallet rejection) — surfaced via failedDepositIds.
             newFailedIds.add(link.depositId.toString());
           }
-        } catch {
-          // Per-link failure (race, wallet rejection) — surfaced via failedDepositIds.
-          newFailedIds.add(link.depositId.toString());
+        }
+
+        setRefundedCount(successCount);
+        setFailedDepositIds(newFailedIds);
+
+        // Top-level error only on full failure; partial failures use failedDepositIds.
+        if (successCount === 0 && newFailedIds.size > 0) {
+          setError(
+            `Could not auto-refund ${newFailedIds.size} link${newFailedIds.size === 1 ? "" : "s"}. ` +
+              "They may have been claimed or refunded in a race. Try a manual refund.",
+          );
+        }
+      } catch (err) {
+        // Top-level error (not per-link) — typically a fetch failure
+        // against the indexer. The manual refund button still works.
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load expired links from indexer",
+        );
+      } finally {
+        // Only update state if this batch wasn't aborted. Aborted batches
+        // leave state to be reset by the aborter (the useEffect on disconnect).
+        if (!controller.signal.aborted) {
+          setIsProcessing(false);
+        }
+        isProcessingRef.current = false;
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
         }
       }
-
-      setRefundedCount(successCount);
-      setFailedDepositIds(newFailedIds);
-
-      // Top-level error only on full failure; partial failures use failedDepositIds.
-      if (successCount === 0 && newFailedIds.size > 0) {
-        setError(
-          `Could not auto-refund ${newFailedIds.size} link${newFailedIds.size === 1 ? "" : "s"}. ` +
-          "They may have been claimed or refunded in a race. Try a manual refund.",
-        );
-      }
-    } catch (err) {
-      // Top-level error (not per-link) — typically a fetch failure
-      // against the indexer. The manual refund button still works.
-      setError(
-        err instanceof Error ? err.message : "Failed to load expired links from indexer",
-      );
-    } finally {
-      // Only update state if this batch wasn't aborted. Aborted batches
-      // leave state to be reset by the aborter (the useEffect on disconnect).
-      if (!controller.signal.aborted) {
-        setIsProcessing(false);
-      }
-      isProcessingRef.current = false;
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
-      }
-    }
-  }, [sendTransactionAsync]);
+    },
+    [sendTransactionAsync],
+  );
 
   const reset = useCallback(() => {
     setRefundedCount(0);

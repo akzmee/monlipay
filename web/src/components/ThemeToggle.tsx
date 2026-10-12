@@ -1,23 +1,28 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 /**
  * Dark/light mode toggle button.
  * Uses next-themes for persistence + system preference detection.
  * Renders a placeholder until mounted to avoid hydration mismatch.
  */
+const subscribe = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Only show the toggle after mount to avoid SSR hydration mismatch
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    subscribe,
+    clientSnapshot,
+    serverSnapshot,
+  );
 
   if (!mounted) {
     return (
-      <div className="h-9 w-9 rounded-lg border border-stone-200 dark:border-stone-700" />
+      <div className="h-11 w-11 rounded-lg border border-stone-200 dark:border-stone-700" />
     );
   }
 
@@ -27,7 +32,7 @@ export function ThemeToggle() {
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Toggle theme"
-      className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+      className="flex h-11 w-11 items-center justify-center rounded-lg border border-stone-300 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
     >
       {isDark ? (
         // Sun icon

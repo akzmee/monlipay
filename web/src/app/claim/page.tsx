@@ -1,35 +1,55 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useSyncExternalStore, Suspense } from "react";
 import { useAccount, useChainId } from "wagmi";
-import { formatEther, isAddress, type Hex } from "viem";
+import { isAddress, type Hex } from "viem";
 import { useDeposit, useClaimLink } from "@/hooks/useLinkVault";
 import { parseClaimUrl } from "@/lib/crypto";
-import { monadChain } from "@/config/chain";
+import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
 import { isGasSponsorAvailable } from "@/config/gas-sponsor";
 import { sponsorClaim } from "@/lib/sponsor-client";
+import { useTokenMetadata } from "@/hooks/useTokenMetadata";
+import { historyAmount } from "@/lib/link-history";
 import { ClaimForm } from "@/components/ClaimForm";
 
+function subscribeHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
 function ClaimPageContent() {
-  const searchParams = useSearchParams();
-
-  // FIX F1: Use state + effect so the page re-renders when the hash becomes
-  // available after SSR hydration or when the URL changes.
-  const [hash, setHash] = useState("");
+  const hash = useSyncExternalStore(
+    subscribeHash,
+    () => window.location.hash,
+    () => null,
+  );
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
-    setHash(window.location.hash);
+    const timer = setInterval(
+      () => setNow(Math.floor(Date.now() / 1000)),
+      1000,
+    );
+    return () => clearInterval(timer);
   }, []);
-
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
 
-  const parsed = parseClaimUrl(hash);
+  const parsed = parseClaimUrl(hash ?? "");
   const depositId = parsed?.depositId ?? null;
   const secretKey = parsed?.secretKey ?? null;
 
   const { data: deposit, isLoading: depositLoading } = useDeposit(depositId);
-  const { claim, error, isSending, isConfirming, isSuccess, txHash, reset } = useClaimLink();
+  const knownToken = SUPPORTED_TOKENS.find(
+    (t) => t.address.toLowerCase() === deposit?.token.toLowerCase(),
+  );
+  const { metadata } = useTokenMetadata(
+    knownToken ? null : (deposit?.token ?? null),
+  );
+  const token = knownToken ?? metadata;
+  const amountLabel = deposit
+    ? historyAmount(deposit.amount, token?.decimals, token?.symbol)
+    : "Loading amount…";
+  const { claim, error, isSending, isConfirming, isSuccess, txHash } =
+    useClaimLink();
   const [recipientOverride, setRecipientOverride] = useState("");
 
   // Sponsor-claim state. When the user clicks claim, we try the sponsor
@@ -39,7 +59,9 @@ function ClaimPageContent() {
   const [sponsorBusy, setSponsorBusy] = useState(false);
   const [sponsorSuccess, setSponsorSuccess] = useState(false);
   const [sponsorError, setSponsorError] = useState<string | null>(null);
-  const [sponsorTxHash, setSponsorTxHash] = useState<`0x${string}` | null>(null);
+  const [sponsorTxHash, setSponsorTxHash] = useState<`0x${string}` | null>(
+    null,
+  );
 
   // Combined busy/success/error across both paths.
   const isBusy = isSending || isConfirming || sponsorBusy;
@@ -47,24 +69,18 @@ function ClaimPageContent() {
   const errorOverall = error ?? sponsorError;
   const successTxHash = txHash ?? sponsorTxHash;
 
-  // Reset sponsor state when the user changes the recipient
-  useEffect(() => {
-    setSponsorError(null);
-  }, [recipientOverride]);
-
   // FIX S1: Validate the override address before using it.
   // Fall back to the connected wallet, or zero-address sentinel (contract will reject).
   const trimmedOverride = recipientOverride.trim();
   const isOverrideValid =
     trimmedOverride.length > 0 && isAddress(trimmedOverride);
-  const effectiveRecipient = (
-    isOverrideValid
-      ? (trimmedOverride as `0x${string}`)
-      : (address ?? "0x0000000000000000000000000000000000000000" as `0x${string}`)
-  );
+  const effectiveRecipient = isOverrideValid
+    ? (trimmedOverride as `0x${string}`)
+    : (address ??
+      ("0x0000000000000000000000000000000000000000" as `0x${string}`));
 
   // While hash hasn't been read yet (SSR first paint), show loading
-  if (!hash && typeof window !== "undefined") {
+  if (hash === null) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-sm text-stone-500">Loading payment link...</div>
@@ -92,19 +108,27 @@ function ClaimPageContent() {
             stroke="currentColor"
             strokeWidth={1.5}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </div>
         <h1 className="text-xl font-bold">Invalid link</h1>
         <p className="mt-2 text-sm text-stone-500">
-          This payment link is malformed. Ask the sender to share the full link again.
+          This payment link is malformed. Ask the sender to share the full link
+          again.
         </p>
       </div>
     );
   }
 
   // Deposit not found
-  if (deposit && deposit.sender === "0x0000000000000000000000000000000000000000") {
+  if (
+    deposit &&
+    deposit.sender === "0x0000000000000000000000000000000000000000"
+  ) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40">
@@ -131,7 +155,7 @@ function ClaimPageContent() {
   }
 
   // Already claimed
-  if (deposit?.claimed) {
+  if (deposit?.claimed && !isSuccessOverall) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <div className="mb-4 flex h-14 w-14 mx-auto items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
@@ -142,7 +166,11 @@ function ClaimPageContent() {
             stroke="currentColor"
             strokeWidth={1.5}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
           </svg>
         </div>
         <h1 className="text-xl font-bold">Already claimed</h1>
@@ -154,7 +182,6 @@ function ClaimPageContent() {
   }
 
   // Check expiry
-  const now = Math.floor(Date.now() / 1000);
   const isExpired = deposit ? now >= Number(deposit.expiry) : false;
 
   if (isExpired) {
@@ -168,7 +195,11 @@ function ClaimPageContent() {
             stroke="currentColor"
             strokeWidth={1.5}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
           </svg>
         </div>
         <h1 className="text-xl font-bold">Link expired</h1>
@@ -182,7 +213,7 @@ function ClaimPageContent() {
   // Success state
   if (isSuccessOverall) {
     return (
-      <div className="hero-gradient">
+      <div className="mp-workspace mp-payment-claim">
         <div className="mx-auto max-w-md px-4 py-16 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/40">
             <svg
@@ -192,12 +223,16 @@ function ClaimPageContent() {
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 12.75l6 6 9-13.5"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold">Funds claimed!</h1>
+          <h1 className="text-2xl font-semibold">Funds claimed!</h1>
           <p className="mt-2 text-sm text-stone-500">
-            {deposit && formatEther(deposit.amount)} MON has been sent to your wallet.
+            {amountLabel} has been sent to the receiving wallet.
           </p>
           {successTxHash && (
             <a
@@ -206,8 +241,18 @@ function ClaimPageContent() {
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                />
               </svg>
               View transaction
             </a>
@@ -219,28 +264,24 @@ function ClaimPageContent() {
 
   // Main claim UI
   const isWrongChain = isConnected && chainId !== monadChain.id;
-  const tokenSymbol = deposit?.token === "0x0000000000000000000000000000000000000000" ? "MON" : "TOKEN";
 
   return (
-    <div className="hero-gradient">
+    <div className="mp-workspace mp-payment-claim">
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-3xl shadow-lg shadow-violet-500/20">
-            <span className="text-white">{"\u{1F389}"}</span>
-          </div>
-          <h1 className="text-2xl font-bold">You&apos;ve received MON!</h1>
+          <h1 className="text-2xl font-semibold">
+            You&apos;ve received a payment
+          </h1>
           <p className="mt-1 text-sm text-stone-500">
             Claim your payment before it expires.
           </p>
         </div>
 
         {/* Payment details */}
-        <div className="mb-6 rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
+        <div className="mp-panel p-5 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-stone-500">Amount</span>
-            <span className="text-xl font-bold">
-              {deposit && formatEther(deposit.amount)} {tokenSymbol}
-            </span>
+            <span className="text-xl font-bold">{amountLabel}</span>
           </div>
           <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
             <span className="text-sm text-stone-500">From</span>
@@ -269,7 +310,10 @@ function ClaimPageContent() {
           error={errorOverall}
           address={address}
           recipientOverride={recipientOverride}
-          setRecipientOverride={setRecipientOverride}
+          setRecipientOverride={(value) => {
+            setRecipientOverride(value);
+            setSponsorError(null);
+          }}
           recipientError={
             trimmedOverride.length > 0 && !isOverrideValid
               ? "Invalid Ethereum address"
@@ -342,7 +386,9 @@ function ClaimPageContent() {
 }
 
 function CountdownTimer({ expiry }: { expiry: number }) {
-  const [remaining, setRemaining] = useState(expiry - Math.floor(Date.now() / 1000));
+  const [remaining, setRemaining] = useState(
+    () => expiry - Math.floor(Date.now() / 1000),
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -351,7 +397,8 @@ function CountdownTimer({ expiry }: { expiry: number }) {
     return () => clearInterval(interval);
   }, [expiry]);
 
-  if (remaining <= 0) return <span className="text-sm text-red-500">Expired</span>;
+  if (remaining <= 0)
+    return <span className="text-sm text-red-500">Expired</span>;
 
   const hours = Math.floor(remaining / 3600);
   const minutes = Math.floor((remaining % 3600) / 60);

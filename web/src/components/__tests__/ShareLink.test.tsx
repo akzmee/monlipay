@@ -205,7 +205,7 @@ describe("ShareLink", () => {
 
     beforeEach(() => {
       // jsdom doesn't implement HTMLCanvasElement.getContext or toDataURL.
-      HTMLCanvasElement.prototype.getContext = vi.fn(() => ctxStub);
+      vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(ctxStub);
       HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/png;base64,FAKE");
       // createElement("a").click would otherwise throw on jsdom.
       vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});

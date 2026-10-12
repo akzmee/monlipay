@@ -43,7 +43,7 @@ export function ConnectButton() {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
+                    className="mp-button mp-button-primary mp-wallet-button"
                   >
                     Connect Wallet
                   </button>
@@ -53,7 +53,7 @@ export function ConnectButton() {
                     type="button"
                     aria-label={`Monad ${currentNetworkLabel} online. Click to switch network.`}
                     title={`Monad ${currentNetworkLabel}`}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                    className="hidden sm:flex h-11 w-11 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
                   >
                     <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                   </button>
@@ -63,7 +63,7 @@ export function ConnectButton() {
                   onClick={openChainModal}
                   type="button"
                   aria-label="Wrong network"
-                  className="flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-300"
+                  className="flex min-h-11 items-center gap-2 rounded-md border border-amber-400 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-300"
                 >
                   <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
                   <span className="hidden sm:inline">Wrong Network</span>
@@ -74,7 +74,7 @@ export function ConnectButton() {
                   <button
                     onClick={openAccountModal}
                     type="button"
-                    className="rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium font-mono transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                    className="mp-wallet-account min-h-11 rounded-md border border-stone-300 px-3 py-2 text-sm font-medium font-mono transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
                   >
                     {account.address.slice(0, 6)}...
                     {account.address.slice(-4)}
@@ -85,7 +85,7 @@ export function ConnectButton() {
                     type="button"
                     aria-label={`Connected to Monad ${currentNetworkLabel}. Click to switch network.`}
                     title={`Monad ${currentNetworkLabel}`}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
+                    className="hidden sm:flex h-11 w-11 items-center justify-center rounded-lg border border-stone-300 text-sm font-medium transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
                   >
                     <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                   </button>

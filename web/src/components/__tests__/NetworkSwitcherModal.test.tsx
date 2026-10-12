@@ -17,16 +17,14 @@ vi.mock("motion/react", () => ({
 // warnings.
 const originalLocation = window.location;
 beforeEach(() => {
-  // @ts-expect-error — jsdom allows delete + reassignment
-  delete window.location;
-  window.location = {
+  vi.stubGlobal("location", {
     ...originalLocation,
     hostname: "localhost",
     href: "http://localhost/",
-  } as typeof window.location;
+  });
 });
 afterEach(() => {
-  window.location = originalLocation;
+  vi.unstubAllGlobals();
 });
 
 // Mock matchMedia for any prefers-reduced-motion queries.

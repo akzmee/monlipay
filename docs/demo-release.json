@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-12",
+  "mainnet": "https://monlipay.xyz/demo",
+  "testnet": "https://testnet.monlipay.xyz/demo",
+  "videoDurationSeconds": 80,
+  "videoBytes": 1336404,
+  "videoSha256": "23efbfc02adf93b4a2040104af2960d7e622f7556f3519462200927d04eb52aa",
+  "buildExit": 0,
+  "services": {
+    "monlipay-mainnet": "healthy",
+    "monlipay-testnet": "healthy",
+    "monlipay-indexer": "healthy"
+  },
+  "publicChecks": {
+    "routeStatus": 200,
+    "rangeStatus": 206,
+    "contentType": "video/mp4",
+    "hashMatchesBothOrigins": true,
+    "browserPlaybackBothOrigins": true
+  },
+  "tests": {
+    "files": 8,
+    "passed": 115,
+    "typescript": "passed",
+    "changedUIlint": "passed"
+  },
+  "limitations": [
+    "No mainnet stablecoin transfer was executed.",
+    "Demo token is test-only, no monetary value.",
+    "Lucky demo pool #2 still contains the unallocated second share, refundable after expiry."
+  ]
+}

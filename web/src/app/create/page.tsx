@@ -2,143 +2,118 @@
 
 import { useState } from "react";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useCreateLink } from "@/hooks/useLinkVault";
-import { SUPPORTED_TOKENS, EXPIRY_PRESETS, isContractDeployed, LINK_VAULT_ADDRESS, monadChain, type TokenInfo } from "@/config/chain";
+import {
+  SUPPORTED_TOKENS,
+  EXPIRY_PRESETS,
+  isContractDeployed,
+  monadChain,
+  type TokenInfo,
+} from "@/config/chain";
 import { CreateForm } from "@/components/CreateForm";
 import { ShareLink } from "@/components/ShareLink";
+import { LinkTypePicker } from "@/components/LinkTypePicker";
+import { LuckyArtwork } from "@/components/LuckyArtwork";
+import {
+  CreatedLinkBackup,
+  LinkBackupPanel,
+} from "@/components/LinkBackupPanel";
 
 export default function CreatePage() {
   const { isConnected } = useAccount();
-  const { create, result, error, isSending, isConfirming, txHash, reset } = useCreateLink();
+  const { openConnectModal } = useConnectModal();
+  const { create, result, error, isSending, isConfirming, txHash, reset } =
+    useCreateLink();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
-
   const [amount, setAmount] = useState("");
-  const [selectedToken, setSelectedToken] = useState<TokenInfo>(SUPPORTED_TOKENS[0]);
-  const [expirySeconds, setExpirySeconds] = useState<number>(EXPIRY_PRESETS[2].value);
-
+  const [selectedToken, setSelectedToken] = useState<TokenInfo>(
+    SUPPORTED_TOKENS[0],
+  );
+  const [expirySeconds, setExpirySeconds] = useState<number>(
+    EXPIRY_PRESETS[2].value,
+  );
   const isBusy = isSending || isConfirming;
   const isWrongChain = isConnected && chainId !== monadChain.id;
 
   if (result) {
     return (
-      <div className="hero-gradient">
-        <div className="mx-auto max-w-md px-4 py-8 pb-24 sm:py-12 sm:pb-12">
-          <ShareLink url={result.shareableUrl} txHash={txHash ?? undefined} onReset={reset} />
-        </div>
+      <div className="mp-workspace mp-share-workspace">
+        <ShareLink
+          url={result.shareableUrl}
+          txHash={txHash ?? undefined}
+          onReset={reset}
+          backup={
+            <CreatedLinkBackup
+              key={result.depositId.toString()}
+              url={result.shareableUrl}
+            />
+          }
+        />
       </div>
     );
   }
 
   return (
-    <div className="hero-gradient min-h-[calc(100vh-3.5rem)]">
-      <div className="mx-auto max-w-md px-4 py-6 pb-24 sm:py-8 sm:pb-8">
-        {/* Contract not deployed warning */}
-        {!isContractDeployed && (
-          <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
-            <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
-              Contract not deployed yet. Set{" "}
-              <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/50">
-                NEXT_PUBLIC_LINK_VAULT_ADDRESS
-              </code>{" "}
-              in <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/50">.env.local</code>.
-            </p>
-            <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-              Current: <code>{LINK_VAULT_ADDRESS.slice(0, 10)}...</code>
-            </p>
-          </div>
-        )}
-
-        {/* Hero */}
-        <div className="mb-5 text-center sm:mb-6">
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 sm:text-3xl">
-            Create a payment link
-          </h1>
-          <p className="text-sm text-stone-600 dark:text-stone-400">
-            Any token on Monad. Share via chat. Recipient claims with one tap.
-          </p>
+    <div className="mp-workspace">
+      <div className="mp-page-heading">
+        <div>
+          <h1>Create a link</h1>
+          <p>Send MON or tokens with a link. Choose how you want to share.</p>
         </div>
-
-        {/* Create form */}
-        <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-5">
+      </div>
+      <LinkTypePicker active="payment" />
+      {!isContractDeployed && (
+        <p className="mp-notice" role="status">
+          Payment links are not yet available on {monadChain.name}. Funding will
+          open when this network is ready.
+        </p>
+      )}
+      <div className="lucky-layout">
+        <section
+          className="mp-panel lucky-form"
+          aria-labelledby="payment-details-title"
+        >
+          <div className="mp-section-title">
+            <h2 id="payment-details-title">Payment details</h2>
+            <span className="mp-network">{monadChain.name}</span>
+          </div>
           {!isConnected ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
-                <svg
-                  className="h-6 w-6 text-red-600 dark:text-red-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Connect your wallet</h2>
-                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                  Tap Connect at the top to create a payment link
-                </p>
-              </div>
+            <div className="mp-payment-gate">
+              <h3>Connect your wallet to get started</h3>
+              <p>Choose a token and amount, then create a link to send.</p>
+              <button
+                type="button"
+                className="mp-button"
+                onClick={openConnectModal}
+              >
+                Connect wallet
+              </button>
             </div>
           ) : !isContractDeployed ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/40">
-                <svg
-                  className="h-6 w-6 text-red-600 dark:text-red-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Contract not deployed</h2>
-                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                  Deploy LinkVault.sol and set the address in .env.local
-                </p>
-              </div>
+            <div className="mp-payment-gate">
+              <h3>Funding is not available yet</h3>
+              <p>
+                Payment links will be available here when this network is ready.
+              </p>
             </div>
           ) : isWrongChain ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40">
-                <svg
-                  className="h-6 w-6 text-amber-600 dark:text-amber-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Wrong network</h2>
-                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                  Switch to {monadChain.name} to create payment links.
-                </p>
-              </div>
+            <div className="mp-payment-gate">
+              <h3>Switch to {monadChain.name}</h3>
+              <p>Your payment link will be created on this network.</p>
               <button
+                type="button"
+                className="mp-button"
                 onClick={async () => {
                   try {
                     await switchChainAsync({ chainId: monadChain.id });
                   } catch {
-                    // User rejected
+                    // The wallet handles the cancellation; the action remains available.
                   }
                 }}
-                className="mt-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-indigo-500 active:scale-95"
               >
-                Switch to {monadChain.name}
+                Switch network
               </button>
             </div>
           ) : (
@@ -164,7 +139,51 @@ export default function CreatePage() {
               error={error}
             />
           )}
-        </div>
+          <p className="mp-payment-note mp-hint">
+            Keep your payment link private. Anyone with the link can claim it
+            once. After expiry, unclaimed funds can be refunded.
+          </p>
+          {isConnected && !isWrongChain && <LinkBackupPanel compact />}
+        </section>
+        <aside className="lucky-preview" aria-label="Payment link summary">
+          <div className="lucky-preview-art">
+            <LuckyArtwork />
+          </div>
+          <h2>
+            Ready to send.
+            <br />
+            Easy to share.
+          </h2>
+          <p className="lucky-preview-copy">
+            One amount for one recipient. Send the link through any chat.
+          </p>
+          <dl className="lucky-summary">
+            <div>
+              <dt>Amount to send</dt>
+              <dd>
+                {amount || "0.00"} {selectedToken.symbol}
+              </dd>
+            </div>
+            <div>
+              <dt>Recipient</dt>
+              <dd>One person</dd>
+            </div>
+            <div>
+              <dt>Expires in</dt>
+              <dd>
+                {
+                  EXPIRY_PRESETS.find(
+                    (preset) => preset.value === expirySeconds,
+                  )?.label
+                }
+              </dd>
+            </div>
+          </dl>
+          <p className="mp-hint">
+            Your recipient opens the link and connects a wallet to claim on
+            Monad.
+          </p>
+        </aside>
       </div>
     </div>
   );

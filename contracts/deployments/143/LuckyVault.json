@@ -1,0 +1,26 @@
+{
+  "network": "mainnet",
+  "chainId": 143,
+  "deployer": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+  "contractAddress": "0x96d8fa162b1a98fa1144b5879c139e9c71c30dec",
+  "transactionHash": "0x992b9e41adbc6a335e38e02e8bc3324602a74dd53b8cb0665a65ec5298a38825",
+  "blockNumber": "112759497",
+  "gasUsed": "3238636",
+  "effectiveGasPriceGwei": "102",
+  "chargedFeeMON": "0.330340872",
+  "entropy": "0xD458261E832415CFd3BAE5E416FdF3230ce6F134",
+  "provider": "0x52DeaA1c84233F7bb8C8A45baeDE41091c616506",
+  "runtimeCodeHash": "0xf2f2e4e845296aee7996ce8150e75af5ea387851a58535c068a5b9cb863ad2ba",
+  "artifactSha256": "382a61244f054f14e311218c1b0e714a500235da74f1e69cd3f7a1777a1e6a63",
+  "verifiedAt": "2026-10-12T12:52:08.654Z",
+  "compilerVersion": "0.8.28+commit.7893614a",
+  "evmVersion": "cancun",
+  "optimizerEnabled": false,
+  "sourceVerification": {
+    "provider": "Sourcify",
+    "match": "exact_match",
+    "creationMatch": "exact_match",
+    "runtimeMatch": "exact_match",
+    "url": "https://repo.sourcify.dev/143/0x96d8fa162b1a98fa1144b5879c139e9c71c30dec"
+  }
+}
