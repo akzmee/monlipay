@@ -31,3 +31,10 @@ export function luckyStatus(
   }
   return packet.requested >= packet.slots ? "Draws pending" : "Open";
 }
+
+export function groupStatus(packet: Parameters<typeof luckyStatus>[0], now: number, equal: boolean) {
+  if (!equal) return luckyStatus(packet, now);
+  if (packet.requested >= packet.slots) return "Completed";
+  if (packet.closed) return "Closed";
+  return now >= packet.expiry ? "Refund available" : "Open";
+}

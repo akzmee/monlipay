@@ -1,4 +1,4 @@
-> **Metropolis extension:** Optional Lucky Links, AnomaPay Private Payment, contacts and passkey-encrypted history extend the original payment-link product. Both sites are live. LuckyVault has exact source verification, real testnet draws passed, and the private WMON mainnet pilot completed deposit, transfer, claim and recovery. See [submission fields](docs/metropolis-submission.json), [release evidence](docs/private-payment-release.json) and [contract receipts](contracts/deployments).
+> **Metropolis extension:** Group Payment, AnomaPay Private Payment, contacts and passkey-encrypted history extend the original payment-link product. Group Payment supports equal or random shares, open to anyone or selected wallets. GroupVault and LuckyVault have exact source verification on both networks. See [Group Payment evidence](docs/group-payment-release.json), [submission fields](docs/metropolis-submission.json), [remaining track requirements](docs/track-readiness.json) and [contract receipts](contracts/deployments).
 
 The reviewed visual system is recorded in [DESIGN.md](DESIGN.md), with reusable component previews in [.impeccable/design.json](.impeccable/design.json).
 
@@ -6,7 +6,7 @@ The updated mainnet and testnet sites, backup location, configuration, and verif
 
 # MonliPay — Send tokens via a link
 
-> Create a funded token link and share it in a chat. Recipients connect a wallet and claim. Recover eligible expired Payment and Lucky Link funds from My Links.
+> Create a funded token link and share it in a chat. Recipients connect a wallet and claim. Recover eligible expired Payment and Group Payment funds from My Links.
 
 Originally built for the **BuildAnything "Spark"** hackathon on Monad. The **Metropolis** extension adds Lucky Links and private contacts; the [build-window disclosure](docs/lucky-links.md#what-is-new-for-metropolis) distinguishes this work from the existing foundation.
 
@@ -32,7 +32,15 @@ MonliPay turns token transfers into a shareable link:
 3. **Claim** — recipient opens the link, connects their wallet, claims with one click
 4. **Manage** — reopen saved links with a passkey in My Links or explicitly refund expired, unclaimed links with wallet confirmation
 
-No address swapping. No chain confusion. One link is all you need.
+A public claim still needs a wallet on the correct Monad network and MON for gas. Gas sponsorship is currently disabled.
+
+### Group Payment
+
+Create a group link at `/create/group`. **Equal amount** is the default: 100 USDC for 10 recipients pays exactly 10 USDC each. The pool must divide exactly in the token's smallest unit. A claim settles in one transaction through GroupVault, with no oracle fee. **Random amount** uses the existing LuckyVault and Pyth Entropy draw, followed by collection.
+
+Both modes support **Anyone** (first-come wallet slots) and **Selected wallets**, with one share per wallet. This is not one-person verification. Pools have a fixed amount, quota and expiry; they cannot be topped up or reused. The sender can refund unclaimed funds after expiry. Old Lucky claim URLs and history retain their original contracts.
+
+Configure `NEXT_PUBLIC_GROUP_VAULT_ADDRESS` alongside the existing Lucky addresses. Deployment receipts are in `contracts/deployments/143/GroupVault.json` and `contracts/deployments/10143/GroupVault.json`.
 
 ---
 
@@ -143,7 +151,9 @@ All contracts are verified on Monadscan. The testnet deployment is the recommend
 - **`/`** — Payment-first landing and product demo
 - **`/create`** — Create a payment link (select token, amount, expiry → get shareable URL)
 - **`/claim`** — Claim a payment link (parse secret from URL hash → sign → claim)
-- **`/my-links`** — Track Payment and Lucky Links, reopen passkey-protected links, explicitly refund expired payments
+- **`/create/group`**: Create an Equal or Random Group Payment link
+- **`/group/claim`**: Claim a share using the contract identified in the link
+- **`/my-links`**: Track Payment, Private and Group Payment links, reopen passkey-protected links, explicitly refund eligible expired payments
 - **`/bridge`** — Bridge tokens from 9+ chains into Monad via LI.FI aggregator
 
 ### Features

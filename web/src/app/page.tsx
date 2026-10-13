@@ -53,8 +53,7 @@ export default function HomePage() {
           </h2>
           <p>
             Send to one person with a payment link. Sharing with a group? Choose
-            Lucky Link when you create your link to split a pool into random
-            shares.
+            Group Payment to split a pool into equal or random amounts.
           </p>
           <Link className="mp-text-button" href="/create">
             Choose your link type <ArrowIcon direction="up-right" />
@@ -129,13 +128,13 @@ export default function HomePage() {
       <DemoVideo />
       <section className="mp-home-details" aria-label="About payment links">
         <p>
-          Payment links carry one amount for one recipient. Lucky Links add a
-          public giveaway or selected wallets, a recipient limit, and random shares. Both start with
+          Payment links carry one amount for one recipient. Group Payments share a
+          pool with anyone or selected wallets, using equal or random amounts. Both start with
           Create a link.
         </p>
         <p>
-          Creating a link requires network gas. Lucky Link recipients also pay a
-          draw fee. After expiry, unclaimed or unallocated funds can be
+          Creating and claiming a link requires network gas. Random amounts also
+          require a draw fee. After expiry, unclaimed or unallocated funds can be
           refunded.
         </p>
       </section>

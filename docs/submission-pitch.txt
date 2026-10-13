@@ -1,20 +1,19 @@
-MonliPay — Send tokens with a link
+MonliPay: Send tokens with a link
 Track: Consumer Products & Payments
 
-Sending a payment should start with the conversation, not a wallet-address exchange. MonliPay lets you fund a link, share it in a chat, and let the recipient claim it.
+Pitch draft for the founder to record, under two minutes. Add your real name, background and reason for building it. The initial segment below is a hypothesis until confirmed by interviews or user testing.
 
-Three modes share one payment flow. Payment Links send one amount. Lucky Links distribute a pool among open giveaways or selected wallets with Pyth Entropy randomness. Private Payment transfers through AnomaPay on Monad mainnet before the recipient withdraws. Contacts save repeat recipients. My Links opens encrypted claim records with a passkey, without a manual recovery-file setup.
+Imagine a community organizer sending a reward to ten members after an event. Today, that can mean collecting ten wallet addresses, making separate transfers, and checking who received the money.
 
-We built on an existing LinkVault project and disclose that baseline. The Metropolis work adds LuckyVault, contacts, the unified interface, token fixes, passkey recovery and private payments. We exercised real testnet payments and random draws, and completed an authorized 1 MON private mainnet pilot through deposit, private transfer, claim and recovery.
+MonliPay starts with a funded link. The organizer chooses a token, a total amount and the number of recipients, then shares the link in the group's existing chat. A pool of 100 USDC for ten recipients gives each wallet 10 USDC. The contract holds the funds, enforces the quota, prevents repeat claims from the same wallet and returns unclaimed funds after expiry. Organizers can restrict eligibility to selected wallets or open the link to anyone. Random shares are optional.
 
-Privacy is specific, not absolute: claim secrets are encrypted in the browser; transfers inside AnomaPay are shielded from public chain observers. Deposits, withdrawals, timing correlation and the proving operator remain privacy limits. Private Payment is a beta and the implementation has not had an independent security audit.
+The working product also supports individual Payment Links, saved contacts, encrypted link history and an optional private payment mode. We built on an existing payment-link project and disclose that baseline. This hackathon's work adds group distributions, the unified interface, encrypted records and the private-payment integration.
 
-Try: https://monlipay.xyz
-Testnet: https://testnet.monlipay.xyz
-Video: https://monlipay.xyz/demo
-Source: https://monlipay.xyz/submission/monlipay-metropolis-source-open-20261013.zip
-Original repository: https://github.com/akzmee/monlipay
-Pilot evidence: https://monlipay.xyz/submission/anoma-private-payment-readiness.json
+Equal Group Payment is deployed on Monad mainnet and testnet. Our testnet checks exercised real token settlement and expiry refunds. Automated checks do not establish consumer adoption. Our next step is to test the full flow with community organizers and recipients, measure where people need help, and remove wallet and gas friction.
 
-Portal fields: docs/metropolis-submission.json
-Final account/team/contact fields must match the entrant's own hackathon account.
+Product: https://monlipay.xyz
+Testnet: https://testnet.monlipay.xyz/create/group
+Technical evidence: docs/group-payment-release.json
+Track gaps and deliverable status: docs/track-readiness.json
+
+Submission still needs the current public GitHub branch, a technical demo URL on YouTube/Loom/Vimeo and a recorded founder pitch. Do not present this draft as a completed video or claim user traction without evidence.

@@ -63,7 +63,7 @@ export default function PrivacyPage() {
         <h2 id="public-chain">What remains public</h2>
         <p>
           Standard Payment Links record wallet addresses, token amounts, deposit
-          and claim activity, and timing on Monad. Lucky Link eligibility is
+          and claim activity, and timing on Monad. Group Payment eligibility is
           also onchain. Encrypting a saved link does not hide its sender or
           recipient.
         </p>

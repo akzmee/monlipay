@@ -7,7 +7,7 @@ related_targets: ["web/src/components/NavBar.tsx","web/src/app/layout.tsx","web/
 
 # MonliPay landing
 
-Mode: Persuade. The user explicitly requested a consistent Metropolis-inspired identity while extending MonliPay; this landing leads with MonliPay as a payment-link product. Private Payment and Lucky Link are optional creation modes, per the user’s payment-first direction.
+Mode: Persuade. The user explicitly requested a consistent Metropolis-inspired identity while extending MonliPay; this landing leads with MonliPay as a payment-link product. Private Payment and Group Payment are optional creation modes, per the user’s payment-first direction.
 
 ## Direction contract
 
@@ -15,7 +15,7 @@ THESIS: Create a link and easily send MON or tokens. Make sending tangible with 
 
 OWN-WORLD: Ink ground, restrained square grid from the user-pinned Metropolis reference, Chakra Petch angular display lettering, Geist UI, solid lilac action, and one prismatic vector envelope shared with creation and claim screens.
 
-STORY: Understand payment links, choose Create a link, then use the default Payment link or choose an optional mode. The ordered sequence explains creating, sharing and claiming; Lucky Link supports group sharing. A later privacy section explains passkey encryption and Private Payment on mainnet without changing the hero's main promise.
+STORY: Understand payment links, choose Create a link, then use the default Payment link or choose an optional mode. The ordered sequence explains creating, sharing and claiming; Group Payment supports group sharing with equal or random amounts. A later privacy section explains passkey encryption and Private Payment on mainnet without changing the hero's main promise.
 
 FIRST VIEWPORT: Left-aligned three-line display headline, two actions and short supporting copy; a large envelope fills the right. Below, a separated row anchors Monad and group distribution. Mobile stacks copy, actions and illustration, with the primary action preceding the artwork.
 
@@ -52,3 +52,7 @@ The demo poster is a 1440 × 900 browser capture of the current dark homepage wi
 Visible web copy contains no em dashes. The page title uses a vertical bar; sentences and status labels use ordinary punctuation. The demo retains concise product instructions, while financial and privacy limits remain on the relevant creation, claim, and privacy surfaces.
 
 The brand finish review is **ship**, with no material fixes, across seven desktop/mobile captures at 1440px and 390px, including the light private-payment panel. `docs/brand-release.json` records validation and release status. The `.impeccable/review/brand-*.png` captures cover the home, demo, and private passkey panel. The browser coverage is Chromium emulation; it does not establish physical-device performance. The design frontmatter and sidecar token extensions are unchanged; identity prose and the sidecar envelope seal now match the implementation.
+
+## Group Payment terminology
+
+Current supporting copy uses Group Payment for the optional mode that shares a pool with anyone or selected wallets, using equal or random amounts. Payment Link remains the default for one recipient. Creation and claims require network gas; a draw fee applies to Random amounts. Preserve the hero, envelope, guide composition, fonts, palette and motion. This terminology update introduces no new visual system or asset. The historical video still shows Lucky transactions and does not demonstrate Equal amount mode; retain that distinction in evidence records. Current Group behavior and review evidence are in the [Group surface brief](web-src-app-create-group-page-tsx.md).

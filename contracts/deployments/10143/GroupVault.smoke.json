@@ -1,0 +1,80 @@
+{
+  "chainId": 10143,
+  "contractAddress": "0x0e767de29c64e3a283a02c211aabbcd498a3ff86",
+  "owner": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+  "transactions": [
+    {
+      "label": "native-create",
+      "hash": "0x0265be853f4ffa48be4ca3ce1e29ef8d95f8dcb5ebe565a55aadd2af72c1c633",
+      "value": "2000000000000000",
+      "status": "success",
+      "blockNumber": "70680923"
+    },
+    {
+      "label": "native-claim",
+      "hash": "0xcbefff580404337fff7f4a2aab95721f2c76d48f9432c1b644cea21881e99a5d",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70680940"
+    },
+    {
+      "label": "demo-token-deploy",
+      "hash": "0xdf76d626df9fd47f0d773b7cf7e78dfa6accd1d4645bd5063d4d115f79e6acb2",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70680956"
+    },
+    {
+      "label": "token-approve",
+      "hash": "0x12a53af17f7f4860c156fbe4fc1046b33b136e2d16e5ee309c480394aabf990d",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70680972"
+    },
+    {
+      "label": "token-create",
+      "hash": "0x5c16653c1aaccbf809f86f7d14561b6a774b8fb84146d8a02554069ca6b9396d",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70680989"
+    },
+    {
+      "label": "token-claim",
+      "hash": "0x4d90ba0211d874b2f09506fc0db8cfa4739101429bb560d29b16af4a709e926b",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70681006"
+    },
+    {
+      "label": "token-refund",
+      "hash": "0x08bc6317a02bc5d00d0db717d6527f12bee7885be6fd06a37b4dd1f39bc94480",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70681853"
+    }
+  ],
+  "status": "complete",
+  "native": {
+    "packetId": "1",
+    "shareMON": "0.002",
+    "completed": true
+  },
+  "token": {
+    "address": "0xd1f71844ffe9b6852b4e10a6173dfdf8413187d5",
+    "symbol": "DEMOUSD",
+    "decimals": 6,
+    "notice": "Testnet demonstration token with no monetary value."
+  },
+  "erc20": {
+    "packetId": "2",
+    "total": "100",
+    "slots": 10,
+    "perRecipient": "10",
+    "expiry": 1791894432
+  },
+  "exactTenTokenTransfer": true,
+  "duplicateRejected": true,
+  "unauthorizedRefundRejected": true,
+  "refundedTokens": "90",
+  "completedAt": "2026-10-13T12:28:41.393Z"
+}

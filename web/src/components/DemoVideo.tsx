@@ -4,7 +4,7 @@ export function DemoVideo() {
       <div className="mp-demo-heading">
         <h2 id="demo-title">See a link become a payment.</h2>
         <p>
-          Payment links, Lucky Links, and an introduction to private payments.
+          Payment links, group payments, and an introduction to private payments.
         </p>
       </div>
       <video
@@ -46,12 +46,12 @@ export function DemoVideo() {
             transaction receipt confirms the transfer.
           </li>
           <li>
-            For a group, choose Lucky Link. Set a pool, recipient slots, and
-            eligible wallets. Contacts let you save wallets for next time.
+            For a group, choose Group Payment. Set a pool, recipient slots, and
+            equal or random amounts. Choose Anyone or Selected wallets.
           </li>
           <li>
-            A Lucky Link recipient requests a random draw and collects their
-            share after it settles. Draw fees and network gas are paid in MON.
+            With equal amounts, recipients claim their fixed payment directly.
+            Random amounts use a draw before collection, as shown in the video.
           </li>
           <li>
             Find your links in My Links. Expired, unallocated funds

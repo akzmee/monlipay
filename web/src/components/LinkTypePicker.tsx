@@ -4,7 +4,7 @@ import { monadChain } from "@/config/chain";
 export function LinkTypePicker({
   active,
 }: {
-  active: "payment" | "lucky" | "private";
+  active: "payment" | "group" | "private";
 }) {
   return (
     <nav className="mp-link-types" aria-label="Link type">
@@ -25,11 +25,11 @@ export function LinkTypePicker({
         </Link>
       )}
       <Link
-        href="/create/lucky"
-        aria-current={active === "lucky" ? "page" : undefined}
+        href="/create/group"
+        aria-current={active === "group" ? "page" : undefined}
       >
-        <strong>Lucky link</strong>
-        <span>Random shares for a group</span>
+        <strong>Group payment</strong>
+        <span>One link, multiple recipients</span>
       </Link>
     </nav>
   );

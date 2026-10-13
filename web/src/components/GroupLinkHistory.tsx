@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useReadContract, useReadContracts } from "wagmi";
 import type { Address } from "viem";
 import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
-import { LUCKY_VAULTS, luckyClaimPath } from "@/config/lucky";
+import { GROUP_VAULTS, groupClaimPath, isEqualGroupVault } from "@/config/group";
 import { luckyVaultAbi } from "@/lib/lucky-abi";
-import { historyAmount, luckyStatus } from "@/lib/link-history";
+import { historyAmount, groupStatus } from "@/lib/link-history";
 import { ArrowIcon } from "./ArrowIcon";
 
-function LuckyRow({
+function GroupRow({
   id,
   vault,
   now,
@@ -32,35 +32,36 @@ function LuckyRow({
   if (query.isError)
     return (
       <li className="mp-history-row">
-        <p className="mp-error">Could not load Lucky Link #{id.toString()}.</p>
+        <p className="mp-error">Could not load Group Payment #{id.toString()}.</p>
         <button className="mp-text-button" onClick={() => void query.refetch()}>
           Retry
         </button>
       </li>
     );
   if (!query.data)
-    return <li className="mp-skeleton" aria-label="Loading Lucky Link" />;
+    return <li className="mp-skeleton" aria-label="Loading Group Payment" />;
   const p = query.data;
   if (p.sender.toLowerCase() !== owner.toLowerCase()) return null;
   const token = SUPPORTED_TOKENS.find(
     (t) => t.address.toLowerCase() === p.token.toLowerCase(),
   );
-  const status = luckyStatus(p, now);
+  const equal = isEqualGroupVault(vault);
+  const status = groupStatus(p, now, equal);
   return (
     <li className="mp-history-row">
       <div className="mp-history-info">
         <h3>{p.title}</h3>
         <p>
           {historyAmount(p.total, token?.decimals, token?.symbol)} ·{" "}
-          {p.requested} of {p.slots} shares reserved
+          {p.requested} of {p.slots} {equal ? "payments claimed" : "shares reserved"}
         </p>
         <small>
-          Lucky Link #{id.toString()} · {status}
+          {equal ? "Equal" : "Random"} · #{id.toString()} · {status}
         </small>
       </div>
       <Link
         className="mp-text-link"
-        href={luckyClaimPath(id, vault)}
+        href={groupClaimPath(id, vault)}
       >
         {status === "Refund available" ? "View refund" : "View link"}
         <ArrowIcon />
@@ -70,7 +71,7 @@ function LuckyRow({
 }
 
 // Parent keys this component by wallet, so pagination never crosses accounts.
-export function LuckyLinkHistory({
+export function GroupLinkHistory({
   address,
   now,
 }: {
@@ -79,18 +80,18 @@ export function LuckyLinkHistory({
 }) {
   const [offset, setOffset] = useState(0);
   const history = useReadContracts({
-    contracts: LUCKY_VAULTS.map((vault) => ({
+    contracts: GROUP_VAULTS.map((vault) => ({
       address: vault,
       abi: luckyVaultAbi,
       functionName: "getCreatedPackets" as const,
       args: [address, BigInt(offset), 10n] as const,
       chainId: monadChain.id,
     })),
-    query: { enabled: LUCKY_VAULTS.length > 0, refetchInterval: 15_000 },
+    query: { enabled: GROUP_VAULTS.length > 0, refetchInterval: 15_000 },
   });
   const records = (history.data ?? []).flatMap((result, index) =>
     result.status === "success"
-      ? result.result.map((id) => ({ id, vault: LUCKY_VAULTS[index] }))
+      ? result.result.map((id) => ({ id, vault: GROUP_VAULTS[index] }))
       : [],
   );
   const failed = history.isError || history.data?.some((result) => result.status === "failure");
@@ -101,18 +102,18 @@ export function LuckyLinkHistory({
       aria-labelledby="lucky-history-title"
     >
       <div className="mp-history-heading">
-        <h2 id="lucky-history-title">Lucky Links</h2>
-        <Link className="mp-text-link" href="/create/lucky">
-          Create Lucky Link <ArrowIcon direction="up-right" />
+        <h2 id="lucky-history-title">Group Payments</h2>
+        <Link className="mp-text-link" href="/create/group">
+          Create Group Payment <ArrowIcon direction="up-right" />
         </Link>
       </div>
-      {LUCKY_VAULTS.length === 0 ? (
+      {GROUP_VAULTS.length === 0 ? (
         <p className="mp-hint">
-          Lucky Links are not available on this network yet.
+          Group Payments are not available on this network yet.
         </p>
       ) : failed ? (
         <p className="mp-error" role="alert">
-          Some Lucky Links could not be loaded.{" "}
+          Some Group Payments could not be loaded.{" "}
           <button
             className="mp-text-button"
             onClick={() => void history.refetch()}
@@ -122,19 +123,19 @@ export function LuckyLinkHistory({
         </p>
       ) : history.isPending ? (
         <p className="mp-hint" role="status">
-          Loading Lucky Links…
+          Loading Group Payments…
         </p>
       ) : !records.length ? (
         <p className="mp-hint">
           {offset
-            ? "No older Lucky Links."
-            : "Create a giveaway for anyone or selected wallets. Your funded Lucky Links will appear here."}
+            ? "No older Group Payments."
+            : "Send to anyone or selected wallets. Your funded Group Payments will appear here."}
         </p>
       ) : null}
       {records.length > 0 && (
         <ul>
           {records.map(({ id, vault }) => (
-            <LuckyRow key={`${vault}:${id}`} id={id} vault={vault} now={now} owner={address} />
+            <GroupRow key={`${vault}:${id}`} id={id} vault={vault} now={now} owner={address} />
           ))}
         </ul>
       )}

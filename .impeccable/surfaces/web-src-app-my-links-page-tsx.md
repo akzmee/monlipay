@@ -2,12 +2,12 @@
 version: 1
 slug: "web-src-app-my-links-page-tsx"
 primary_target: "web/src/app/my-links/page.tsx"
-related_targets: ["web/src/components/LuckyLinkHistory.tsx", "web/src/components/PrivateLinkHistory.tsx", "web/src/components/LinkBackupPanel.tsx", "web/src/app/lucky.css"]
+related_targets: ["web/src/components/GroupLinkHistory.tsx", "web/src/components/PrivateLinkHistory.tsx", "web/src/components/LinkBackupPanel.tsx", "web/src/app/lucky.css"]
 ---
 
 # My Links
 
-Mode: Operate. Extend MonliPay's established ink/lilac workspace. One wallet-scoped history entry point, with All links, Payment links, Private links on mainnet, and Lucky Links filters. Flat rows show amounts, lifecycle status, and a clear action. Payment metadata respects token decimals; unknown values are base units. Lucky allocation is not labelled withdrawal. Refund requires a deliberate wallet confirmation. A failure of payment indexing must not hide Lucky or private history. No aggregate balances, invented activity, or statistics. Mobile rows stack actions below amounts.
+Mode: Operate. Extend MonliPay's established ink/lilac workspace. One wallet-scoped history entry point, with All links, Payment links, Private links on mainnet, and Group Payments filters. Flat rows show amounts, lifecycle status, and a clear action. Payment metadata respects token decimals; unknown values are base units. Random allocation is not labelled withdrawal. Refund requires a deliberate wallet confirmation. A failure of payment indexing must not hide Group or private history. No aggregate balances, invented activity, or statistics. Mobile rows stack actions below amounts.
 
 ## Passkey access and saved links
 
@@ -28,3 +28,9 @@ The shared access area opens saved Payment Links and private payment records wit
 Completed creation reads “Created · open to check claim status”; copy and Open or reclaim expose the bearer link. This is not a claim receipt or a remaining-balance guarantee. Failed operations read “Not completed”; unresolved operations read “In progress”. Both retain Check activity. Private links have no expiry or automatic refund; reclaim competes with the recipient's claim for the same unspent balance.
 
 Keep the existing flat history rows, tabular amounts, muted metadata, semantic theme colors and mobile action stacking. The final private-history desktop/mobile captures show an unfunded failed-record fixture, not successful payment evidence. Review resolved the failed-state label and retained its recovery action.
+
+## Group Payment extension
+
+Group Payments replaces the visible Lucky Links filter and section name. `GroupLinkHistory` reads the configured Equal GroupVault and both legacy Lucky vaults. Each row keeps its vault address with its pool ID, so overlapping IDs remain distinct and View link opens the correct `/group/claim` URL. Legacy Random pools remain available in this same history.
+
+Rows distinguish Equal payments claimed from Random shares reserved, and label the distribution beside the pool ID and lifecycle status. A settled Random allocation is not proof of collection. View refund remains the action when unallocated funds can be recovered; the claim page owns the wallet-confirmed refund. Keep independent vault errors, retry, wallet-scoped pagination, existing flat rows and mobile stacking. This is an ordinary extension with no new visual primitives. The [Group surface brief](web-src-app-create-group-page-tsx.md) records the current creation and claim contract and the six reviewed captures; those captures do not add a new My Links visual test.

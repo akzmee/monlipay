@@ -12,7 +12,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { erc20Abi } from "viem";
 import { useMyLinks } from "@/hooks/useMyLinks";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";
-import { LuckyLinkHistory } from "@/components/LuckyLinkHistory";
+import { GroupLinkHistory } from "@/components/GroupLinkHistory";
 import { PrivateLinkHistory } from "@/components/PrivateLinkHistory";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import {
@@ -200,7 +200,7 @@ export default function MyLinksPage() {
               "All links",
               "Payment links",
               ...(monadChain.id === 143 ? ["Private links"] : []),
-              "Lucky Links",
+              "Group Payments",
             ].map((label) => (
               <button
                 key={label}
@@ -274,8 +274,8 @@ export default function MyLinksPage() {
               )}
             </section>
           )}
-          {(filter === "All links" || filter === "Lucky Links") && (
-            <LuckyLinkHistory key={address} address={address} now={now} />
+          {(filter === "All links" || filter === "Group Payments") && (
+            <GroupLinkHistory key={address} address={address} now={now} />
           )}
         </>
       )}

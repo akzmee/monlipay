@@ -64,7 +64,7 @@ function ContactsWorkspace() {
           <div>
             <h2>Keep addresses. Remember names.</h2>
             <p>
-              Save a wallet once, then choose it when you create a Lucky Link.
+              Save a wallet once, then choose it when you create a group payment link.
               Only you can access your contacts.
             </p>
             <button
@@ -208,7 +208,7 @@ function ContactsWorkspace() {
                 <p>
                   {search
                     ? "Try a different name or wallet address."
-                    : "Add a name and wallet address. You can also save new contacts while creating a Lucky Link."}
+                    : "Add a name and wallet address. You can also save new contacts while creating a group payment link."}
                 </p>
               </div>
             )}

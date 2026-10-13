@@ -1,0 +1,190 @@
+{
+  "status": "Contracts deployed and verified; frontend release in progress",
+  "features": [
+    "Group Payment replaces Lucky Link as the visible mode name; Equal amount is the default and Random amount remains available.",
+    "Equal pools require exact division in token base units: 100 tokens / 10 recipients = 10 tokens each, without rounding away funds.",
+    "Anyone and Selected wallets both enforce one share per wallet, with 1 to 100 recipient slots.",
+    "Equal shares settle in one claim transaction, with no oracle call or draw fee.",
+    "Shared searchable token picker, logos, contract addresses and imports; legacy Lucky V1/V2 claim links and history preserved."
+  ],
+  "checks": {
+    "webTests": {
+      "fullSuitePassed": 804,
+      "files": 61,
+      "afterFinalClaimCopyChange": 6
+    },
+    "contractTestsPassed": 141,
+    "typescript": "pass",
+    "scopedEslint": "pass",
+    "detector": [],
+    "localBrowser": {
+      "equalDefault": true,
+      "exactTokenPreview": true,
+      "legacyCreateRedirect": true,
+      "legacyClaimV1V2": true,
+      "mobileOverflow": false
+    },
+    "productionBuilds": {
+      "mainnet": "pass",
+      "testnet": "pass"
+    },
+    "impeccableReview": {
+      "disposition": "ship",
+      "scope": "Six supplied desktop/mobile captures covering Equal and Random creation, eligibility, dark/light themes, expired and completed claims",
+      "materialFixes": []
+    },
+    "documentation": {
+      "status": "complete",
+      "systemFilesPreserved": true,
+      "updated": [
+        "PRODUCT.md",
+        ".impeccable/surfaces/web-src-app-create-group-page-tsx.md",
+        ".impeccable/surfaces/web-src-app-create-lucky-page-tsx.md",
+        ".impeccable/surfaces/web-src-app-my-links-page-tsx.md",
+        ".impeccable/surfaces/web-src-app-page-tsx.md"
+      ],
+      "preExistingDrift": "Incumbent picker documentation describes two columns/640px while the established implementation uses three columns/840px including Private. System files preserved."
+    }
+  },
+  "contracts": {
+    "143": {
+      "network": "mainnet",
+      "chainId": 143,
+      "deployer": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+      "contractAddress": "0x9a313800032e81d5bd0f89099912def7e8915c86",
+      "transactionHash": "0xc74cf9346a61dc7686bc412f802258d43f87f85ed5f20f43986947b632f0ce29",
+      "blockNumber": "113040268",
+      "gasUsed": "2508940",
+      "effectiveGasPriceGwei": "102",
+      "chargedFeeMON": "0.25591188",
+      "runtimeCodeHash": "0x4a8726d15606ea88721af02dbb36e611f861b512d0ddfc5a1b1cbedbca70e340",
+      "artifactSha256": "cfd9b10243b16df52ad39b0e53d5024ca39440103b3a930f48d3525edf629f32",
+      "verifiedAt": "2026-10-13T12:25:19.109Z",
+      "version": 1,
+      "distribution": "equal",
+      "compilerVersion": "0.8.28+commit.7893614a",
+      "evmVersion": "cancun",
+      "optimizerEnabled": false,
+      "sourceVerification": {
+        "provider": "Sourcify",
+        "match": "exact_match",
+        "url": "https://repo.sourcify.dev/143/0x9a313800032e81d5bd0f89099912def7e8915c86"
+      }
+    },
+    "10143": {
+      "network": "testnet",
+      "chainId": 10143,
+      "deployer": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+      "contractAddress": "0x0e767de29c64e3a283a02c211aabbcd498a3ff86",
+      "transactionHash": "0x4eb3bb792bfb4529448f4da08140ba569534b0915f90f4fa6380f64da7a5e4fa",
+      "blockNumber": "70680546",
+      "gasUsed": "2508940",
+      "effectiveGasPriceGwei": "102",
+      "chargedFeeMON": "0.25591188",
+      "runtimeCodeHash": "0x4a8726d15606ea88721af02dbb36e611f861b512d0ddfc5a1b1cbedbca70e340",
+      "artifactSha256": "cfd9b10243b16df52ad39b0e53d5024ca39440103b3a930f48d3525edf629f32",
+      "verifiedAt": "2026-10-13T12:22:02.728Z",
+      "version": 1,
+      "distribution": "equal",
+      "compilerVersion": "0.8.28+commit.7893614a",
+      "evmVersion": "cancun",
+      "optimizerEnabled": false,
+      "sourceVerification": {
+        "provider": "Sourcify",
+        "match": "exact_match",
+        "url": "https://repo.sourcify.dev/10143/0x0e767de29c64e3a283a02c211aabbcd498a3ff86"
+      }
+    }
+  },
+  "testnetSmoke": {
+    "chainId": 10143,
+    "contractAddress": "0x0e767de29c64e3a283a02c211aabbcd498a3ff86",
+    "owner": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+    "transactions": [
+      {
+        "label": "native-create",
+        "hash": "0x0265be853f4ffa48be4ca3ce1e29ef8d95f8dcb5ebe565a55aadd2af72c1c633",
+        "value": "2000000000000000",
+        "status": "success",
+        "blockNumber": "70680923"
+      },
+      {
+        "label": "native-claim",
+        "hash": "0xcbefff580404337fff7f4a2aab95721f2c76d48f9432c1b644cea21881e99a5d",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70680940"
+      },
+      {
+        "label": "demo-token-deploy",
+        "hash": "0xdf76d626df9fd47f0d773b7cf7e78dfa6accd1d4645bd5063d4d115f79e6acb2",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70680956"
+      },
+      {
+        "label": "token-approve",
+        "hash": "0x12a53af17f7f4860c156fbe4fc1046b33b136e2d16e5ee309c480394aabf990d",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70680972"
+      },
+      {
+        "label": "token-create",
+        "hash": "0x5c16653c1aaccbf809f86f7d14561b6a774b8fb84146d8a02554069ca6b9396d",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70680989"
+      },
+      {
+        "label": "token-claim",
+        "hash": "0x4d90ba0211d874b2f09506fc0db8cfa4739101429bb560d29b16af4a709e926b",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70681006"
+      },
+      {
+        "label": "token-refund",
+        "hash": "0x08bc6317a02bc5d00d0db717d6527f12bee7885be6fd06a37b4dd1f39bc94480",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70681853"
+      }
+    ],
+    "status": "complete",
+    "native": {
+      "packetId": "1",
+      "shareMON": "0.002",
+      "completed": true
+    },
+    "token": {
+      "address": "0xd1f71844ffe9b6852b4e10a6173dfdf8413187d5",
+      "symbol": "DEMOUSD",
+      "decimals": 6,
+      "notice": "Testnet demonstration token with no monetary value."
+    },
+    "erc20": {
+      "packetId": "2",
+      "total": "100",
+      "slots": 10,
+      "perRecipient": "10",
+      "expiry": 1791894432
+    },
+    "exactTenTokenTransfer": true,
+    "duplicateRejected": true,
+    "unauthorizedRefundRejected": true,
+    "refundedTokens": "90",
+    "completedAt": "2026-10-13T12:28:41.393Z"
+  },
+  "limits": [
+    "One wallet is not proof of one person. Anyone mode can be claimed by people using multiple wallets.",
+    "Equal claims require a wallet and MON gas. Random claims additionally require a variable oracle fee and separate draw/collection transactions.",
+    "A pool has a fixed amount, quota and expiry. It cannot be topped up or reused as another distribution round.",
+    "No mainnet Group pool was funded in this release. The ERC20 live smoke used a testnet demo token with no monetary value; ten distinct equal claims are covered by local contract tests.",
+    "No independent contract audit is claimed. Automated tests are not evidence of consumer user testing.",
+    "The historical 104-second video does not demonstrate the new Equal amount mode."
+  ],
+  "portalSubmitted": false,
+  "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip",
+  "updatedAt": "2026-10-13T12:37:34.001689+00:00"
+}
