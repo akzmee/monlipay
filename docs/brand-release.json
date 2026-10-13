@@ -1,5 +1,5 @@
 {
-  "status": "Reviewed and built; deployment pending",
+  "status": "Deployed and live-verified",
   "scope": "Original MonliPay app mark and icons, private passkey panel padding, demo copy cleanup and removal of visible em dashes. No financial or encryption logic changes.",
   "checks": {
     "componentTests": {
@@ -31,5 +31,163 @@
     "materialFixes": 0,
     "captures": 7,
     "scope": "Private panel spacing, original app mark, demo copy and visible punctuation at 1440px/390px, including both themes."
-  }
+  },
+  "deployment": {
+    "activatedAt": "2026-10-13T09:08:20.795605+00:00",
+    "images": {
+      "monlipay-mainnet": "sha256:d1c157112646457b0c199c8e42d2c7d1af27bc42c134a32393588706648b12d5",
+      "monlipay-testnet": "sha256:0ce59d57ea4d835a829a68e2fd1ea94738e722744961224afd8d6beceec1f06d"
+    },
+    "health": {
+      "monlipay-mainnet": "healthy",
+      "monlipay-testnet": "healthy"
+    },
+    "encryptedRecordsPreserved": true,
+    "state": {
+      "mainnet": {
+        "backup_profiles": {
+          "rows": 3,
+          "sha256": "575bd0ea5faf55fbd37e899d78b24416dc4a276b899eb9a2280b2e29f3843fab"
+        },
+        "link_backups": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "link_passkeys": {
+          "rows": 2,
+          "sha256": "6a3714c9f8507533c97da9e78be261fe118f046f4ef3dd9587c6c45028111837"
+        },
+        "private_payment_records": {
+          "rows": 1,
+          "sha256": "8bc10c102ef31854cfe508b514b96bbd2e9f83f96d72fe82e6f7d7d8926fabdd"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      },
+      "testnet": {
+        "backup_profiles": {
+          "rows": 1,
+          "sha256": "e6a62b54efe723b777810d0a6794b460dbc1a6e7d412d96b0792fa3dc3de3005"
+        },
+        "link_backups": {
+          "rows": 1,
+          "sha256": "817ef2cb582ad997acb6097c1490dd05ecbe514443865324d4040e35120901ef"
+        },
+        "link_passkeys": {
+          "rows": 1,
+          "sha256": "d7ed2d993edc1be03dfd6e66abcb5d55a0fd636e0ed295eda07a87bc97eab306"
+        },
+        "private_payment_records": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      }
+    }
+  },
+  "liveBrowser": {
+    "https://monlipay.xyz": {
+      "home": {
+        "title": "MonliPay | Send tokens with a link",
+        "noEmDash": true,
+        "newMark": true,
+        "oldMark": false
+      },
+      "demo": {
+        "copyRemoved": true,
+        "walkthrough": true,
+        "poster": "/demo/monlipay-poster.jpg?v=monlipay-mark",
+        "noEmDash": true
+      },
+      "private": {
+        "desktop": "28px",
+        "mobile": {
+          "padding": "20px",
+          "overflow": false
+        }
+      }
+    },
+    "https://testnet.monlipay.xyz": {
+      "home": {
+        "title": "MonliPay | Send tokens with a link",
+        "noEmDash": true,
+        "newMark": true,
+        "oldMark": false
+      },
+      "demo": {
+        "copyRemoved": true,
+        "walkthrough": true,
+        "poster": "/demo/monlipay-poster.jpg?v=monlipay-mark",
+        "noEmDash": true
+      },
+      "private": {
+        "mainnetOnly": true
+      }
+    }
+  },
+  "http": {
+    "assets": [
+      {
+        "url": "https://monlipay.xyz/brand/monlipay-mark.svg?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://monlipay.xyz/icon.svg?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://monlipay.xyz/favicon.ico?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://monlipay.xyz/apple-icon.png?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://monlipay.xyz/demo/monlipay-poster.jpg?v=monlipay-mark&verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://testnet.monlipay.xyz/brand/monlipay-mark.svg?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://testnet.monlipay.xyz/icon.svg?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://testnet.monlipay.xyz/favicon.ico?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://testnet.monlipay.xyz/apple-icon.png?verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      },
+      {
+        "url": "https://testnet.monlipay.xyz/demo/monlipay-poster.jpg?v=monlipay-mark&verify=brand-20261013",
+        "status": 200,
+        "sha256Matches": true
+      }
+    ],
+    "sourceArchiveHashVerified": true,
+    "publicManifestMatches": true
+  },
+  "source": {
+    "file": "monlipay-metropolis-source-brand-20261013.zip",
+    "revision": "bd54fdcbe8de94e9ae0c841ece506a2406c831b4",
+    "files": 305,
+    "bytes": 2406805,
+    "sha256": "de4bbbf36bf3bd449a4b0f875f68767706e8e11cc703ca0e1c17b1b046095148"
+  },
+  "verifiedAt": "2026-10-13T09:09:56.699666+00:00"
 }

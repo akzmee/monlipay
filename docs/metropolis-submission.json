@@ -32,7 +32,7 @@
     "779 web tests across 55 files and 20 Anoma integration tests pass; Next.js 16.4.0 production build and scoped lint pass. Impeccable reviewed 17 desktop/mobile captures; the failed-state wording correction was scored resolved.",
     "Live passkey enrollment, encrypted account creation, refresh/unlock, wrong-wallet401, unfunded claim discovery and 104-second video passed. Both containers were replaced again; ciphertext and all existing encrypted records were preserved.",
     "Landing motion deployed on both networks; live pointer and scroll parallax, reduced motion, Create navigation and private-payment gates checked. Existing encrypted records remained unchanged during replacement.",
-    "Brand and copy refinement: 75 existing component tests and both production builds passed. Private panel measured 28px desktop / 20px mobile; production TS/TSX text scan found no em dashes. Existing lint findings in Bridge, LinkCard and ShareLink matched the prior commit. Impeccable reviewed seven captures and returned ship. Deployment checks are recorded separately in brand-release.json."
+    "Brand and copy refinement: 75 existing component tests and both production builds passed. Private panel measured 28px desktop / 20px mobile; production TS/TSX text scan found no em dashes. Existing lint findings in Bridge, LinkCard and ShareLink matched the prior commit. Impeccable reviewed seven captures and returned ship. Both deployments passed live browser checks; encrypted records were preserved and the source download hash matched. Details are recorded in brand-release.json."
   ],
   "limits": [
     "Standard Payment and Lucky Link claims require network gas; Lucky draws also require a variable MON oracle fee. Public gas sponsorship is disabled.",
@@ -62,10 +62,13 @@
   },
   "source_publication": {
     "branch": "metropolis",
-    "status": "Brand and copy source archive prepared; publication verification pending. GitHub branch publication still awaits repository write access.",
+    "status": "Updated source ZIP with MonliPay identity, private panel spacing and copy cleanup published and hash verified. GitHub branch publication still awaits repository write access.",
     "archive": "output/submission/monlipay-metropolis-source-brand-20261013.zip",
     "instruction": "Use the live source archive for verification while the GitHub branch awaits write access. The original repository is the existing baseline.",
     "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-brand-20261013.zip",
-    "manifest_url": "https://monlipay.xyz/submission/source-manifest.json"
+    "manifest_url": "https://monlipay.xyz/submission/source-manifest.json",
+    "commit": "bd54fdcbe8de94e9ae0c841ece506a2406c831b4",
+    "archive_sha256": "de4bbbf36bf3bd449a4b0f875f68767706e8e11cc703ca0e1c17b1b046095148",
+    "verified_at": "2026-10-13T09:09:56.699666+00:00"
   }
 }
