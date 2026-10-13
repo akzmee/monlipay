@@ -1,5 +1,5 @@
 {
-  "status": "Contracts verified, both frontend builds passed, design review ship; awaiting frontend activation",
+  "status": "Deployed and live verified on mainnet and testnet",
   "features": [
     "Anyone public giveaway without recipient list, 1 to 100 first-come wallet slots",
     "Selected-wallet mode preserved",
@@ -35,6 +35,53 @@
       "disposition": "ship",
       "scope": "Creation UI, six desktop/mobile captures, dark and light states",
       "materialFixes": []
+    },
+    "liveBrowser": {
+      "origins": {
+        "https://monlipay.xyz": {
+          "anyoneDefault": true,
+          "noRecipientField": true,
+          "selectedHasRecipients": true,
+          "sharedTokenPicker": true,
+          "usdcLogo": true,
+          "usdcAddress": "https://monadscan.com/address/0x754704Bc059F8C67012fEd69BC8A327a5aafb603",
+          "usdcSelected": true
+        },
+        "https://testnet.monlipay.xyz": {
+          "anyoneDefault": true,
+          "noRecipientField": true,
+          "selectedHasRecipients": true,
+          "sharedTokenPicker": true,
+          "nativeToken": true
+        }
+      },
+      "legacyTitle": "MonliPay deployment smoke test",
+      "v2Title": "Open giveaway verification",
+      "openEnded": true,
+      "unknownVaultRejected": true,
+      "privateGatePresent": true
+    },
+    "http": [
+      {
+        "origin": "https://monlipay.xyz",
+        "sourceArchiveHashVerified": true,
+        "publicManifestMatches": true,
+        "releaseReceiptReadable": true
+      },
+      {
+        "origin": "https://testnet.monlipay.xyz",
+        "sourceArchiveHashVerified": true,
+        "publicManifestMatches": true,
+        "releaseReceiptReadable": true
+      }
+    ],
+    "documentation": {
+      "status": "complete",
+      "systemFilesPreserved": true,
+      "updated": [
+        "PRODUCT.md",
+        ".impeccable/surfaces/web-src-app-create-lucky-page-tsx.md"
+      ]
     }
   },
   "contracts": {
@@ -151,5 +198,67 @@
     "No V2 mainnet pool was funded in this release. Testnet funded smoke used native MON; ERC20 coverage is local.",
     "The existing video remains a historical recording and does not demonstrate the new open mode."
   ],
-  "portalSubmitted": false
+  "portalSubmitted": false,
+  "activation": {
+    "activatedAt": "2026-10-13T09:57:38.062549+00:00",
+    "images": {
+      "monlipay-mainnet": "sha256:35a6c27c914ac2ff706f82c67b33c0b37cc8425dfdcd7e78470612fcb84455f2",
+      "monlipay-testnet": "sha256:1d34fc6e31a4cb685b83de87aa43bdf8d020d6dbbdcf0da383952230c2392b25"
+    },
+    "health": {
+      "monlipay-mainnet": "healthy",
+      "monlipay-testnet": "healthy"
+    },
+    "encryptedRecordsPreserved": true,
+    "state": {
+      "mainnet": {
+        "backup_profiles": {
+          "rows": 3,
+          "sha256": "575bd0ea5faf55fbd37e899d78b24416dc4a276b899eb9a2280b2e29f3843fab"
+        },
+        "link_backups": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "link_passkeys": {
+          "rows": 2,
+          "sha256": "6a3714c9f8507533c97da9e78be261fe118f046f4ef3dd9587c6c45028111837"
+        },
+        "private_payment_records": {
+          "rows": 1,
+          "sha256": "8bc10c102ef31854cfe508b514b96bbd2e9f83f96d72fe82e6f7d7d8926fabdd"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      },
+      "testnet": {
+        "backup_profiles": {
+          "rows": 1,
+          "sha256": "e6a62b54efe723b777810d0a6794b460dbc1a6e7d412d96b0792fa3dc3de3005"
+        },
+        "link_backups": {
+          "rows": 1,
+          "sha256": "817ef2cb582ad997acb6097c1490dd05ecbe514443865324d4040e35120901ef"
+        },
+        "link_passkeys": {
+          "rows": 1,
+          "sha256": "d7ed2d993edc1be03dfd6e66abcb5d55a0fd636e0ed295eda07a87bc97eab306"
+        },
+        "private_payment_records": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      }
+    }
+  },
+  "sourceManifest": {
+    "file": "monlipay-metropolis-source-open-20261013.zip",
+    "revision": "a4e4c59950804c0bb7405fc30bc6849273012fbc",
+    "files": 312,
+    "bytes": 2421768,
+    "sha256": "cd89bf72a6a7c26b3e0a1f9d695bfffc54570084d188b49168f30260cc5d9a13"
+  },
+  "verifiedAt": "2026-10-13T10:00:10.524040+00:00"
 }

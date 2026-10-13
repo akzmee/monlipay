@@ -65,10 +65,13 @@
   },
   "source_publication": {
     "branch": "metropolis",
-    "status": "Open giveaway source archive prepared; publication verification pending. GitHub branch publication still awaits repository write access.",
+    "status": "Open giveaway and shared token picker source ZIP published and hash verified on both live sites. GitHub branch publication still awaits repository write access.",
     "archive": "output/submission/monlipay-metropolis-source-open-20261013.zip",
     "instruction": "Use the live source archive for verification while the GitHub branch awaits write access. The original repository is the existing baseline.",
     "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-open-20261013.zip",
-    "manifest_url": "https://monlipay.xyz/submission/source-manifest.json"
+    "manifest_url": "https://monlipay.xyz/submission/source-manifest.json",
+    "commit": "a4e4c59950804c0bb7405fc30bc6849273012fbc",
+    "archive_sha256": "cd89bf72a6a7c26b3e0a1f9d695bfffc54570084d188b49168f30260cc5d9a13",
+    "verified_at": "2026-10-13T10:00:10.524040+00:00"
   }
 }
