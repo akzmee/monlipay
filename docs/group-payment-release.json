@@ -1,5 +1,5 @@
 {
-  "status": "Contracts deployed and verified; frontend release in progress",
+  "status": "Deployed and live verified on mainnet and testnet",
   "features": [
     "Group Payment replaces Lucky Link as the visible mode name; Equal amount is the default and Random amount remains available.",
     "Equal pools require exact division in token base units: 100 tokens / 10 recipients = 10 tokens each, without rounding away funds.",
@@ -44,7 +44,48 @@
         ".impeccable/surfaces/web-src-app-page-tsx.md"
       ],
       "preExistingDrift": "Incumbent picker documentation describes two columns/640px while the established implementation uses three columns/840px including Private. System files preserved."
-    }
+    },
+    "http": [
+      {
+        "origin": "https://monlipay.xyz",
+        "sourceArchiveHashVerified": true,
+        "publicManifestMatches": true,
+        "releaseReceiptReadable": true
+      },
+      {
+        "origin": "https://testnet.monlipay.xyz",
+        "sourceArchiveHashVerified": true,
+        "publicManifestMatches": true,
+        "releaseReceiptReadable": true
+      }
+    ],
+    "liveBrowser": {
+      "origins": {
+        "https://monlipay.xyz": {
+          "equalDefault": true,
+          "anyoneDefault": true,
+          "nativePreview": true,
+          "tokenPreview": true,
+          "randomSelectedAvailable": true,
+          "legacyCreateRedirect": true
+        },
+        "https://testnet.monlipay.xyz": {
+          "equalDefault": true,
+          "anyoneDefault": true,
+          "nativePreview": true,
+          "testnetNativeRegistry": true,
+          "randomSelectedAvailable": true,
+          "legacyCreateRedirect": true
+        }
+      },
+      "equalCompleted": true,
+      "equalTokenShare": true,
+      "legacyV1": true,
+      "legacyV2": true,
+      "unknownVaultRejected": true,
+      "privateGatePresent": true
+    },
+    "browserConsoleNote": "Cloudflare-injected analytics beacon is blocked by the existing Content Security Policy. Functional payment and navigation checks passed; no analytics permission was added."
   },
   "contracts": {
     "143": {
@@ -186,5 +227,67 @@
   ],
   "portalSubmitted": false,
   "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip",
-  "updatedAt": "2026-10-13T12:37:34.001689+00:00"
+  "updatedAt": "2026-10-13T12:48:32.530997+00:00",
+  "sourceManifest": {
+    "file": "monlipay-metropolis-source-group-20261013.zip",
+    "revision": "61f08a4967fd3a47f2286738babbb55a7898cd19",
+    "files": 330,
+    "bytes": 2449039,
+    "sha256": "970bf5f8a86f23ea57cea677a23e7dd56b984b5a64e7d677896677e72396eb29"
+  },
+  "activation": {
+    "activatedAt": "2026-10-13T12:44:42.774201+00:00",
+    "images": {
+      "monlipay-mainnet": "sha256:a7b2a5ca1c770d02a4c17d65f934ca1081347b35f086a01415f28330f4ee4f1e",
+      "monlipay-testnet": "sha256:539b4e42b9ee61932f024a738b321ad7deaad947dad307e7ffcfb9e15fb9dbb0"
+    },
+    "health": {
+      "monlipay-mainnet": "healthy",
+      "monlipay-testnet": "healthy"
+    },
+    "encryptedRecordsPreserved": true,
+    "state": {
+      "mainnet": {
+        "backup_profiles": {
+          "rows": 3,
+          "sha256": "575bd0ea5faf55fbd37e899d78b24416dc4a276b899eb9a2280b2e29f3843fab"
+        },
+        "link_backups": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "link_passkeys": {
+          "rows": 2,
+          "sha256": "6a3714c9f8507533c97da9e78be261fe118f046f4ef3dd9587c6c45028111837"
+        },
+        "private_payment_records": {
+          "rows": 1,
+          "sha256": "8bc10c102ef31854cfe508b514b96bbd2e9f83f96d72fe82e6f7d7d8926fabdd"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      },
+      "testnet": {
+        "backup_profiles": {
+          "rows": 1,
+          "sha256": "e6a62b54efe723b777810d0a6794b460dbc1a6e7d412d96b0792fa3dc3de3005"
+        },
+        "link_backups": {
+          "rows": 1,
+          "sha256": "817ef2cb582ad997acb6097c1490dd05ecbe514443865324d4040e35120901ef"
+        },
+        "link_passkeys": {
+          "rows": 1,
+          "sha256": "d7ed2d993edc1be03dfd6e66abcb5d55a0fd636e0ed295eda07a87bc97eab306"
+        },
+        "private_payment_records": {
+          "rows": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "integrity": "ok",
+        "foreignKeys": 0
+      }
+    }
+  },
+  "verifiedAt": "2026-10-13T12:48:32.530997+00:00"
 }

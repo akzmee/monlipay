@@ -1,5 +1,5 @@
 {
-  "assessedAt": "2026-10-13T12:37:34.001689+00:00",
+  "assessedAt": "2026-10-13T12:46:55.549398+00:00",
   "criteriaSource": "Track description supplied by the user in this conversation",
   "track": "Consumer Products & Payments",
   "deadline": "2026-10-14T10:59:00+07:00",
@@ -98,7 +98,7 @@
     },
     {
       "item": "Live product + judge instructions",
-      "status": "Existing product live; Group frontend rollout in progress",
+      "status": "Live on both networks; instructions available in docs/metropolis-submission.json",
       "mainnet": "https://monlipay.xyz",
       "testnet": "https://testnet.monlipay.xyz",
       "action": "Judge guide must explain wallet, faucet MON, fees and testnet network. No login credentials are needed; signature is required for saved records."
@@ -109,7 +109,7 @@
     }
   ],
   "priorityBeforeDeadline": [
-    "Complete Group frontend release and preserve existing data.",
+    "Group frontend release complete; keep the verified working build stable while completing submission materials.",
     "Publish the current source to the required public GitHub repository.",
     "Record and upload current technical demo and founder pitch to accepted platforms.",
     "Choose one initial segment and run five real user trials.",

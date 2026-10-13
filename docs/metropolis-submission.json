@@ -36,7 +36,8 @@
     "Landing motion deployed on both networks; live pointer and scroll parallax, reduced motion, Create navigation and private-payment gates checked. Existing encrypted records remained unchanged during replacement.",
     "Brand and copy refinement: 75 existing component tests and both production builds passed. Private panel measured 28px desktop / 20px mobile; production TS/TSX text scan found no em dashes. Existing lint findings in Bridge, LinkCard and ShareLink matched the prior commit. Impeccable reviewed seven captures and returned ship. Both deployments passed live browser checks; encrypted records were preserved and the source download hash matched. Details are recorded in brand-release.json.",
     "V2 LuckyVault exact-match verified on mainnet/testnet. Open giveaway funded on testnet with real Pyth callback, withdrawal and expiry refund; duplicate claims and withdrawals rejected. Contract suite and web tests passed; deployment receipt in open-lucky-release.json.",
-    "GroupVault exact-match verified on both chains. 141 contract tests and 804 web tests pass. Testnet native and six-decimal token claims settled; a 100-token/10-recipient pool paid exactly 10 tokens and returned 90 unclaimed tokens after expiry. Duplicate claims and unauthorized refunds rejected. See group-payment-release.json."
+    "GroupVault exact-match verified on both chains. 141 contract tests and 804 web tests pass. Testnet native and six-decimal token claims settled; a 100-token/10-recipient pool paid exactly 10 tokens and returned 90 unclaimed tokens after expiry. Duplicate claims and unauthorized refunds rejected. See group-payment-release.json.",
+    "Group frontend deployed on both networks; live Equal/Random creation, exact mainnet USDC preview, completed/refunded testnet claims, legacy V1/V2 links and private-wallet gate passed. Six-capture Impeccable review returned ship. Existing encrypted records were preserved. Both public source archive hashes matched."
   ],
   "limits": [
     "Public Payment and Group Payment claims require network gas. Random Group Payment also requires a variable MON oracle fee. Public gas sponsorship is disabled.",
@@ -48,7 +49,7 @@
     "The 80-second transaction demo uses Monad testnet and an automated dedicated wallet; the added 24-second privacy interface walkthrough is explicitly separate from the real funded mainnet pilot.",
     "Group Payment pools have a fixed quota and expiry; they cannot be topped up or reused. The existing demo predates Equal Group Payment. No consumer user-testing results have been provided."
   ],
-  "submission_status": "Not submission-complete. Group contracts verified and frontend rollout in progress. Current public GitHub branch, accepted-platform technical demo URL, founder pitch video and human user-testing evidence remain outstanding. Portal submission has not been sent.",
+  "submission_status": "Not submission-complete. Group Payment deployed on mainnet and testnet with encrypted records preserved. Current public GitHub branch, accepted-platform technical demo URL, founder pitch video and human user-testing evidence remain outstanding. Portal submission has not been sent.",
   "judge_quickstart": [
     "Watch https://monlipay.xyz/demo (1 minute 44 seconds).",
     "Open https://testnet.monlipay.xyz/create/group with a Monad testnet wallet. Both sender and recipient need faucet MON for gas. Select Equal amount for a fixed share, or Random amount for a Pyth draw. Anyone accepts first-come wallets; Selected wallets restricts eligibility.",
@@ -70,8 +71,12 @@
   },
   "source_publication": {
     "branch": "metropolis",
-    "status": "Current branch not published; repository write access rejected for authenticated account dwlpra. Group source archive pending release.",
+    "status": "Group source archive published and hash verified on both live sites. Current GitHub branch is not published; repository write access remains blocked.",
     "instruction": "Publish current source to a public GitHub branch before submitting. The ZIP does not fulfill the required GitHub deliverable.",
-    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip"
+    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip",
+    "commit": "61f08a4967fd3a47f2286738babbb55a7898cd19",
+    "archive_sha256": "970bf5f8a86f23ea57cea677a23e7dd56b984b5a64e7d677896677e72396eb29",
+    "manifest_url": "https://monlipay.xyz/submission/source-manifest-group.json",
+    "verified_at": "2026-10-13T12:48:32.530997+00:00"
   }
 }
