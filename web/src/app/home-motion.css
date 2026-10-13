@@ -1,0 +1,85 @@
+/* The envelope is the moving object; copy and controls stay on the page plane. */
+.mp-hero-flight {
+  perspective: 1100px;
+  transform: translate3d(0, var(--hero-drift, 0px), 0) rotate(var(--hero-turn, 0deg));
+}
+
+.mp-hero-depth {
+  transform: translate3d(var(--hero-x, 0px), var(--hero-y, 0px), 0)
+    rotateX(var(--hero-tilt-x, 0deg)) rotateY(var(--hero-tilt-y, 0deg));
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mp-hero-grid {
+  inset-block: -56px;
+  transform: translate3d(0, var(--hero-grid-drift, 0px), 0);
+}
+
+.mp-hero-art .lucky-art {
+  overflow: visible;
+}
+
+.mp-hero-art .lucky-art-share {
+  translate: 0 var(--hero-near, 0px);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mp-hero-art .lucky-art-share + .lucky-art-share {
+  translate: 0 var(--hero-far, 0px);
+}
+
+.mp-home :is(.mp-button, .mp-text-button, .mp-home-footer a) .mp-arrow-icon {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mp-home :is(.mp-button, .mp-text-button, .mp-home-footer a):is(:hover, :focus-visible) .mp-arrow-icon {
+  transform: translate(2px, -2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mp-hero[data-motion="ready"] .mp-hero-arrival {
+    animation: mp-envelope-arrive 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .mp-hero[data-motion="ready"] .lucky-art-share {
+    animation: mp-token-release 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .mp-hero[data-motion="ready"] .lucky-art-share + .lucky-art-share {
+    animation-duration: 800ms;
+  }
+
+  .mp-hero[data-motion="ready"] h1 {
+    animation: mp-title-arrive 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes mp-envelope-arrive {
+  from { opacity: 0.65; transform: translate3d(24px, 26px, 0) rotate(4deg) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes mp-token-release {
+  from { transform: translateY(24px) rotate(-12deg) scale(0.85); }
+  to { transform: none; }
+}
+
+@keyframes mp-title-arrive {
+  from { opacity: 0.75; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-hero-flight,
+  .mp-hero-depth,
+  .mp-hero-grid,
+  .mp-home :is(.mp-button, .mp-text-button, .mp-home-footer a) .mp-arrow-icon {
+    transform: none;
+    transition: none;
+  }
+
+  .mp-hero-art .lucky-art-share {
+    translate: none;
+  }
+}

@@ -19,9 +19,21 @@ STORY: Understand payment links, choose Create a link, then use the default Paym
 
 FIRST VIEWPORT: Left-aligned three-line display headline, two actions and short supporting copy; a large envelope fills the right. Below, a separated row anchors Monad and group distribution. Mobile stacks copy, actions and illustration, with the primary action preceding the artwork.
 
-FORM: User-pinned reference extended directly from the app's new visual system. No generated comp or invented trust claims. The landing stays still; the functional envelope-opening moment belongs to the claim flow, with reduced motion showing the final state.
+FORM: User-pinned reference extended directly from the app's new visual system. No generated comp or invented trust claims. The user's request for animation and parallax “seperti web3 native” adds a brief hero arrival and bounded artwork depth. Text and actions remain stationary during scroll; the functional envelope-opening moment remains independent in the claim flow. Reduced motion shows the static landing and immediate final claim state.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Landing motion extension
+
+Keep the original envelope, typography, palette, composition, and payment-first copy. The title arrives in `560ms`, the envelope in `760ms`, and its two shares in `720ms` and `800ms`, using `cubic-bezier(0.16, 1, 0.3, 1)`. Landing action arrows shift slightly on hover or keyboard focus; controls retain visible focus and their existing targets.
+
+Scroll parallax moves the envelope, shares, and background grid at different depths. Maximum envelope travel is `110px`, reduced to `30px` at widths up to `640px`; the headline, explanatory text, and calls to action stay on the page plane. Fine mouse input adds bounded perspective with a `260ms` settling transition. Coarse and touch input do not tilt the artwork. Updates use event-triggered animation frames, stop while the hero is offscreen or the document is hidden, and introduce no continuous loops. The enhancement cleans up its listeners, observer, and pending frame on disposal.
+
+Reduced motion removes the arrival, parallax, perspective, and arrow movement, leaving the complete static hero visible. The server-rendered content and calls to action also work without JavaScript. Landing decoration does not signal claim assignment or alter the claim flow's existing envelope reveal.
+
+The finish review is **ship**, with no material fixes: [motion-finish-review.md](../../output/playwright/motion-finish-review.md). [Verification](../../output/playwright/motion-verification.json) records pointer and scroll behavior, reduced motion, actual keyboard navigation, coarse-pointer behavior, no-JavaScript navigation, overflow checks from `320px` through `1440px`, lint, type checking, and mainnet/testnet builds. Browser coverage uses Chromium desktop and mobile emulation; it does not establish physical low-end-device performance.
+
+Reviewed captures: [desktop dark](../../output/playwright/motion-desktop-dark.png), [desktop light](../../output/playwright/motion-desktop-light.png), [desktop scrolled](../../output/playwright/motion-desktop-scrolled.png), [mobile dark](../../output/playwright/motion-mobile-dark.png), [mobile light](../../output/playwright/motion-mobile-light.png), and [reduced motion](../../output/playwright/motion-reduced.png), compared with the [baseline](../../output/playwright/motion-before.png). The extension adds no raster asset or product capability.
 
 ## Privacy and demo extension
 

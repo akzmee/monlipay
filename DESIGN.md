@@ -238,9 +238,11 @@ Creation modes share one heading and a two-column picker capped at (`640px`). Ea
 
 ### Prismatic envelope
 
-Reuse the original `LuckyArtwork` SVG for the landing, preview, success, and claim states. Its facets, pale flap, small seal, floating shares, and quiet cross marks form one recognizable object. The landing is still. When a claim becomes assigned, the flap opens and the shares move using a reveal transition (`650ms`, `cubic-bezier(0.16, 1, 0.3, 1)`). Pending draw dots use a soft opacity cycle (`1.5s`) with short staggered delays.
+Reuse the original `LuckyArtwork` SVG for the landing, preview, success, and claim states. Its facets, pale flap, small seal, floating shares, and quiet cross marks form one recognizable object. The user-approved landing motion adds a brief arrival: the title settles first (`560ms`), followed by the envelope (`760ms`) and its two shares (`720ms` and `800ms`), using `cubic-bezier(0.16, 1, 0.3, 1)`.
 
-Reduced motion removes the flap/share transition and pending-dot animation. The assigned state remains visible immediately; no information depends on animation. Global reduced-motion CSS also minimizes other transition and animation durations.
+During landing scroll, the envelope, shares, and grid move at different depths while text and actions stay on the page plane. Envelope travel is bounded (`110px` maximum; `30px` at widths up to `640px`). Fine mouse input adds bounded perspective; touch input does not tilt the artwork. Motion updates are event-driven, idle while the hero is offscreen or the document is hidden, and have no continuous animation loop. Reduced motion shows the static hero immediately, and its content and actions remain available without JavaScript.
+
+The claim reveal remains an independent financial state change: when a claim becomes assigned, the flap opens and the shares move using a reveal transition (`650ms`, `cubic-bezier(0.16, 1, 0.3, 1)`). Pending draw dots use a soft opacity cycle (`1.5s`) with short staggered delays. Reduced motion removes the flap/share transition and pending-dot animation. The assigned state remains visible immediately; no information depends on animation. Global reduced-motion CSS also minimizes other transition and animation durations.
 
 ## Do's and Don'ts
 

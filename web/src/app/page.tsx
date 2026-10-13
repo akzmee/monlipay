@@ -2,11 +2,12 @@ import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { LuckyArtwork } from "@/components/LuckyArtwork";
 import { DemoVideo } from "@/components/DemoVideo";
+import { HeroMotion } from "@/components/HeroMotion";
 
 export default function HomePage() {
   return (
     <div className="mp-home">
-      <section className="mp-hero" aria-labelledby="home-title">
+      <HeroMotion>
         <div className="mp-hero-grid" aria-hidden="true" />
         <div className="mp-hero-copy">
           <h1 id="home-title">
@@ -30,13 +31,19 @@ export default function HomePage() {
           </div>
         </div>
         <div className="mp-hero-art" aria-hidden="true">
-          <LuckyArtwork />
+          <div className="mp-hero-flight">
+            <div className="mp-hero-depth">
+              <div className="mp-hero-arrival">
+                <LuckyArtwork />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="mp-hero-foot">
           <span>Built for Monad</span>
           <span>From your wallet to their inbox.</span>
         </div>
-      </section>
+      </HeroMotion>
       <section className="mp-home-guide" aria-labelledby="guide-title">
         <div>
           <h2 id="guide-title">

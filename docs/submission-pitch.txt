@@ -12,7 +12,7 @@ Privacy is specific, not absolute: claim secrets are encrypted in the browser; t
 Try: https://monlipay.xyz
 Testnet: https://testnet.monlipay.xyz
 Video: https://monlipay.xyz/demo
-Source: https://monlipay.xyz/submission/monlipay-metropolis-source.zip
+Source: https://monlipay.xyz/submission/monlipay-metropolis-source-motion-20261013.zip
 Original repository: https://github.com/akzmee/monlipay
 Pilot evidence: https://monlipay.xyz/submission/anoma-private-payment-readiness.json
 

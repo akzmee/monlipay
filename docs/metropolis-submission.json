@@ -20,7 +20,8 @@
     "Real testnet product demo and public video player.",
     "Passkey access to browser-encrypted Payment Links, legacy-key migration, wallet-scoped persistence, idle locking and an encrypted retry queue.",
     "AnomaPay Private Payment create, claim and reclaim flows, lazy-loaded SDK/WASM, verified onchain resources, exact Permit2 binding, fee review, encrypted private account and operation records, and interruption recovery without automatic duplicate submission.",
-    "Unified Payment, Private and Lucky history filters; explicit privacy page; 104-second video combining real testnet transactions with a labelled privacy interface walkthrough."
+    "Unified Payment, Private and Lucky history filters; explicit privacy page; 104-second video combining real testnet transactions with a labelled privacy interface walkthrough.",
+    "Responsive landing motion: envelope/token arrival, layered scroll parallax, mouse perspective, reduced-motion and static-render fallbacks, with no added animation dependency."
   ],
   "validation": [
     "Real native Lucky Link testnet creation, Pyth callback, withdrawal and expiry refund; 122 existing contract tests passed during this build window.",
@@ -45,24 +46,21 @@
     "Open https://testnet.monlipay.xyz/create with a Monad testnet wallet for standard MON payment or Lucky Link testing. A sender and receiver need faucet MON; the selected wallet controls group eligibility.",
     "Open https://monlipay.xyz/my-links, verify your wallet and use a PRF-compatible passkey to open encrypted links. Contacts use the wallet signature session.",
     "Explore https://monlipay.xyz/create/private on mainnet. Connect a wallet and set up a passkey before funding. Review fees and privacy limits. No mainnet spend is necessary to review the already-published pilot receipts.",
-    "Download the source archive at https://monlipay.xyz/submission/monlipay-metropolis-source.zip. It includes the build-window delta, contract source, tests, pinned integration, setup instructions, and public transaction receipts."
+    "Download the source archive at https://monlipay.xyz/submission/monlipay-metropolis-source-motion-20261013.zip. It includes the build-window delta, contract source, tests, pinned integration, setup instructions, and public transaction receipts."
   ],
   "sources": {
     "rules": "https://monad.xyz/developers/hackathons/metropolis",
     "portal": "https://hackathon.monad.xyz",
     "sourceBranch": "https://github.com/akzmee/monlipay/tree/metropolis",
     "privateProof": "https://monlipay.xyz/submission/anoma-private-payment-readiness.json",
-    "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
+    "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-motion-20261013.zip"
   },
   "source_publication": {
-    "commit": "f0ee436e46df6be6dc8fbd59a4330f1f38655e8f",
     "branch": "metropolis",
-    "status": "Complete source ZIP published and verified. GitHub branch push remains denied to authenticated account dwlpra.",
-    "archive": "output/submission/monlipay-metropolis-source.zip",
+    "status": "Source snapshot updated with landing motion. See the live source manifest for the exact published revision and SHA-256; GitHub branch push still awaits write access.",
+    "archive": "output/submission/monlipay-metropolis-source-motion-20261013.zip",
     "instruction": "Use the live source archive for verification while the GitHub branch awaits write access. The original repository is the existing baseline.",
-    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip",
-    "archive_sha256": "a73e59971105584dd6ebca3a758dffa52d1c1895c8f19c903a0a94a417694fd0",
-    "verified_at": "2026-10-13T01:11:55.337881+00:00",
+    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-motion-20261013.zip",
     "manifest_url": "https://monlipay.xyz/submission/source-manifest.json"
   }
 }

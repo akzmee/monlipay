@@ -1,0 +1,55 @@
+{
+  "status": "Production builds passed; awaiting activation",
+  "scope": "Landing motion only; payment contracts, wallets, encryption and transaction behavior unchanged",
+  "features": [
+    "One envelope and token arrival, 560\u2013800ms",
+    "Layered scroll parallax; 110px desktop and 30px compact maximum",
+    "Fine-mouse perspective tilt with bounded angles",
+    "Reduced-motion static fallback and visible server-rendered content",
+    "No perpetual loop; offscreen and hidden scheduling suspended"
+  ],
+  "checks": {
+    "pointer": true,
+    "scrollParallax": true,
+    "reducedMotionDisablesMovement": true,
+    "keyboardFocusAndEnter": true,
+    "createNavigation": true,
+    "demoAnchor": true,
+    "noJavaScriptCTA": true,
+    "noHorizontalOverflowWidths": [
+      320,
+      390,
+      768,
+      1024,
+      1440
+    ],
+    "touchEmulation": {
+      "coarsePointer": true,
+      "tilt": "0deg",
+      "driftAt250pxScroll": -7.508720008455766
+    },
+    "video": {
+      "controls": true,
+      "autoplay": false
+    },
+    "eslint": "pass",
+    "typescript": "pass",
+    "builds": [
+      "mainnet: pass",
+      "testnet: pass"
+    ],
+    "detectorFindings": [],
+    "scope": "Chromium desktop/mobile emulation; no physical low-end-device performance benchmark. Initial programmatic focus check was replaced by a real Tab/Shift+Tab keyboard check."
+  },
+  "review": {
+    "disposition": "ship",
+    "materialFixes": 0,
+    "captures": 6,
+    "baselineCaptures": 1
+  },
+  "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-motion-20261013.zip",
+  "limitations": [
+    "Checks used Chromium desktop and mobile emulation, not physical-device benchmarks."
+  ],
+  "portalSubmitted": false
+}
