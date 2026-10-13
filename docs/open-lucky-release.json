@@ -1,0 +1,155 @@
+{
+  "status": "Contracts verified, both frontend builds passed, design review ship; awaiting frontend activation",
+  "features": [
+    "Anyone public giveaway without recipient list, 1 to 100 first-come wallet slots",
+    "Selected-wallet mode preserved",
+    "Shared Payment Link token registry, logos, contract addresses, search and import",
+    "Legacy links and history continue to use their original contract"
+  ],
+  "checks": {
+    "webTests": {
+      "fullSuitePassed": 788,
+      "additionalHistoryTestsPassed": 2
+    },
+    "contractSuite": "pass, including four new open-mode tests",
+    "typescript": "pass",
+    "scopedEslint": "pass",
+    "browser": {
+      "open": {
+        "default": true,
+        "noRecipientField": true,
+        "enabled": true
+      },
+      "symbolUnclipped": true,
+      "tokenSelected": true,
+      "contractLink": "https://monadscan.com/address/0x754704Bc059F8C67012fEd69BC8A327a5aafb603",
+      "mobileOverflow": false,
+      "selectedMobileOverflow": false
+    },
+    "contractTestCount": 126,
+    "productionBuilds": {
+      "mainnet": "pass",
+      "testnet": "pass"
+    },
+    "impeccableReview": {
+      "disposition": "ship",
+      "scope": "Creation UI, six desktop/mobile captures, dark and light states",
+      "materialFixes": []
+    }
+  },
+  "contracts": {
+    "143": {
+      "network": "mainnet",
+      "chainId": 143,
+      "deployer": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+      "contractAddress": "0xa52e018765b266dbf9743cd11d126338d018ee47",
+      "transactionHash": "0xb72441f91d2d4ca0b8e67879d241d920b4179ac023c47966fa280264253dc099",
+      "blockNumber": "113007654",
+      "gasUsed": "3394695",
+      "effectiveGasPriceGwei": "102",
+      "chargedFeeMON": "0.34625889",
+      "entropy": "0xD458261E832415CFd3BAE5E416FdF3230ce6F134",
+      "provider": "0x52DeaA1c84233F7bb8C8A45baeDE41091c616506",
+      "runtimeCodeHash": "0x79b0936676a4621d6b5bbc369bd5bcbeaed6a2d8d7b56a127d2f2f665b9d35bb",
+      "artifactSha256": "90abaf4b71f83cd1757c388492f6fd45a003e3f481514fb56b9fb01ae09a6378",
+      "verifiedAt": "2026-10-13T09:41:12.872Z",
+      "version": 2,
+      "compilerVersion": "0.8.28+commit.7893614a",
+      "evmVersion": "cancun",
+      "optimizerEnabled": false,
+      "sourceVerification": {
+        "provider": "Sourcify",
+        "match": "exact_match",
+        "url": "https://repo.sourcify.dev/143/0xa52e018765b266dbf9743cd11d126338d018ee47"
+      }
+    },
+    "10143": {
+      "network": "testnet",
+      "chainId": 10143,
+      "deployer": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+      "contractAddress": "0xa52e018765b266dbf9743cd11d126338d018ee47",
+      "transactionHash": "0xb970a679e8283b4d135f52a486205c2c91b3e7fbe88c397a5f7e045c4959a910",
+      "blockNumber": "70648874",
+      "gasUsed": "3394695",
+      "effectiveGasPriceGwei": "102",
+      "chargedFeeMON": "0.34625889",
+      "entropy": "0x825c0390f379C631f3Cf11A82a37D20BddF93c07",
+      "provider": "0x6CC14824Ea2918f5De5C2f75A9Da968ad4BD6344",
+      "runtimeCodeHash": "0x1c8550e833b363f405a7f99c55a4ceaf43edfb4928ba2f0a4260ca3a07cdcbe3",
+      "artifactSha256": "90abaf4b71f83cd1757c388492f6fd45a003e3f481514fb56b9fb01ae09a6378",
+      "verifiedAt": "2026-10-13T09:41:03.195Z",
+      "version": 2,
+      "compilerVersion": "0.8.28+commit.7893614a",
+      "evmVersion": "cancun",
+      "optimizerEnabled": false,
+      "sourceVerification": {
+        "provider": "Sourcify",
+        "match": "exact_match",
+        "url": "https://repo.sourcify.dev/10143/0xa52e018765b266dbf9743cd11d126338d018ee47"
+      }
+    }
+  },
+  "testnetSmoke": {
+    "network": "testnet",
+    "chainId": 10143,
+    "contractAddress": "0xa52e018765b266dbf9743cd11d126338d018ee47",
+    "owner": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+    "packetId": "1",
+    "total": "10000000000000000",
+    "expiry": 1791884666,
+    "transactions": [
+      {
+        "label": "create",
+        "hash": "0xaeb20b939c4ecfe867a4133c9d73646860e37e8462f7a8d7d383fa741fe08e6b",
+        "gasLimit": "238883",
+        "gasPrice": "102000000000",
+        "value": "10000000000000000",
+        "status": "success",
+        "blockNumber": "70649159"
+      },
+      {
+        "label": "request",
+        "hash": "0x75337b8cbe4835321fa1b4d78c7005c2b8316071407b54d87670778e7a5c1758",
+        "gasLimit": "262875",
+        "gasPrice": "102000000000",
+        "value": "128159999999100001",
+        "status": "success",
+        "blockNumber": "70649176"
+      },
+      {
+        "label": "withdraw",
+        "hash": "0x2706f5c670f34c16d6807e6d06574568059a973aaa203df8833efd7d49073a1d",
+        "gasLimit": "86801",
+        "gasPrice": "102000000000",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70649192"
+      },
+      {
+        "label": "refund",
+        "hash": "0x67a11f126fe6aea1a7f2c0a583452142a55d50bf5d42420c2c1ccfbf6e3d449a",
+        "gasLimit": "60498",
+        "gasPrice": "102000000000",
+        "value": "0",
+        "status": "success",
+        "blockNumber": "70649816"
+      }
+    ],
+    "status": "complete",
+    "unlistedWalletCanClaim": true,
+    "duplicateRequestRejected": true,
+    "sequence": "4124",
+    "share": "6789684336300202",
+    "duplicateWithdrawalRejected": true,
+    "refundedMON": "0.003210315663699798",
+    "completedAt": "2026-10-13T09:45:52.456Z"
+  },
+  "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-open-20261013.zip",
+  "limits": [
+    "Open giveaways are public onchain. One wallet is not proof of one person.",
+    "Claims require network gas and the dynamic Pyth draw fee.",
+    "No V2 mainnet pool was funded in this release. Testnet funded smoke used native MON; ERC20 coverage is local.",
+    "The existing video remains a historical recording and does not demonstrate the new open mode."
+  ],
+  "portalSubmitted": false
+}

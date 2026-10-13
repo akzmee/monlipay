@@ -48,7 +48,7 @@ export function ContactsPicker({
   return (
     <div className="recipient-picker">
       <div className="mp-section-title">
-        <h2>Who can claim?</h2>
+        <h2>Recipients</h2>
         <span className="mp-count">{wallets.length} selected</span>
       </div>
       <p className="mp-hint">

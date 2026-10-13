@@ -2,25 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useReadContract } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import type { Address } from "viem";
 import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
-import { isLuckyConfigured, LUCKY_VAULT_ADDRESS } from "@/config/lucky";
+import { LUCKY_VAULTS, luckyClaimPath } from "@/config/lucky";
 import { luckyVaultAbi } from "@/lib/lucky-abi";
 import { historyAmount, luckyStatus } from "@/lib/link-history";
 import { ArrowIcon } from "./ArrowIcon";
 
 function LuckyRow({
   id,
+  vault,
   now,
   owner,
 }: {
   id: bigint;
+  vault: Address;
   now: number;
   owner: Address;
 }) {
   const query = useReadContract({
-    address: LUCKY_VAULT_ADDRESS,
+    address: vault,
     abi: luckyVaultAbi,
     functionName: "getPacket",
     args: [id],
@@ -58,7 +60,7 @@ function LuckyRow({
       </div>
       <Link
         className="mp-text-link"
-        href={`/lucky/claim?id=${id}&chain=${monadChain.id}`}
+        href={luckyClaimPath(id, vault)}
       >
         {status === "Refund available" ? "View refund" : "View link"}
         <ArrowIcon />
@@ -76,14 +78,23 @@ export function LuckyLinkHistory({
   now: number;
 }) {
   const [offset, setOffset] = useState(0);
-  const history = useReadContract({
-    address: LUCKY_VAULT_ADDRESS,
-    abi: luckyVaultAbi,
-    functionName: "getCreatedPackets",
-    args: [address, BigInt(offset), 10n],
-    chainId: monadChain.id,
-    query: { enabled: isLuckyConfigured, refetchInterval: 15_000 },
+  const history = useReadContracts({
+    contracts: LUCKY_VAULTS.map((vault) => ({
+      address: vault,
+      abi: luckyVaultAbi,
+      functionName: "getCreatedPackets" as const,
+      args: [address, BigInt(offset), 10n] as const,
+      chainId: monadChain.id,
+    })),
+    query: { enabled: LUCKY_VAULTS.length > 0, refetchInterval: 15_000 },
   });
+  const records = (history.data ?? []).flatMap((result, index) =>
+    result.status === "success"
+      ? result.result.map((id) => ({ id, vault: LUCKY_VAULTS[index] }))
+      : [],
+  );
+  const failed = history.isError || history.data?.some((result) => result.status === "failure");
+  const hasOlder = history.data?.some((result) => result.status === "success" && result.result.length === 10);
   return (
     <section
       className="mp-history-section"
@@ -95,13 +106,13 @@ export function LuckyLinkHistory({
           Create Lucky Link <ArrowIcon direction="up-right" />
         </Link>
       </div>
-      {!isLuckyConfigured ? (
+      {LUCKY_VAULTS.length === 0 ? (
         <p className="mp-hint">
           Lucky Links are not available on this network yet.
         </p>
-      ) : history.isError ? (
+      ) : failed ? (
         <p className="mp-error" role="alert">
-          Could not load Lucky Links.{" "}
+          Some Lucky Links could not be loaded.{" "}
           <button
             className="mp-text-button"
             onClick={() => void history.refetch()}
@@ -113,16 +124,17 @@ export function LuckyLinkHistory({
         <p className="mp-hint" role="status">
           Loading Lucky Links…
         </p>
-      ) : !history.data?.length ? (
+      ) : !records.length ? (
         <p className="mp-hint">
           {offset
             ? "No older Lucky Links."
-            : "Share a pool with selected wallets. Your funded Lucky Links will appear here."}
+            : "Create a giveaway for anyone or selected wallets. Your funded Lucky Links will appear here."}
         </p>
-      ) : (
+      ) : null}
+      {records.length > 0 && (
         <ul>
-          {history.data.map((id) => (
-            <LuckyRow key={id.toString()} id={id} now={now} owner={address} />
+          {records.map(({ id, vault }) => (
+            <LuckyRow key={`${vault}:${id}`} id={id} vault={vault} now={now} owner={address} />
           ))}
         </ul>
       )}
@@ -135,7 +147,7 @@ export function LuckyLinkHistory({
             Newer links
           </button>
         )}
-        {history.data?.length === 10 && (
+        {hasOlder && (
           <button
             className="mp-text-button"
             onClick={() => setOffset(offset + 10)}

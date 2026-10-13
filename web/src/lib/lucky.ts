@@ -7,6 +7,8 @@ import {
 } from "viem";
 import { MAX_LUCKY_RECIPIENTS } from "@/config/lucky";
 
+export type LuckyAccess = "open" | "selected";
+
 export function parseRecipients(input: string): Address[] {
   const entries = input.split(/[\s,;]+/).filter(Boolean);
   const unique = new Map<string, Address>();
@@ -25,6 +27,7 @@ export function validateLuckyInput(
   slots: number,
   wallets: Address[],
   title: string,
+  access: LuckyAccess = "selected",
 ) {
   if (
     !/^\d+(\.\d+)?$/.test(amount) ||
@@ -39,9 +42,13 @@ export function validateLuckyInput(
   if (
     !Number.isInteger(slots) ||
     slots < 1 ||
+    slots > MAX_LUCKY_RECIPIENTS
+  )
+    throw new Error("Choose between 1 and 100 recipient slots.");
+  if (access === "selected" && (
     slots > wallets.length ||
     wallets.length > MAX_LUCKY_RECIPIENTS
-  )
+  ))
     throw new Error(
       "Choose at least as many eligible wallets as there are recipient slots (up to 100).",
     );

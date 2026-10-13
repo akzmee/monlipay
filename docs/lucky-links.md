@@ -1,6 +1,6 @@
 # Lucky Links
 
-A funded link for a chosen group. The sender selects a token, total pool, recipient slots, expiry, title, and up to 100 eligible wallets. Select private saved contacts or paste new addresses. Saving a contact is optional. A wallet gets one draw; if the eligible list is larger than the quota, the first wallets to request a draw reserve the available slots.
+A funded link with two recipient modes. Anyone creates a public giveaway without a recipient list. Selected wallets limits claims to up to 100 addresses from contacts or pasted input. The sender chooses a token, total pool, 1 to 100 recipient slots, expiry and title. Slots go to the first successful onchain requests, one draw per wallet per link. The recipient still connects a wallet and pays the displayed fees.
 
 ## What is new for Metropolis
 
@@ -14,7 +14,7 @@ MonliPay remains a payment-link product. The landing leads to `/create`, where P
 
 ## Allocation and refunds
 
-1. The sender deposits MON or a supported standard ERC-20. Recipient eligibility becomes an immutable on-chain snapshot. Updating contacts later does not change that snapshot.
+1. The sender deposits MON or a supported standard ERC-20. The access mode is fixed at creation. Selected-wallet eligibility is an immutable onchain snapshot; updating contacts later does not change it. Open giveaways accept any wallet.
 2. `requestClaim` authenticates the recipient, reserves a slot, and forwards the current oracle fee to Pyth Entropy V2. The sender's deposited pool is not used to pay oracle fees.
 3. Only the configured Entropy contract and provider can deliver randomness. The callback allocates a share without sending tokens to the recipient.
 4. `withdrawShare` lets the recipient collect the assigned amount in a separate transaction. A failed transfer can be retried, including to another destination through the contract.
@@ -24,7 +24,7 @@ Shares are not independent or identically distributed. Each settled draw, except
 
 The one-claim rule applies to wallets, not unique people. Titles, eligible addresses, pool values, and claims are public blockchain data. Contact names remain in the backend database. Contacts are access-controlled, not end-to-end encrypted.
 
-Native MON and ordinary ERC-20 transfers are supported. Fee-on-transfer deposits revert. Rebasing, blacklistable, malicious, or later-upgraded token behavior can affect custody; the UI offers a curated token list rather than arbitrary imports. Both network gas and an oracle fee are required for the draw, followed by network gas for collection. The UI reads the fee rather than hardcoding it.
+Native MON and ordinary ERC-20 transfers are supported. Fee-on-transfer deposits revert. Rebasing, blacklistable, malicious, or later-upgraded token behavior can affect custody; the UI reuses Payment Link’s token registry, avatar and search/import modal. Imported token metadata is read onchain, not a security endorsement. The selected token’s contract address links to the explorer. Both network gas and an oracle fee are required for the draw, followed by network gas for collection. The UI reads the fee rather than hardcoding it.
 
 ## Local development
 
@@ -153,3 +153,11 @@ and lint of the changed UI/metadata/history files passed. Browser playback advan
 with readyState 4 and the expected 80-second duration. My Links and the demo player
 were inspected at 1440px and 390px in light and dark themes, without horizontal
 overflow. These checks do not constitute a full security audit.
+
+## Open giveaways and shared token picker (2026-10-13)
+
+`createOpenPacket` creates a public packet with no recipient list. `createPacket` retains its required allowlist and never interprets an empty list as open access. Both paths share funding checks, reservation, Pyth callbacks, withdrawal and refunds. `openPackets` is immutable after creation. Open packets are public onchain and can be discovered without the shared URL. The first successful requests, not browser clicks, reserve slots. Wallet limits do not identify unique people.
+
+New links include the contract address alongside the packet ID and chain. The frontend accepts only known deployments. Older links without a contract parameter still resolve to V1, while My Links reads both versions and keeps identically numbered packets separate. V1 deployment records are retained as `LuckyVault.v1.json`.
+
+Both V2 contracts are deployed and verified with exact Sourcify matches. The testnet native-MON open pool completed creation, an unlisted wallet’s draw, actual Pyth callback, collection and expiry refund. Duplicate requests and withdrawals were rejected. No V2 mainnet pool was funded. See `contracts/deployments/10143/LuckyVault.open-smoke.json` and `docs/open-lucky-release.json` for release status and evidence.

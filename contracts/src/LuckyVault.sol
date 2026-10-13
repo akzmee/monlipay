@@ -14,7 +14,7 @@ interface ILuckyEntropy {
         returns (uint64);
 }
 
-/// @notice One funded link, an immutable wallet allowlist, and a random share per claimant.
+/// @notice One funded link, open or selected-wallet access, and a random share per claimant.
 /// @dev Contact names stay off-chain. Entropy callbacks allocate funds; recipients pull payments.
 contract LuckyVault is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -64,6 +64,7 @@ contract LuckyVault is ReentrancyGuard {
     }
     mapping(uint256 => Packet) private packets;
     mapping(uint256 => mapping(address => bool)) public eligible;
+    mapping(uint256 => bool) public openPackets;
     mapping(uint256 => mapping(address => Claim)) public claims;
     mapping(uint64 => Draw) public draws;
     mapping(address => uint256[]) private created;
@@ -77,6 +78,7 @@ contract LuckyVault is ReentrancyGuard {
         uint40 expiry
     );
     event DrawRequested(uint256 indexed packetId, address indexed recipient, uint64 sequence);
+    event PacketAccessSet(uint256 indexed packetId, bool openAccess);
     event ShareReady(uint256 indexed packetId, address indexed recipient, uint256 amount);
     event ShareWithdrawn(
         uint256 indexed packetId, address indexed recipient, address destination, uint256 amount
@@ -99,8 +101,32 @@ contract LuckyVault is ReentrancyGuard {
         string calldata title,
         address[] calldata recipients
     ) external payable nonReentrant returns (uint256 id) {
+        return _createPacket(token, total, slots, expiry, title, recipients, false);
+    }
+
+    /// @notice Public giveaway. The first successful requests reserve the slots.
+    function createOpenPacket(
+        address token,
+        uint256 total,
+        uint16 slots,
+        uint40 expiry,
+        string calldata title
+    ) external payable nonReentrant returns (uint256 id) {
+        return _createPacket(token, total, slots, expiry, title, new address[](0), true);
+    }
+
+    function _createPacket(
+        address token,
+        uint256 total,
+        uint16 slots,
+        uint40 expiry,
+        string memory title,
+        address[] memory recipients,
+        bool openAccess
+    ) private returns (uint256 id) {
         if (
-            slots == 0 || slots > recipients.length || recipients.length > MAX_RECIPIENTS
+            slots == 0 || slots > MAX_RECIPIENTS || recipients.length > MAX_RECIPIENTS
+                || (!openAccess && slots > recipients.length)
                 || total < slots || total > type(uint128).max || expiry <= block.timestamp
                 || expiry > block.timestamp + 30 days || bytes(title).length == 0
                 || bytes(title).length > 80
@@ -108,6 +134,7 @@ contract LuckyVault is ReentrancyGuard {
             revert InvalidInput();
         }
         id = nextPacketId++;
+        openPackets[id] = openAccess;
         for (uint256 i; i < recipients.length; ++i) {
             address recipient = recipients[i];
             if (recipient == address(0) || eligible[id][recipient]) revert InvalidInput();
@@ -127,6 +154,7 @@ contract LuckyVault is ReentrancyGuard {
         packets[id] = Packet(msg.sender, token, total, total, expiry, slots, 0, 0, false, title);
         created[msg.sender].push(id);
         emit PacketCreated(id, msg.sender, token, total, slots, expiry);
+        emit PacketAccessSet(id, openAccess);
     }
 
     function claimFee() public view returns (uint128) {
@@ -142,7 +170,7 @@ contract LuckyVault is ReentrancyGuard {
         ) {
             revert Unavailable();
         }
-        if (!eligible[id][msg.sender]) revert NotEligible();
+        if (!openPackets[id] && !eligible[id][msg.sender]) revert NotEligible();
         if (claims[id][msg.sender].requested) revert AlreadyRequested();
         uint128 fee = claimFee();
         if (msg.value != fee) revert WrongFee();

@@ -4,6 +4,17 @@ import { type Address, zeroAddress } from "viem";
 const wallet = "0x1111111111111111111111111111111111111111" as Address;
 
 describe("Lucky Link form validation", () => {
+  it("accepts an open giveaway without any recipient addresses", () => {
+    expect(validateLuckyInput("10", 18, 10, [], "Giveaway", "open")).toBe(10n ** 19n);
+    expect(() => validateLuckyInput("10", 18, 10, [], "Giveaway", "selected")).toThrow("wallets");
+  });
+  it("bounds open giveaway slots independently from the wallet list", () => {
+    for (const slots of [0, -1, 101, 1.5, NaN, Infinity]) {
+      expect(() => validateLuckyInput("10", 18, slots, [], "Giveaway", "open")).toThrow("slots");
+    }
+    expect(validateLuckyInput("100", 0, 100, [], "Giveaway", "open")).toBe(100n);
+    expect(() => validateLuckyInput("9", 0, 10, [], "Giveaway", "open")).toThrow("small");
+  });
   it("parses pasted wallet lists and deduplicates them", () => {
     expect(parseRecipients(` ${wallet},\n${wallet}; ${wallet} `)).toEqual([
       wallet,

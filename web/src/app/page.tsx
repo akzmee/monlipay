@@ -130,7 +130,7 @@ export default function HomePage() {
       <section className="mp-home-details" aria-label="About payment links">
         <p>
           Payment links carry one amount for one recipient. Lucky Links add a
-          selected group, a recipient limit, and random shares. Both start with
+          public giveaway or selected wallets, a recipient limit, and random shares. Both start with
           Create a link.
         </p>
         <p>

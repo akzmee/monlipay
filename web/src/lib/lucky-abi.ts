@@ -132,6 +132,45 @@ export const luckyVaultAbi = [
   },
   {
     "type": "function",
+    "name": "createOpenPacket",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "total",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "slots",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "expiry",
+        "type": "uint40",
+        "internalType": "uint40"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
     "name": "createPacket",
     "inputs": [
       {
@@ -355,6 +394,25 @@ export const luckyVaultAbi = [
   },
   {
     "type": "function",
+    "name": "openPackets",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "provider",
     "inputs": [],
     "outputs": [
@@ -441,6 +499,25 @@ export const luckyVaultAbi = [
         "type": "uint64",
         "indexed": false,
         "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PacketAccessSet",
+    "inputs": [
+      {
+        "name": "packetId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "openAccess",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
       }
     ],
     "anonymous": false

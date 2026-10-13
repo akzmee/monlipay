@@ -1,0 +1,55 @@
+{
+  "network": "testnet",
+  "chainId": 10143,
+  "contractAddress": "0xa52e018765b266dbf9743cd11d126338d018ee47",
+  "owner": "0xd16385B936BDC12BEc3f363521513419C0cED249",
+  "packetId": "1",
+  "total": "10000000000000000",
+  "expiry": 1791884666,
+  "transactions": [
+    {
+      "label": "create",
+      "hash": "0xaeb20b939c4ecfe867a4133c9d73646860e37e8462f7a8d7d383fa741fe08e6b",
+      "gasLimit": "238883",
+      "gasPrice": "102000000000",
+      "value": "10000000000000000",
+      "status": "success",
+      "blockNumber": "70649159"
+    },
+    {
+      "label": "request",
+      "hash": "0x75337b8cbe4835321fa1b4d78c7005c2b8316071407b54d87670778e7a5c1758",
+      "gasLimit": "262875",
+      "gasPrice": "102000000000",
+      "value": "128159999999100001",
+      "status": "success",
+      "blockNumber": "70649176"
+    },
+    {
+      "label": "withdraw",
+      "hash": "0x2706f5c670f34c16d6807e6d06574568059a973aaa203df8833efd7d49073a1d",
+      "gasLimit": "86801",
+      "gasPrice": "102000000000",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70649192"
+    },
+    {
+      "label": "refund",
+      "hash": "0x67a11f126fe6aea1a7f2c0a583452142a55d50bf5d42420c2c1ccfbf6e3d449a",
+      "gasLimit": "60498",
+      "gasPrice": "102000000000",
+      "value": "0",
+      "status": "success",
+      "blockNumber": "70649816"
+    }
+  ],
+  "status": "complete",
+  "unlistedWalletCanClaim": true,
+  "duplicateRequestRejected": true,
+  "sequence": "4124",
+  "share": "6789684336300202",
+  "duplicateWithdrawalRejected": true,
+  "refundedMON": "0.003210315663699798",
+  "completedAt": "2026-10-13T09:45:52.456Z"
+}

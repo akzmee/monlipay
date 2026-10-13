@@ -12,7 +12,7 @@ People sending MON or tokens through chat. The sender funds a link and shares it
 
 ## Product Purpose
 
-MonliPay is a payment-link product: create a link and easily send MON or tokens. Payment Link is the default creation mode for one recipient. Private Payment is an optional Monad mainnet beta using AnomaPay for shielded transfers. Lucky Link is another optional link type within the same creation flow, adding a funded pool with randomly sized shares, a recipient quota, eligible wallets, and an expiry. Neither optional mode replaces MonliPay's brand or the landing page's payment-first promise.
+MonliPay is a payment-link product: create a link and easily send MON or tokens. Payment Link is the default creation mode for one recipient. Private Payment is an optional Monad mainnet beta using AnomaPay for shielded transfers. Lucky Link is another optional link type within the same creation flow, adding a funded pool with randomly sized shares, a recipient quota, an expiry, and access for anyone or selected wallets. Neither optional mode replaces MonliPay's brand or the landing page's payment-first promise.
 
 ## Capabilities and Constraints
 
@@ -24,8 +24,10 @@ MonliPay is a payment-link product: create a link and easily send MON or tokens.
 - Private links have no expiry or automatic refund. Anyone holding the complete bearer link, including the sender, can withdraw its unspent balance; the first successful spend wins. Recipient claim progress is encrypted locally using the link secret. Lost bearer links cannot be reset.
 - My Links includes Payment, Private and Lucky history, with Private links on mainnet only. Opening private records requires the same passkey session. A created private link is not proof of a completed claim: users open it to check the available balance. Incomplete activity retains an explicit next action.
 - Contacts are a private backend address book, scoped to a signed-in wallet. A sender can select contacts or enter new wallet addresses without saving them.
-- A Lucky Link snapshots eligibility on-chain at creation. Contact names stay in the backend. The wallet list becomes public blockchain data.
-- Slots are first-come, first-served among eligible wallets. A wallet may request only one share. This is a wallet limit, not proof of unique humans.
+- Lucky Link defaults to Anyone: a public onchain giveaway with 1 to 100 recipient slots and no registered recipients or wallet list. Slots go to the first successful onchain draw requests, not the first people to open the link. A wallet may request only one share per packet. A person can use more than one wallet; this is not proof of unique humans.
+- Selected wallets remains available and shows the contacts picker. This mode snapshots eligibility onchain at creation, requires at least as many eligible wallets as slots, and allocates slots to the first successful eligible requests. Contact names stay in the backend; the selected wallet list becomes public blockchain data.
+- Lucky Link's Total pool uses the same token picker as Payment Link: token logos, search by name, symbol or address, and custom ERC-20 import. The selected ERC-20 shows its address linked to the explorer. Token decimal precision, minimum pool size and allowance checks remain part of funding.
+- The new Lucky vault supports both access modes. New claim URLs identify their vault; old URLs without a vault still resolve to the legacy deployment. My Links reads both deployments so existing Lucky Links remain accessible.
 - Random allocation uses Pyth Entropy. A recipient requests a draw, waits for its callback, and collects the assigned share. Network and oracle fees are separate from the funded pool.
 - Pending draws receive a one-hour grace period after expiry. The sender can then recover unallocated funds. Allocated shares remain collectable.
 - Invoice functionality is a later priority; current work extends payment links, optional private payments, Lucky Links and contacts.

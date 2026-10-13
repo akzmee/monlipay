@@ -7,18 +7,18 @@ import { useAccount, useReadContract } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { decodeEventLog, erc20Abi, formatEther, type Address } from "viem";
 import { QRCodeSVG } from "qrcode.react";
-import { monadChain, SUPPORTED_TOKENS, EXPIRY_PRESETS } from "@/config/chain";
-import { LUCKY_VAULT_ADDRESS, isLuckyConfigured } from "@/config/lucky";
+import { monadChain, SUPPORTED_TOKENS, EXPIRY_PRESETS, type TokenInfo } from "@/config/chain";
+import { LUCKY_VAULT_ADDRESS, isLuckyConfigured, luckyClaimPath, supportsOpenLuckyLinks } from "@/config/lucky";
 import { luckyVaultAbi } from "@/lib/lucky-abi";
-import { validateLuckyInput } from "@/lib/lucky";
+import { validateLuckyInput, shortAddress, type LuckyAccess } from "@/lib/lucky";
 import { useLuckyTransaction } from "@/hooks/useLuckyTransaction";
 import { ContactsPicker } from "@/components/ContactsPicker";
 import { LuckyArtwork } from "@/components/LuckyArtwork";
 import { LinkTypePicker } from "@/components/LinkTypePicker";
 
-const assets = SUPPORTED_TOKENS.filter((token) =>
-  ["MON", "USDC", "USDT0", "AUSD"].includes(token.symbol),
-);
+import { TokenAvatar } from "@/components/TokenAvatar";
+import { TokenSelectModal } from "@/components/TokenSelectModal";
+import { useTokenRegistry } from "@/hooks/useTokenRegistry";
 
 export default function LuckyPage() {
   const { address } = useAccount();
@@ -26,9 +26,13 @@ export default function LuckyPage() {
   const tx = useLuckyTransaction();
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [asset, setAsset] = useState(assets[0]);
+  const [asset, setAsset] = useState<TokenInfo>(SUPPORTED_TOKENS[0]);
+  const [showTokenModal, setShowTokenModal] = useState(false);
+  const { tokens, customTokens, addToken, removeToken } = useTokenRegistry();
   const [slots, setSlots] = useState(5);
   const [expiry, setExpiry] = useState(86400);
+  const [access, setAccess] = useState<LuckyAccess>("open");
+  const openSupported = supportsOpenLuckyLinks(LUCKY_VAULT_ADDRESS);
   const [wallets, setWallets] = useState<Address[]>([]);
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
@@ -53,9 +57,12 @@ export default function LuckyPage() {
         slots,
         wallets,
         title,
+        access,
       );
       if (!isLuckyConfigured)
         throw new Error("Lucky Links is not yet available on this network.");
+      if (access === "open" && !openSupported)
+        throw new Error("Open giveaways are not available on this network yet. Choose selected wallets.");
       if (!asset.isNative) {
         const allowance = await client.readContract({
           address: asset.address,
@@ -97,8 +104,9 @@ export default function LuckyPage() {
         await write({
           address: LUCKY_VAULT_ADDRESS,
           abi: luckyVaultAbi,
-          functionName: "createPacket",
-          args: [asset.address, total, slots, expiresAt, title.trim(), wallets],
+          ...(access === "open"
+            ? { functionName: "createOpenPacket" as const, args: [asset.address, total, slots, expiresAt, title.trim()] as const }
+            : { functionName: "createPacket" as const, args: [asset.address, total, slots, expiresAt, title.trim(), wallets] as const }),
           value: asset.isNative ? total : 0n,
           account: wallet,
           chainId: monadChain.id,
@@ -115,7 +123,7 @@ export default function LuckyPage() {
             topics: log.topics,
           });
           setResult(
-            `${window.location.origin}/lucky/claim?id=${decoded.args.packetId}&chain=${monadChain.id}`,
+            `${window.location.origin}${luckyClaimPath(decoded.args.packetId, LUCKY_VAULT_ADDRESS)}`,
           );
           setCopied(false);
           setCopyError("");
@@ -155,8 +163,9 @@ export default function LuckyPage() {
           <div>
             <h2 id="success-title">Your Lucky Link is ready.</h2>
             <p>
-              Send this link to your selected recipients. Only their wallets can
-              claim.
+              {access === "open"
+                ? `Share it with your group. The first ${slots} wallets to reserve a share can claim.`
+                : "Send this link to your selected recipients. Only their wallets can claim."}
             </p>
             <label className="mp-label" htmlFor="lucky-share-url">
               Share link
@@ -232,9 +241,10 @@ export default function LuckyPage() {
               <label className="mp-label" htmlFor="lucky-amount">
                 Total pool
               </label>
-              <div className="amount-control">
+              <div className="mp-payment-amount">
                 <input
                   id="lucky-amount"
+                  className="mp-payment-amount-input"
                   inputMode="decimal"
                   placeholder="0.00"
                   value={amount}
@@ -242,24 +252,27 @@ export default function LuckyPage() {
                   required
                   disabled={tx.busy}
                 />
-                <label className="sr-only" htmlFor="lucky-token">
-                  Token
-                </label>
-                <select
-                  id="lucky-token"
-                  value={asset.address}
-                  onChange={(e) =>
-                    setAsset(assets.find((t) => t.address === e.target.value)!)
-                  }
+                <button
+                  type="button"
+                  className="mp-payment-token"
+                  aria-label={`Select token, ${asset.symbol}`}
+                  onClick={() => setShowTokenModal(true)}
                   disabled={tx.busy}
                 >
-                  {assets.map((token) => (
-                    <option key={token.address} value={token.address}>
-                      {token.symbol}
-                    </option>
-                  ))}
-                </select>
+                  <TokenAvatar token={asset} size={28} />
+                  <span className="max-w-20 truncate" title={asset.symbol}>{asset.symbol}</span>
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
               </div>
+              <p className="mp-hint">
+                {asset.isNative ? "Native MON" : (
+                  <a className="mp-text-link" href={`${monadChain.blockExplorers.default.url}/address/${asset.address}`} target="_blank" rel="noreferrer" title={asset.address}>
+                    {asset.name} · {shortAddress(asset.address)}
+                  </a>
+                )}
+              </p>
               <p className="mp-hint">
                 This total is split into random amounts. Transaction fees are
                 separate.
@@ -301,14 +314,35 @@ export default function LuckyPage() {
                 </select>
               </div>
             </div>
-            <ContactsPicker
-              wallets={wallets}
-              onChange={setWallets}
-              disabled={tx.busy}
-            />
+            <fieldset className="mp-field lucky-access" disabled={tx.busy}>
+              <legend className="mp-label">Who can claim?</legend>
+              <div className="lucky-access-options">
+                <label>
+                  <input type="radio" name="lucky-access" value="open" checked={access === "open"} onChange={() => setAccess("open")} />
+                  <span>Anyone</span>
+                </label>
+                <label>
+                  <input type="radio" name="lucky-access" value="selected" checked={access === "selected"} onChange={() => setAccess("selected")} />
+                  <span>Selected wallets</span>
+                </label>
+              </div>
+              <p className="mp-hint">
+                {access === "open"
+                  ? "A public giveaway. No recipient list needed. One share per wallet."
+                  : "Only the wallets you choose can claim. One share per wallet."}
+              </p>
+              {access === "open" && !openSupported && (
+                <p className="mp-notice">Open giveaways are not available on this network yet.</p>
+              )}
+            </fieldset>
+            {access === "selected" && (
+              <ContactsPicker wallets={wallets} onChange={setWallets} disabled={tx.busy} />
+            )}
             <div className="lucky-form-footer">
               <p className="mp-hint">
-                {wallets.length > slots
+                {access === "open"
+                  ? "Slots go to the first successful claims onchain. A person can use more than one wallet."
+                  : wallets.length > slots
                   ? `The first ${slots} of your ${wallets.length} selected wallets can claim.`
                   : "Select at least one eligible wallet for each recipient slot."}{" "}
                 After expiry, you can reclaim any unallocated funds.
@@ -321,7 +355,7 @@ export default function LuckyPage() {
               <button
                 className="mp-button mp-button-wide"
                 type="submit"
-                disabled={tx.busy || !isLuckyConfigured}
+                disabled={tx.busy || !isLuckyConfigured || (access === "open" && !openSupported)}
               >
                 {tx.busy
                   ? tx.stage || "Working…"
@@ -356,6 +390,10 @@ export default function LuckyPage() {
                 <dd>{Number.isFinite(slots) ? slots : "Not set"}</dd>
               </div>
               <div>
+                <dt>Who can claim</dt>
+                <dd>{access === "open" ? "Anyone" : "Selected wallets"}</dd>
+              </div>
+              <div>
                 <dt>Distribution</dt>
                 <dd>Random amounts</dd>
               </div>
@@ -367,8 +405,8 @@ export default function LuckyPage() {
               </p>
             )}
             <p className="mp-hint">
-              Only selected wallets can claim. Each gets one draw, then collects
-              their share.
+              {access === "open" ? "Open to anyone." : "Only selected wallets can claim."}{" "}
+              Each wallet gets one draw, then collects its share.
             </p>
             <Link href="/create" className="mp-text-link">
               Sending to just one person? Use a payment link{" "}
@@ -377,6 +415,16 @@ export default function LuckyPage() {
           </aside>
         </div>
       )}
+      <TokenSelectModal
+        open={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        tokens={tokens}
+        selectedToken={asset}
+        onSelect={(token) => setAsset(token as TokenInfo)}
+        onAddCustomToken={(token) => addToken(token as TokenInfo)}
+        onRemoveCustomToken={removeToken}
+        customTokenAddresses={new Set(customTokens.map((token) => token.address.toLowerCase()))}
+      />
       {tx.hash && (
         <a
           className="mp-receipt"

@@ -14,7 +14,7 @@ import {
   zeroAddress,
 } from "viem";
 import { monadChain } from "@/config/chain";
-import { isLuckyConfigured, LUCKY_VAULT_ADDRESS } from "@/config/lucky";
+import { resolveLuckyVault, supportsOpenLuckyLinks } from "@/config/lucky";
 import { luckyVaultAbi } from "@/lib/lucky-abi";
 import { shortAddress } from "@/lib/lucky";
 import { useLuckyTransaction } from "@/hooks/useLuckyTransaction";
@@ -24,6 +24,8 @@ function ClaimLuckyLink() {
   const search = useSearchParams();
   const rawId = search.get("id") || "";
   const network = search.get("chain");
+  const vault = resolveLuckyVault(search.get("vault"));
+  const supportsOpen = Boolean(vault && supportsOpenLuckyLinks(vault));
   const validId = /^[1-9]\d{0,76}$/.test(rawId);
   const id = validId ? BigInt(rawId) : 0n;
   const correctNetwork = !network || network === String(monadChain.id);
@@ -37,9 +39,9 @@ function ClaimLuckyLink() {
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, []);
-  const enabled = validId && correctNetwork && isLuckyConfigured;
+  const enabled = validId && correctNetwork && Boolean(vault);
   const base = {
-    address: LUCKY_VAULT_ADDRESS,
+    address: vault || zeroAddress,
     abi: luckyVaultAbi,
     chainId: monadChain.id,
   } as const;
@@ -50,6 +52,15 @@ function ClaimLuckyLink() {
     query: { enabled, refetchInterval: 5000 },
   });
   const p = packetQuery.data;
+  const accessQuery = useReadContract({
+    ...base,
+    functionName: "openPackets",
+    args: [id],
+    query: { enabled: enabled && supportsOpen },
+  });
+  const openAccess = supportsOpen && accessQuery.data === true;
+  const accessReady = !supportsOpen || accessQuery.isSuccess;
+  const accessError = supportsOpen && accessQuery.isError;
   const claimQuery = useReadContract({
     ...base,
     functionName: "claims",
@@ -106,7 +117,7 @@ function ClaimLuckyLink() {
     !requested &&
     claimQuery.isSuccess &&
     p.requested < p.slots &&
-    eligibility.data,
+    accessReady && (openAccess || eligibility.data),
   );
   const owner = Boolean(p && address?.toLowerCase() === p.sender.toLowerCase());
   const refundReady = Boolean(
@@ -127,8 +138,8 @@ function ClaimLuckyLink() {
       "This Lucky Link is incomplete. Ask the sender for the full link.";
   else if (!correctNetwork)
     unavailable = `This link belongs to another network. Open it on the matching MonliPay site.`;
-  else if (!isLuckyConfigured)
-    unavailable = `Lucky Links is not yet available on ${monadChain.name}.`;
+  else if (!vault)
+    unavailable = "This Lucky Link uses an unrecognized contract. Ask the sender for the correct link.";
   else if (packetQuery.isError)
     unavailable =
       "We couldn’t load this link. Check your connection and try again.";
@@ -211,7 +222,9 @@ function ClaimLuckyLink() {
                 <p>
                   {requested && timedOut && !ready
                     ? "Your draw could not finish in time. Unallocated funds can be returned to the sender."
-                    : "The sender chose the people. Each eligible wallet gets one random share."}
+                    : openAccess
+                      ? "A public giveaway. The first wallets to reserve a share can claim. One share per wallet."
+                      : "The sender chose the people. Each eligible wallet gets one random share."}
                 </p>
               </div>
             )}
@@ -243,7 +256,7 @@ function ClaimLuckyLink() {
                 className="mp-button mp-button-wide"
                 onClick={openConnectModal}
               >
-                Connect wallet to check eligibility
+                Connect wallet to claim
               </button>
             ) : ready && !withdrawn ? (
               <button
@@ -272,7 +285,12 @@ function ClaimLuckyLink() {
               !p.closed &&
               p.requested < p.slots ? (
               <>
-                {claimQuery.isError ? (
+                {accessError ? (
+                  <p className="mp-error">
+                    Could not check who can claim.{" "}
+                    <button className="mp-text-button" onClick={() => void accessQuery.refetch()}>Retry</button>
+                  </p>
+                ) : claimQuery.isError ? (
                   <p className="mp-error">
                     Could not check your claim.{" "}
                     <button
@@ -282,9 +300,9 @@ function ClaimLuckyLink() {
                       Retry
                     </button>
                   </p>
-                ) : claimQuery.isPending || eligibility.isPending ? (
+                ) : claimQuery.isPending || !accessReady || (!openAccess && eligibility.isPending) ? (
                   <p role="status">Checking your wallet…</p>
-                ) : eligibility.isError ? (
+                ) : !openAccess && eligibility.isError ? (
                   <p className="mp-error">
                     Could not check eligibility.{" "}
                     <button
@@ -294,7 +312,7 @@ function ClaimLuckyLink() {
                       Retry
                     </button>
                   </p>
-                ) : !eligibility.data ? (
+                ) : !openAccess && !eligibility.data ? (
                   <p className="mp-notice">
                     This wallet isn’t on the recipient list. Connect the wallet
                     your sender selected.
@@ -406,7 +424,7 @@ function ClaimLuckyLink() {
         </section>
       )}
       <p className="lucky-claim-footnote">
-        A Lucky Link from MonliPay. One draw per eligible wallet.
+        A Lucky Link from MonliPay. One draw per wallet.
       </p>
     </div>
   );

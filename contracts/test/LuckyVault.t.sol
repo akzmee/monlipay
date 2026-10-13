@@ -117,6 +117,97 @@ contract LuckyVaultTest is Test {
         entropy.fulfill(vault, seq, provider, bytes32(random));
     }
 
+    function test_OpenPacketFirstTenWalletsReserveExactlyTenSlots() public {
+        uint256 id = vault.createOpenPacket{value: 1 ether}(
+            address(0), 1 ether, 10, uint40(block.timestamp + 1 days), "For everyone"
+        );
+        assertTrue(vault.openPackets(id));
+        uint64[] memory sequences = new uint64[](10);
+        for (uint256 i; i < 10; ++i) {
+            address user = address(uint160(1000 + i));
+            assertFalse(vault.eligible(id, user));
+            vm.deal(user, FEE);
+            sequences[i] = request(id, user);
+        }
+        vm.prank(alice);
+        vm.expectRevert(LuckyVault.Unavailable.selector);
+        vault.requestClaim{value: FEE}(id, 0);
+        assertEq(vault.getPacket(id).requested, 10);
+        assertEq(vault.getPacket(id).settled, 0);
+        for (uint256 i; i < 10; ++i) {
+            fulfill(sequences[9 - i], i * 1297);
+            vm.prank(address(uint160(1009 - i)));
+            vault.withdrawShare(id, bob);
+        }
+        assertEq(vault.getPacket(id).remaining, 0);
+        assertEq(vault.getPacket(id).settled, 10);
+        assertEq(address(vault).balance, 0);
+        assertEq(bob.balance, 11 ether);
+    }
+
+    function test_OpenPacketCannotRerollOrWithdrawTwice() public {
+        uint256 id = vault.createOpenPacket{value: 1 ether}(
+            address(0), 1 ether, 2, uint40(block.timestamp + 1 days), "Open"
+        );
+        uint64 seq = request(id, alice);
+        vm.prank(alice);
+        vm.expectRevert(LuckyVault.AlreadyRequested.selector);
+        vault.requestClaim{value: FEE}(id, bytes32(uint256(9)));
+        fulfill(seq, 12);
+        vm.prank(alice);
+        vault.withdrawShare(id, alice);
+        vm.prank(alice);
+        vm.expectRevert(LuckyVault.AlreadyRequested.selector);
+        vault.requestClaim{value: FEE}(id, bytes32(uint256(10)));
+        vm.prank(alice);
+        vm.expectRevert(LuckyVault.NothingToWithdraw.selector);
+        vault.withdrawShare(id, alice);
+        uint256 other = vault.createOpenPacket{value: 1 ether}(
+            address(0), 1 ether, 1, uint40(block.timestamp + 1 days), "Another"
+        );
+        request(other, alice);
+        assertEq(vault.getPacket(other).requested, 1);
+    }
+
+    function test_OpenERC20RefundPreservesAllocatedShare() public {
+        token.mint(address(this), 100_000_000);
+        token.approve(address(vault), 100_000_000);
+        uint256 id = vault.createOpenPacket(
+            address(token), 100_000_000, 2, uint40(block.timestamp + 1 days), "Open tokens"
+        );
+        fulfill(request(id, charlie), 8);
+        (,, uint256 amount,) = vault.claims(id, charlie);
+        vm.warp(block.timestamp + 1 days);
+        vm.prank(bob);
+        vm.expectRevert(LuckyVault.Unavailable.selector);
+        vault.requestClaim{value: FEE}(id, 0);
+        vault.refund(id, address(this));
+        vm.prank(charlie);
+        vault.withdrawShare(id, charlie);
+        assertEq(token.balanceOf(charlie), amount);
+        assertEq(token.balanceOf(address(this)) + amount, 100_000_000);
+        assertEq(token.balanceOf(address(vault)), 0);
+    }
+
+    function test_OpenModeIsExplicitAndQuotaIsBounded() public {
+        vm.expectRevert(LuckyVault.InvalidInput.selector);
+        vault.createPacket{value: 1 ether}(
+            address(0), 1 ether, 1, uint40(block.timestamp + 1 days), "Selected", new address[](0)
+        );
+        vm.expectRevert(LuckyVault.InvalidInput.selector);
+        vault.createOpenPacket{value: 1 ether}(
+            address(0), 1 ether, 0, uint40(block.timestamp + 1 days), "Open"
+        );
+        vm.expectRevert(LuckyVault.InvalidInput.selector);
+        vault.createOpenPacket{value: 1 ether}(
+            address(0), 1 ether, 101, uint40(block.timestamp + 1 days), "Open"
+        );
+        uint256 id = create(2, 1 ether);
+        assertFalse(vault.openPackets(id));
+        vm.expectRevert(LuckyVault.NotEligible.selector);
+        vault.requestClaim{value: FEE}(id, 0);
+    }
+
     function test_NativeLifecycleConservesPot() public {
         uint256 id = create(2, 10 ether);
         uint64 a = request(id, alice);
