@@ -3,17 +3,15 @@
 Indexes all `LinkVault` events on Monad mainnet (and/or testnet) and exposes
 an HTTP + GraphQL API consumed by the web app's "My Links" page.
 
-This replaces the previous localStorage-based link history (which broke when
-the user switched wallets — see commit history for `web/src/lib/storage.ts`).
-The source of truth is now on-chain, indexed here, and served via Ponder's
-SQLite (dev) or Postgres (prod) store.
+The indexer stores public payment events. Claim secrets are not onchain and cannot
+be reconstructed from this API; saved links use the web app's encrypted storage.
 
 ## Quick start
 
 ```bash
 cd indexer
-pnpm install        # or npm install / yarn
-pnpm dev            # starts Ponder on http://localhost:42069
+npm ci
+npm run dev            # starts Ponder on http://localhost:42069
 ```
 
 The dev server hot-reloads when you edit `src/index.ts`, `ponder.config.ts`,
@@ -21,25 +19,23 @@ or `ponder.schema.ts`.
 
 ## Environment
 
-Defaults point at the deployed mainnet + testnet LinkVault contracts.
+Mainnet is enabled by default. Set a testnet vault address to index testnet too.
 Override via `.env.local` (gitignored):
 
 ```bash
-# Both chains are indexed by default. Set either to "" to disable it.
+# Deployed LinkVault contracts. Testnet is optional.
 PONDER_MONAD_MAINNET_VAULT=0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC
 PONDER_MONAD_TESTNET_VAULT=0x90978783cb701AEe7896975B43ecd37e0B4819DC
 
-# Optional — override the public RPCs (recommended in prod for rate limits):
+# Optional : override the public RPCs (recommended in prod for rate limits):
 PONDER_RPC_MAINNET=https://rpc.monad.xyz
 PONDER_RPC_TESTNET=https://testnet-rpc.monad.xyz
 
-# Optional — Postgres for production (SQLite by default in dev):
-# DATABASE_URL=postgresql://user:pass@host:5432/monlipay_indexer
 ```
 
 ## HTTP API
 
-The web app uses these JSON endpoints (not GraphQL — simpler client code).
+The web app uses these JSON endpoints (not GraphQL : simpler client code).
 
 | Endpoint                                       | Purpose                            |
 | ---------------------------------------------- | ---------------------------------- |
@@ -65,14 +61,14 @@ because JSON has no native bigint. The client wraps them with `BigInt()`.
 | `RefundFailed` | UPDATE `links` → status `refund_failed` (recoverable)     |
 
 The `links` table mirrors what the frontend previously stored in
-localStorage, except for `shareableUrl` — the link URL containing the
+localStorage, except for `shareableUrl` : the link URL containing the
 secret key fragment cannot be reconstructed from on-chain data (the secret
 key is generated client-side and never sent to the contract). The web
 create flow now warns the user to save the URL immediately.
 
 ## Deployment
 
-This indexer is **separate from the Next.js app** — it runs as its own
+This indexer is **separate from the Next.js app** : it runs as its own
 process, ideally on a long-running VM (not Vercel serverless, because
 Ponder keeps an in-memory event queue).
 
@@ -95,7 +91,7 @@ NEXT_PUBLIC_INDEXER_URL=https://indexer.monlipay.xyz
 
 - Ponder was acquired by the Monad Foundation and is the recommended
   indexer for Monad.
-- TypeScript-first — types flow from the ABI into the schema into the API.
+- TypeScript-first : types flow from the ABI into the schema into the API.
 - Hot-reload dev server (very fast iteration).
 - Built-in GraphQL playground for ad-hoc queries.
 

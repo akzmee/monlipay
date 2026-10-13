@@ -62,3 +62,18 @@ output/playwright/
 # Generated submission deliverables
 output/submission/
 public-artifacts/
+
+# Local project notes and generated release materials
+/AGENTS.md
+/PRODUCT.md
+/DESIGN.md
+/STORY.md
+/.impeccable/
+/docs/
+/web/AGENTS.md
+/web/CLAUDE.md
+/scripts/append-privacy-demo.py
+/scripts/render-demo.py
+/scripts/render-narrated-demo.py
+/scripts/package-submission.py
+/scripts/prepare-submission.sh

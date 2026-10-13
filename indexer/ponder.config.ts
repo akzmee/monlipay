@@ -9,12 +9,15 @@ const TESTNET_VAULT =
   process.env.PONDER_MONAD_TESTNET_VAULT || "";
 
 const MAINNET_RPC =
-  process.env.PONDER_RPC_MAINNET || "https://monad-mainnet.g.alchemy.com/v2/DVb0FpBDpZEmThk4Ut1Rp";
+  process.env.PONDER_RPC_MAINNET || "https://rpc.monad.xyz";
 const TESTNET_RPC =
   process.env.PONDER_RPC_TESTNET || "https://testnet-rpc.monad.xyz";
 
 function buildConfig() {
-  const chains: Record<string, { id: number; rpc: ReturnType<typeof http> }> = {};
+  const chains: Record<
+    string,
+    { id: number; rpc: ReturnType<typeof http>; ethGetLogsBlockRange: number }
+  > = {};
   const chainAddresses: Record<
     string,
     { address: `0x${string}`; startBlock?: number }
