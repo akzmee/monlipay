@@ -27,7 +27,8 @@
     "Real six-decimal DEMOUSD Payment Link approval, funding and claim; the demo token has no monetary value.",
     "Authorized 1 MON mainnet private pilot: wrapped MON, deposited WMON, sent 0.5 WMON to a separate bearer account, claimed, recovered the sender remainder and unwrapped. Protocol fees: 0.230736921281629696 WMON. Wallet gas: 0.037193076 MON. Remaining private resources and Permit2 allowance: zero.",
     "Native Chromium WebAuthn PRF setup and reload/unlock; encrypted storage acknowledgement, wrong-wallet rejection, uncertain wallet result recovery and no automatic resubmission. These are virtual authenticator checks, not physical-device or cross-device certification.",
-    "779 web tests across 55 files and 20 Anoma integration tests pass; Next.js 16.4.0 production build and scoped lint pass. Impeccable reviewed 17 desktop/mobile captures; the failed-state wording correction was scored resolved."
+    "779 web tests across 55 files and 20 Anoma integration tests pass; Next.js 16.4.0 production build and scoped lint pass. Impeccable reviewed 17 desktop/mobile captures; the failed-state wording correction was scored resolved.",
+    "Live passkey enrollment, encrypted account creation, refresh/unlock, wrong-wallet401, unfunded claim discovery and 104-second video passed. Both containers were replaced again; ciphertext and all existing encrypted records were preserved."
   ],
   "limits": [
     "Standard Payment and Lucky Link claims require network gas; Lucky draws also require a variable MON oracle fee. Public gas sponsorship is disabled.",
@@ -38,18 +39,27 @@
     "Wallet eligibility is not proof of one human per wallet. Passkey PRF support depends on the browser and provider, and lost passkeys cannot be reset. No independent security audit or enterprise certification is claimed.",
     "The 80-second transaction demo uses Monad testnet and an automated dedicated wallet; the added 24-second privacy interface walkthrough is explicitly separate from the real funded mainnet pilot."
   ],
-  "submission_status": "Prepared release and submission fields; VPS activation and public source publication are being verified. Not submitted to the hackathon portal.",
+  "submission_status": "App and submission package ready. Mainnet/testnet deployment and encrypted history persistence verified. Portal submission has not been sent. GitHub branch publication needs repository write access; a source ZIP is available.",
   "judge_quickstart": [
     "Watch https://monlipay.xyz/demo (1 minute 44 seconds).",
     "Open https://testnet.monlipay.xyz/create with a Monad testnet wallet for standard MON payment or Lucky Link testing. A sender and receiver need faucet MON; the selected wallet controls group eligibility.",
     "Open https://monlipay.xyz/my-links, verify your wallet and use a PRF-compatible passkey to open encrypted links. Contacts use the wallet signature session.",
     "Explore https://monlipay.xyz/create/private on mainnet. Connect a wallet and set up a passkey before funding. Review fees and privacy limits. No mainnet spend is necessary to review the already-published pilot receipts.",
-    "Inspect docs/anoma-private-payment-readiness.json for public mainnet receipts and docs/lucky-links.md for the build-window delta, contract verification and testnet transaction evidence."
+    "Download the source archive at https://monlipay.xyz/submission/monlipay-metropolis-source.zip. It includes the build-window delta, contract source, tests, pinned integration, setup instructions, and public transaction receipts."
   ],
   "sources": {
     "rules": "https://monad.xyz/developers/hackathons/metropolis",
     "portal": "https://hackathon.monad.xyz",
     "sourceBranch": "https://github.com/akzmee/monlipay/tree/metropolis",
-    "privateProof": "https://github.com/akzmee/monlipay/blob/metropolis/docs/anoma-private-payment-readiness.json"
+    "privateProof": "https://monlipay.xyz/submission/anoma-private-payment-readiness.json",
+    "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
+  },
+  "source_publication": {
+    "commit": "b3aab33",
+    "branch": "metropolis",
+    "status": "Local commit ready; push denied to authenticated account dwlpra.",
+    "archive": "output/submission/monlipay-metropolis-source.zip",
+    "instruction": "Use the live source archive for verification while the GitHub branch awaits write access. The original repository is the existing baseline.",
+    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
   }
 }

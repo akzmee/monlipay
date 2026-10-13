@@ -1,5 +1,7 @@
 # Optional sender privacy — feasibility check, 12 October 2026
 
+Historical research. The implemented and deployed AnomaPay option is documented in [current release evidence](private-payment-release.json).
+
 The user wants an optional private Payment Link that does not expose their funding wallet to the recipient. This is separate from encrypted backups. A forwarding contract or relayer alone does not remove the funding trace, and stealth recipient addresses alone do not hide the sender. The existing LinkVault records a public sender and emits publicly indexed deposit/claim events. Its ordinary flow must not be labelled anonymous.
 
 ## Candidate evidence

@@ -58,3 +58,7 @@ rencana-hackathon-paymentlink-monad.md
 .playwright-cli/
 output/playwright/
 .impeccable/review/
+
+# Generated submission deliverables
+output/submission/
+public-artifacts/

@@ -151,3 +151,40 @@ The [release record](passkey-privacy-release.json) records images, scope and
 limitations. Post-verification release documentation is synced separately from
 the immutable build archive. Existing CSP-blocked Cloudflare analytics and font
 preload warnings are unchanged. This verification is not a security audit.
+
+## Private Payment beta — 13 October 2026
+
+Mainnet and testnet now run Next.js 16.4.0. Private Payment is available on
+mainnet through AnomaPay; testnet shows an explicit mainnet gate. The browser
+SDK, passkey-encrypted account and operation records, private claim/reclaim
+screens, and My Links filters are deployed. Existing runtime environments,
+contracts, indexer and persistent volumes were preserved.
+
+The funded 1 MON pilot passed deposit, separate bearer transfer, claim,
+sender-remainder withdrawal and unwrap. Net cost was 0.267929997281629696 MON,
+including protocol fees and wallet gas. The full [pilot evidence](anoma-private-payment-readiness.json)
+contains public receipts; private journals and wallet keys remain outside the repo.
+
+779 web tests and 20 integration tests passed. Production builds and scoped lint
+passed. Live Chromium/native virtual PRF verification passed setup, reload/unlock,
+wallet isolation and an unfunded claim. Both containers were replaced again and
+all encrypted records remained identical. The old pre-release profiles, saved
+links and wrapped keys were preserved; SQLite integrity and foreign-key checks
+passed. The [release record](private-payment-release.json) contains exact images,
+archive hash and verification scope. Review screenshots are local QA artifacts.
+
+Consistent snapshots, previous source and rollback image tags are in the operator's
+private release directory `/home/clawuser/backups/monlipay-private-20261013`.
+There is no off-host snapshot destination or schedule. No additional funds were
+spent on the live browser checks. The video is now 104 seconds, with the privacy
+interface walkthrough explicitly separated from the funded harness evidence.
+
+Private Payment is a beta, not complete anonymity. Proving services see witness
+data; entry/exit transactions and correlation remain public-chain limitations.
+Only WMON has funded end-to-end validation, and this release has no independent
+security audit. Production npm audit reported 0 high/critical and 22 moderate
+dependency findings after the security update.
+
+The public source archive and selected evidence files are served under `/submission/`
+from a separate, read-only `public-artifacts` bind mount. This directory contains
+only deliberately published artifacts and does not expose `/app/data` or environment files.

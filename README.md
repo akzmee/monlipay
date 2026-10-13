@@ -1,4 +1,4 @@
-> **Metropolis extension:** Lucky Links adds random group distributions and private wallet contacts. The separate LuckyVault is deployed on Monad mainnet and testnet, with exact source verification on Sourcify. See [implementation and deployment notes](docs/lucky-links.md) and [deployment receipts](contracts/deployments). The real Pyth draw, collection, and refund flow has been exercised on testnet.
+> **Metropolis extension:** Optional Lucky Links, AnomaPay Private Payment, contacts and passkey-encrypted history extend the original payment-link product. Both sites are live. LuckyVault has exact source verification, real testnet draws passed, and the private WMON mainnet pilot completed deposit, transfer, claim and recovery. See [submission fields](docs/metropolis-submission.json), [release evidence](docs/private-payment-release.json) and [contract receipts](contracts/deployments).
 
 The reviewed visual system is recorded in [DESIGN.md](DESIGN.md), with reusable component previews in [.impeccable/design.json](.impeccable/design.json).
 
@@ -6,7 +6,7 @@ The updated mainnet and testnet sites, backup location, configuration, and verif
 
 # MonliPay — Send tokens via a link
 
-> Send tokens on Monad as easily as sharing a WhatsApp link. Recipient clicks, funds arrive. Unclaimed? Auto-refunded.
+> Create a funded token link and share it in a chat. Recipients connect a wallet and claim. Recover eligible expired Payment and Lucky Link funds from My Links.
 
 Originally built for the **BuildAnything "Spark"** hackathon on Monad. The **Metropolis** extension adds Lucky Links and private contacts; the [build-window disclosure](docs/lucky-links.md#what-is-new-for-metropolis) distinguishes this work from the existing foundation.
 

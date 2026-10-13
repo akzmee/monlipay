@@ -1,5 +1,5 @@
 {
-  "status": "Funded mainnet pilot and browser verification passed; deployment activation pending",
+  "status": "Funded mainnet pilot passed; web feature deployed and live-verified",
   "readiness": {
     "checkedAt": "2026-10-12T17:34:23.220Z",
     "sdk": "1.2.0",
@@ -26,7 +26,7 @@
       }
     },
     "livePrivateTransfer": "PASS: deposit, separate private bearer transfer, claim, remainder withdrawal and unwrap",
-    "productionFeatureEnabled": false,
+    "productionFeatureEnabled": true,
     "privacy": "Shielded transfers hide parties from public chain observers. Proving operators receive witness data. Deposits and withdrawals remain public."
   },
   "liveDiscoveryProbe": {
@@ -65,15 +65,18 @@
   },
   "webIntegration": {
     "implemented": true,
-    "deployed": false,
+    "deployed": true,
     "browserVerified": true,
     "webTests": 779,
     "integrationTests": 20,
     "uiReview": "Initial17-capture review plus one failed-state fix; verdict ship at scored-fix scope",
-    "browserEvidence": "Native virtual WebAuthn PRF; empty live provider account; encrypted save, reload/unlock, wallet isolation and uncertain wallet response recovery. No additional funded browser transactions."
+    "browserEvidence": "Native virtual WebAuthn PRF; empty live provider account; encrypted save, reload/unlock, wallet isolation and uncertain wallet response recovery. No additional funded browser transactions.",
+    "liveVerifiedAt": "2026-10-13T00:38:37.718638+00:00",
+    "liveRelease": "docs/private-payment-release.json",
+    "postContainerReplacementUnlock": true
   },
   "remaining": [
-    "VPS activation and public source publication"
+    "Publish source branch when repository write access is available, or attach the prepared source archive."
   ],
   "vpsPreparation": {
     "host": "168.110.205.224",

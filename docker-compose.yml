@@ -62,6 +62,7 @@ services:
       APP_ORIGIN: ${TESTNET_APP_ORIGIN:-https://testnet.monlipay.xyz}
     volumes:
       - testnet-contacts:/app/data
+      - ./public-artifacts:/app/public/submission:ro
     networks:
       - monlipay
 
@@ -95,6 +96,7 @@ services:
       APP_ORIGIN: ${MAINNET_APP_ORIGIN:-https://monlipay.xyz}
     volumes:
       - mainnet-contacts:/app/data
+      - ./public-artifacts:/app/public/submission:ro
     networks:
       - monlipay
 

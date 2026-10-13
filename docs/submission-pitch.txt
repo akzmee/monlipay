@@ -12,8 +12,9 @@ Privacy is specific, not absolute: claim secrets are encrypted in the browser; t
 Try: https://monlipay.xyz
 Testnet: https://testnet.monlipay.xyz
 Video: https://monlipay.xyz/demo
-Source: https://github.com/akzmee/monlipay/tree/metropolis
-Pilot evidence: https://github.com/akzmee/monlipay/blob/metropolis/docs/anoma-private-payment-readiness.json
+Source: https://monlipay.xyz/submission/monlipay-metropolis-source.zip
+Original repository: https://github.com/akzmee/monlipay
+Pilot evidence: https://monlipay.xyz/submission/anoma-private-payment-readiness.json
 
 Portal fields: docs/metropolis-submission.json
 Final account/team/contact fields must match the entrant's own hackathon account.
