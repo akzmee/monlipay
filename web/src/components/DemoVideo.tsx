@@ -4,7 +4,7 @@ export function DemoVideo() {
       <div className="mp-demo-heading">
         <h2 id="demo-title">See a link become a payment.</h2>
         <p>
-          Payment links, group payments, and an introduction to private payments.
+          One link, ten recipients. Watch a group payment from creation to claim.
         </p>
       </div>
       <video
@@ -14,20 +14,20 @@ export function DemoVideo() {
         poster="/demo/monlipay-poster.jpg?v=monlipay-mark"
         width="1440"
         height="900"
-        aria-label="MonliPay product demo with English captions"
+        aria-label="MonliPay product demo with English narration and captions"
       >
-        <source src="/demo/monlipay-demo.mp4" type="video/mp4" />
+        <source src="/demo/monlipay-demo.mp4?v=group-voice-20261013" type="video/mp4" />
         <track
           kind="captions"
-          src="/demo/monlipay-en.vtt"
+          src="/demo/monlipay-en.vtt?v=group-voice-20261013"
           srcLang="en"
           label="English"
         />
         Your browser does not support embedded video.{" "}
-        <a href="/demo/monlipay-demo.mp4">Download the demo</a>.
+        <a href="/demo/monlipay-demo.mp4?v=group-voice-20261013">Download the demo</a>.
       </video>
       <div className="mp-demo-actions">
-        <a className="mp-text-link" href="/demo/monlipay-demo.mp4" download>
+        <a className="mp-text-link" href="/demo/monlipay-demo.mp4?v=group-voice-20261013" download>
           Download video
         </a>
       </div>
@@ -35,31 +35,30 @@ export function DemoVideo() {
         <summary>Read the walkthrough</summary>
         <ol>
           <li>
-            Create a payment link: choose a token, amount, and expiry.
+            Choose Group Payment, pick a token, and set a pool of 100 for 10
+            recipients. Equal amount gives each wallet 10 tokens.
           </li>
           <li>
-            Fund the link in your wallet, then copy it into a private chat.
-            Anyone holding this payment link can claim it.
+            Choose Anyone or Selected wallets. Approve the token, fund the pool,
+            and share the link in your group chat.
           </li>
           <li>
-            The recipient opens the link, connects a wallet, and claims. The
-            transaction receipt confirms the transfer.
+            Each recipient opens the link, connects a wallet, and claims their
+            share. Each wallet can claim once, until the slots are filled.
+            A wallet and network gas are needed.
           </li>
           <li>
-            For a group, choose Group Payment. Set a pool, recipient slots, and
-            equal or random amounts. Choose Anyone or Selected wallets.
+            My Links shows the claimed payments and remaining pool. Unclaimed
+            funds can be refunded after the deadline.
           </li>
           <li>
-            With equal amounts, recipients claim their fixed payment directly.
-            Random amounts use a draw before collection, as shown in the video.
+            Switch to Random amount for a giveaway, or Payment Link for one
+            recipient. Saved contacts make repeat payments easier.
           </li>
           <li>
-            Find your links in My Links. Expired, unallocated funds
-            can be refunded with wallet confirmation.
-          </li>
-          <li>
-            Open saved links with your passkey. To send a private payment,
-            choose Private when creating a link on Monad mainnet.
+            Private Payment is available on Monad mainnet. A passkey protects
+            saved payment records. AnomaPay shields transfers inside its pool;
+            deposits and withdrawals remain public.
           </li>
         </ol>
       </details>

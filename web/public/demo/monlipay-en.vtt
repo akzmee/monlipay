@@ -1,38 +1,85 @@
 WEBVTT
 
-00:00:00.000 --> 00:00:06.000
-Send tokens with a link. Real Monad testnet demo. Wallet confirmations are automated.
+00:00:00.660 --> 00:00:03.160
+A community reward should be easy to share.
 
-00:00:06.000 --> 00:00:20.000
-Choose a token. Set the amount. Fund the link. 12.34 DEMOUSD: a six-decimal test token with no monetary value.
+00:00:03.300 --> 00:00:07.660
+With MonliPay, one funded link can pay one person or an entire group.
 
-00:00:20.000 --> 00:00:31.000
-Open the link and claim the payment. The transaction receipt confirms the token transfer.
+00:00:08.130 --> 00:00:11.090
+Here is the working product on Monad testnet.
 
-00:00:31.000 --> 00:00:39.000
-Save the wallets you send to. Contacts are private. Unlock them with a wallet signature.
+00:00:12.900 --> 00:00:14.840
+Let's create a group payment for 10 people.
 
-00:00:39.000 --> 00:00:51.000
-Sharing with a group? Choose Lucky Link. Set the pool, recipient slots, and eligible wallets.
+00:00:15.270 --> 00:00:16.550
+Choose a token.
 
-00:00:51.000 --> 00:01:01.000
-One random share per eligible wallet. Pyth Entropy settles the draw. Fees and gas are paid in MON.
+00:00:16.590 --> 00:00:20.520
+Set the total pool to 100 and select 10 recipients.
 
-00:01:01.000 --> 00:01:07.000
-Reveal the amount. Collect your share. This is a real testnet withdrawal. Confirmation waits are shortened.
+00:00:20.540 --> 00:00:23.620
+Equal amount gives each wallet 10 tokens.
 
-00:01:07.000 --> 00:01:15.000
-Every link, in one place. Track Payment and Lucky Links. Refund available funds after expiry.
+00:00:23.640 --> 00:00:26.960
+Anyone can claim or you can limit access to selected wallets.
 
-00:01:15.000 --> 00:01:20.000
-Create a link. Send it in a chat. Try MonliPay at monlipay.xyz
+00:00:30.660 --> 00:00:33.370
+Confirm the token approval and fund the pool.
 
+00:00:33.390 --> 00:00:35.670
+The money is now held by the contract.
 
-00:01:20.000 --> 00:01:28.000
-Private Payment is an option. Interface walkthrough: protect saved payment records with your passkey.
+00:00:35.690 --> 00:00:39.140
+Copy the link and share it in your group's existing chat.
 
-00:01:28.000 --> 00:01:36.000
-Add funds, then create a private link. MON wraps to WMON. Deposits and withdrawals are public; the proving service sees details.
+00:00:39.450 --> 00:00:42.750
+There is no need to collect 10 wallet addresses first.
 
-00:01:36.000 --> 00:01:44.000
-The mainnet pilot passed. 1 MON: deposit, private transfer, claim and recovery. Verified separately, not in this recording.
+00:00:44.490 --> 00:00:48.650
+The recipient opens the same link and sees their exact share.
+
+00:00:48.670 --> 00:00:51.890
+Connect a wallet, then choose Claim my payment.
+
+00:00:52.230 --> 00:00:54.760
+Ten tokens arrive in one transaction.
+
+00:00:54.780 --> 00:00:58.480
+Each wallet can claim once until the slots are filled.
+
+00:00:58.500 --> 00:01:01.530
+Public claims need a wallet and network gas.
+
+00:01:03.330 --> 00:01:04.280
+Back in My Links,
+
+00:01:04.300 --> 00:01:09.050
+the sender can see how many payments have been claimed and what remains in the pool.
+
+00:01:09.070 --> 00:01:11.970
+Unclaimed funds can be refunded after the deadline.
+
+00:01:13.830 --> 00:01:16.520
+For a giveaway, switch to Random amount.
+
+00:01:16.540 --> 00:01:19.430
+For a single recipient, use a Payment Link.
+
+00:01:19.450 --> 00:01:24.790
+Both use the same token picker, and saved contacts make repeat payments easier.
+
+00:01:26.220 --> 00:01:28.940
+Private Payment is also available on mainnet.
+
+00:01:29.340 --> 00:01:35.140
+A passkey protects saved payment records and AnomaPay shields transfers inside its pool.
+
+00:01:35.160 --> 00:01:37.740
+Deposits and withdrawals remain public.
+
+00:01:39.720 --> 00:01:45.090
+Create a link, share it in a chat, let recipients claim when they are ready.
+
+00:01:45.110 --> 00:01:47.160
+Try MonliPay at monlipay.xyz.

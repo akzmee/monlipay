@@ -6,7 +6,7 @@ import { ArrowIcon } from "@/components/ArrowIcon";
 export const metadata: Metadata = {
   title: "Watch the demo | MonliPay",
   description:
-    "Watch MonliPay create and claim a token payment link on Monad testnet, with random group payments for selected wallets.",
+    "Watch a Group Payment from creation to claim on Monad testnet, with English narration and captions. One link, ten recipients, equal shares.",
 };
 
 export default function DemoPage() {
