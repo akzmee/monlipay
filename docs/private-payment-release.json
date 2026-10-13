@@ -161,6 +161,16 @@
     "Physical-device and cross-device passkey support were not tested.",
     "Private transfers shield public-chain details; deposits, withdrawals and proving operators remain privacy limits.",
     "No off-host snapshot destination or schedule configured.",
-    "GitHub publication currently blocked: authenticated SSH account dwlpra lacks write access to akzmee/monlipay. Source archive is prepared as an alternative."
-  ]
+    "GitHub branch push is blocked because authenticated SSH account dwlpra lacks write access to akzmee/monlipay. Complete source snapshot f0ee436 is publicly downloadable from https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
+  ],
+  "sourcePublication": {
+    "url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip",
+    "revision": "f0ee436e46df6be6dc8fbd59a4330f1f38655e8f",
+    "sha256": "a73e59971105584dd6ebca3a758dffa52d1c1895c8f19c903a0a94a417694fd0",
+    "verifiedAt": "2026-10-13T01:11:55.337881+00:00",
+    "allFivePublicArtifactsHTTP200": true,
+    "downloadedArchiveHashMatches": true,
+    "encryptedDataPreservedAfterMountActivation": true,
+    "postActivationPasskeyUnlock": true
+  }
 }

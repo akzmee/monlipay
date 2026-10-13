@@ -76,7 +76,8 @@
     "postContainerReplacementUnlock": true
   },
   "remaining": [
-    "Publish source branch when repository write access is available, or attach the prepared source archive."
+    "Entrant must complete account/team/contact fields and submit through the hackathon portal.",
+    "Optional: publish the metropolis GitHub branch after repository write access is available; the complete source ZIP is already public."
   ],
   "vpsPreparation": {
     "host": "168.110.205.224",
@@ -92,5 +93,12 @@
     "fundedPilotExecuted": false,
     "productionAppReplaced": false,
     "scope": "Historical pre-pilot isolated image preparation; funded result is recorded above."
+  },
+  "sourcePublication": {
+    "url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip",
+    "revision": "f0ee436e46df6be6dc8fbd59a4330f1f38655e8f",
+    "sha256": "a73e59971105584dd6ebca3a758dffa52d1c1895c8f19c903a0a94a417694fd0",
+    "verifiedAt": "2026-10-13T01:11:55.337881+00:00",
+    "status": "Published; downloaded archive hash verified"
   }
 }

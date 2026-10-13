@@ -39,7 +39,7 @@
     "Wallet eligibility is not proof of one human per wallet. Passkey PRF support depends on the browser and provider, and lost passkeys cannot be reset. No independent security audit or enterprise certification is claimed.",
     "The 80-second transaction demo uses Monad testnet and an automated dedicated wallet; the added 24-second privacy interface walkthrough is explicitly separate from the real funded mainnet pilot."
   ],
-  "submission_status": "App and submission package ready. Mainnet/testnet deployment and encrypted history persistence verified. Portal submission has not been sent. GitHub branch publication needs repository write access; a source ZIP is available.",
+  "submission_status": "App and submission package ready. Mainnet/testnet deployment, encrypted history persistence and public source download verified. Portal submission has not been sent. GitHub branch publication awaits repository write access; use the published source ZIP.",
   "judge_quickstart": [
     "Watch https://monlipay.xyz/demo (1 minute 44 seconds).",
     "Open https://testnet.monlipay.xyz/create with a Monad testnet wallet for standard MON payment or Lucky Link testing. A sender and receiver need faucet MON; the selected wallet controls group eligibility.",
@@ -55,11 +55,14 @@
     "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
   },
   "source_publication": {
-    "commit": "b3aab33",
+    "commit": "f0ee436e46df6be6dc8fbd59a4330f1f38655e8f",
     "branch": "metropolis",
-    "status": "Local commit ready; push denied to authenticated account dwlpra.",
+    "status": "Complete source ZIP published and verified. GitHub branch push remains denied to authenticated account dwlpra.",
     "archive": "output/submission/monlipay-metropolis-source.zip",
     "instruction": "Use the live source archive for verification while the GitHub branch awaits write access. The original repository is the existing baseline.",
-    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip"
+    "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source.zip",
+    "archive_sha256": "a73e59971105584dd6ebca3a758dffa52d1c1895c8f19c903a0a94a417694fd0",
+    "verified_at": "2026-10-13T01:11:55.337881+00:00",
+    "manifest_url": "https://monlipay.xyz/submission/source-manifest.json"
   }
 }
