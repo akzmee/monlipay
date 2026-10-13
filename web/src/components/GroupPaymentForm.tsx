@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { useAccount, useReadContract } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { decodeEventLog, erc20Abi, formatEther, formatUnits, type Address } from "viem";
 import { QRCodeSVG } from "qrcode.react";
 import { monadChain, SUPPORTED_TOKENS, EXPIRY_PRESETS, type TokenInfo } from "@/config/chain";
@@ -396,7 +396,7 @@ export default function GroupPaymentForm() {
                   : !configured
                     ? "Funding coming soon"
                     : !address
-                      ? "Connect wallet to create"
+                      ? "Continue to create"
                       : "Fund & create link"}
                 <ArrowIcon />
               </button>

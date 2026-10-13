@@ -43,7 +43,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           Opening encrypted links requires passkey encryption support (WebAuthn
-          PRF). Browser and provider support varies. On another device, use the
+          PRF), accessed through Mera. Browser and provider support varies. On another device, use the
           same passkey provider and MonliPay site. Mainnet and testnet keep
           separate saved links.
         </p>
@@ -119,11 +119,24 @@ export default function PrivacyPage() {
       <section aria-labelledby="service-data">
         <h2 id="service-data">What the service can see</h2>
         <p>
+          Email sign-in uses Privy to create a wallet that you control. Privy
+          processes your email and authentication information. You confirm
+          signatures and transactions, and can export your wallet from the
+          wallet menu. Your email login does not unlock saved payment links;
+          those still require your encryption passkey.
+        </p>
+        <p>
           Wallet sign-in identifies the wallet accessing saved links. The
           service processes public link metadata and request information.
           Contact names and addresses are stored in your wallet-scoped address
           book on the server; contacts do not use the claim-link encryption
           described above.
+        </p>
+        <p>
+          Group Payment activity is read from public contract events through
+          Envio HyperSync. Envio receives the network, contract and payment ID,
+          without claim-link secrets or your contact names. Alchemy supplies
+          blockchain data for payment history and supported bridge balances.
         </p>
         <p>
           Wallet providers, RPC services, hosting providers, and other services

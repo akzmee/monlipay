@@ -1,4 +1,5 @@
 import { bytesToHex, hexToBytes } from "viem";
+import { createRecordPasskey, readRecordPasskey } from "./mera-passkey";
 import {
   createBackupProfile,
   generateRecoveryKey,
@@ -14,22 +15,10 @@ import {
 
 // WebAuthn is an encryption ceremony here; wallet SIWE remains the server's authentication.
 // The server receives neither the PRF result nor a WebAuthn assertion used as key material.
-type PrfResult = {
-  prf?: { enabled?: boolean; results?: { first: ArrayBuffer } };
-};
 const encoder = new TextEncoder();
 const random = (n: number) => crypto.getRandomValues(new Uint8Array(n));
 const hex = (b: Uint8Array) => bytesToHex(b).slice(2);
 const bytes = (s: string) => Uint8Array.from(hexToBytes(`0x${s}`));
-const b64 = (b: Uint8Array) =>
-  btoa(String.fromCharCode(...b))
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replace(/=+$/, "");
-const unb64 = (s: string) =>
-  Uint8Array.from(atob(s.replaceAll("-", "+").replaceAll("_", "/")), (c) =>
-    c.charCodeAt(0),
-  );
 const context = (
   scope: BackupScope,
   profile: BackupProfile,
@@ -64,82 +53,10 @@ function available() {
       "Open MonliPay in a browser that supports passkeys. You can still create and share links without saving them.",
     );
 }
-function failure(error: unknown): never {
-  if (
-    error instanceof DOMException &&
-    ["NotAllowedError", "AbortError"].includes(error.name)
-  )
-    throw new Error(
-      "Passkey request cancelled or timed out. Your saved links are unchanged. Try again when ready.",
-    );
-  throw error;
-}
-function validateCredential(
-  value: Credential | null,
-  challenge: Uint8Array,
-  type: string,
-): PublicKeyCredential {
-  if (!value || value.type !== "public-key")
-    throw new Error("No passkey was selected. Try again.");
-  const credential = value as PublicKeyCredential;
-  const data = JSON.parse(
-    new TextDecoder().decode(credential.response.clientDataJSON),
-  );
-  if (
-    data.type !== type ||
-    data.challenge !== b64(challenge) ||
-    data.origin !== location.origin ||
-    data.crossOrigin === true
-  )
-    throw new Error(
-      "Passkey verification did not match this site. Please retry.",
-    );
-  return credential;
-}
-async function evaluate(
-  credentialId: string,
-  salt: string,
-  signal?: AbortSignal,
-) {
+async function evaluate(credentialId: string, salt: string, signal?: AbortSignal) {
   available();
-  const challenge = random(32);
-  try {
-    const credential = validateCredential(
-      await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          rpId: location.hostname,
-          timeout: 60_000,
-          userVerification: "required",
-          allowCredentials: [{ type: "public-key", id: unb64(credentialId) }],
-          extensions: {
-            prf: { eval: { first: bytes(salt) } },
-          } as AuthenticationExtensionsClientInputs,
-        },
-        signal,
-      }),
-      challenge,
-      "webauthn.get",
-    );
-    if (b64(new Uint8Array(credential.rawId)) !== credentialId)
-      throw new Error("Choose the passkey used to save these links.");
-    const flags = new Uint8Array(
-      (credential.response as AuthenticatorAssertionResponse).authenticatorData,
-    )[32];
-    if (!(flags & 0x04))
-      throw new Error(
-        "Verify with your device screen lock to open saved links.",
-      );
-    const result = (credential.getClientExtensionResults() as PrfResult).prf
-      ?.results?.first;
-    if (!result || result.byteLength !== 32)
-      throw new Error(
-        "This passkey provider does not support encrypted links (PRF). Try a supported password manager or security key. Keep your original links.",
-      );
-    return new Uint8Array(result);
-  } catch (error) {
-    return failure(error);
-  }
+  const { prfOutput } = await readRecordPasskey(credentialId, bytes(salt), signal);
+  return prfOutput;
 }
 async function wrappingKey(
   output: Uint8Array<ArrayBuffer>,
@@ -241,49 +158,17 @@ export async function createLinkPasskey(
         key: await unlockBackupProfile(recovery, scope, existing.profile),
       }
     : await createBackupProfile(recovery, scope);
-  const challenge = random(32);
-  let credential: PublicKeyCredential;
-  try {
-    credential = validateCredential(
-      await navigator.credentials.create({
-        publicKey: {
-          challenge,
-          rp: { id: location.hostname, name: "MonliPay" },
-          user: {
-            id: random(32),
-            name: `${scope.owner} · ${scope.chainId}`,
-            displayName: `MonliPay ${scope.owner.slice(0, 6)}…${scope.owner.slice(-4)} · ${scope.chainId === 143 ? "Monad" : "Monad Testnet"}`,
-          },
-          pubKeyCredParams: [
-            { type: "public-key", alg: -7 },
-            { type: "public-key", alg: -257 },
-          ],
-          authenticatorSelection: {
-            residentKey: "required",
-            userVerification: "required",
-          },
-          attestation: "none",
-          timeout: 60_000,
-          extensions: { prf: {} } as AuthenticationExtensionsClientInputs,
-        },
-        signal,
-      }),
-      challenge,
-      "webauthn.create",
-    );
-  } catch (error) {
-    return failure(error);
-  }
-  if (!(credential.getClientExtensionResults() as PrfResult).prf?.enabled)
-    throw new Error(
-      "This passkey provider cannot encrypt saved links (PRF). Try a supported password manager or security key. Nothing has been saved or replaced.",
-    );
-  const header = {
-    credentialId: b64(new Uint8Array(credential.rawId)),
-    salt: hex(random(32)),
-  };
-  // Read the credential back before persisting anything: no unopenable profile after a cancelled ceremony.
-  const output = await evaluate(header.credentialId, header.salt, signal);
+  const salt = random(32);
+  const credential = await createRecordPasskey(
+    {
+      name: `${scope.owner} · ${scope.chainId}`,
+      displayName: `MonliPay ${scope.owner.slice(0, 6)}…${scope.owner.slice(-4)} · ${scope.chainId === 143 ? "Monad" : "Monad Testnet"}`,
+    },
+    salt,
+    signal,
+  );
+  const header = { credentialId: credential.credentialId, salt: hex(salt) };
+  const output = credential.prfOutput;
   try {
     const passkey = await wrapLinkRoot(
       recovery,

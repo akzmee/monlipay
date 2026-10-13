@@ -2,6 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { WagmiProvider as PrivyWagmiProvider } from "@privy-io/wagmi";
 import {
   lightTheme,
   darkTheme,
@@ -10,7 +12,10 @@ import {
 import { ThemeProvider, useTheme } from "next-themes";
 import { wagmiConfig } from "@/config/wagmi";
 import { LinkBackupProvider } from "./LinkBackupProvider";
-import { useState, useEffect, type ReactNode, useMemo } from "react";
+import { PrivyWalletEntry } from "./PrivyWalletEntry";
+import { PRIVY_APP_ID } from "@/config/privy";
+import { monadChain } from "@/config/chain";
+import { useState, useSyncExternalStore, type ReactNode, useMemo } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 
 /** Pinned SSR theme to avoid hydration mismatch with next-themes; dark by default. */
@@ -21,19 +26,14 @@ const SSR_THEME = darkTheme({
   overlayBlur: "small",
 });
 
-/**
- * Custom RainbowKit theme that matches the MonliPay brand colors.
- * Uses Monad's official electric violet (#6E54FF) brand color.
- */
+const subscribe = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
 function useRainbowKitTheme() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
+  const mounted = useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot);
+  const isDark = !mounted || resolvedTheme !== "light";
 
   return useMemo(
     () =>
@@ -58,6 +58,40 @@ function RainbowKitWrapper({ children }: { children: ReactNode }) {
   );
 }
 
+function WalletProviders({ children, queryClient }: { children: ReactNode; queryClient: QueryClient }) {
+  const { resolvedTheme } = useTheme();
+  const content = <LinkBackupProvider>{children}</LinkBackupProvider>;
+  if (!PRIVY_APP_ID) return (
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitWrapper>{content}</RainbowKitWrapper>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+  return (
+    <PrivyProvider appId={PRIVY_APP_ID} config={{
+      defaultChain: monadChain,
+      supportedChains: [monadChain],
+      loginMethods: ["email", "wallet"],
+      appearance: {
+        theme: resolvedTheme === "light" ? "light" : "#101012",
+        accentColor: "#8b73ff",
+        logo: "/brand/monlipay-mark.svg",
+        landingHeader: "Open MonliPay",
+        loginMessage: "Use your email or connect a wallet to send and receive payments.",
+        walletChainType: "ethereum-only",
+      },
+      embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" }, showWalletUIs: true },
+    }}>
+      <QueryClientProvider client={queryClient}>
+        <PrivyWagmiProvider config={wagmiConfig}>
+          <RainbowKitWrapper><PrivyWalletEntry>{content}</PrivyWalletEntry></RainbowKitWrapper>
+        </PrivyWagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
+  );
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -77,13 +111,7 @@ export function Providers({ children }: { children: ReactNode }) {
       defaultTheme="dark"
       disableTransitionOnChange
     >
-      <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitWrapper>
-            <LinkBackupProvider>{children}</LinkBackupProvider>
-          </RainbowKitWrapper>
-        </QueryClientProvider>
-      </WagmiProvider>
+      <WalletProviders queryClient={queryClient}>{children}</WalletProviders>
     </ThemeProvider>
   );
 }

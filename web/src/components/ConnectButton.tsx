@@ -4,9 +4,11 @@ import { useState } from "react";
 import { ConnectButton as RKConnectButton } from "@rainbow-me/rainbowkit";
 import { monadChain, isMainnet } from "@/config/chain";
 import { NetworkSwitcherModal } from "./NetworkSwitcherModal";
+import { useWalletEntry } from "./WalletEntryContext";
 
 /** Branded wrapper around RainbowKit ConnectButton. The chain pill opens the cross-domain network switcher; "Wrong Network" opens RainbowKit's chain modal. */
 export function ConnectButton() {
+  const entry = useWalletEntry();
   const [showNetworkModal, setShowNetworkModal] = useState(false);
 
   const currentNetworkLabel = isMainnet ? "Mainnet" : "Testnet";
@@ -41,11 +43,12 @@ export function ConnectButton() {
               {!connected ? (
                 <>
                   <button
-                    onClick={openConnectModal}
+                    onClick={entry?.open ?? openConnectModal}
+                    disabled={entry ? !entry.ready : false}
                     type="button"
                     className="mp-button mp-button-primary mp-wallet-button"
                   >
-                    Connect Wallet
+                    {entry ? "Get started" : "Connect Wallet"}
                   </button>
                   {/* Online indicator — opens the network switcher. */}
                   <button
@@ -72,7 +75,7 @@ export function ConnectButton() {
                 <>
                   {/* Account button */}
                   <button
-                    onClick={openAccountModal}
+                    onClick={entry?.openAccount ?? openAccountModal}
                     type="button"
                     className="mp-wallet-account min-h-11 rounded-md border border-stone-300 px-3 py-2 text-sm font-medium font-mono transition-colors hover:bg-stone-100 dark:border-stone-600 dark:hover:bg-stone-800"
                   >

@@ -8,7 +8,7 @@ import {
   useReadContracts,
   useSwitchChain,
 } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { erc20Abi } from "viem";
 import { useMyLinks } from "@/hooks/useMyLinks";
 import { useRefundMultiple } from "@/hooks/useRefundMultiple";

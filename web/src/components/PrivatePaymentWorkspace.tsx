@@ -8,7 +8,7 @@ import {
   useWriteContract,
   useSignTypedData,
 } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { bytesToHex, hexToBytes, erc20Abi, formatUnits, parseAbi } from "viem";
 import { monadChain } from "@/config/chain";
 import { useLinkBackups } from "./LinkBackupProvider";
@@ -71,7 +71,7 @@ export function PrivatePaymentWorkspace() {
         <section className="mp-panel mp-payment-gate">
           <h2>Send with more privacy</h2>
           <p>
-            Connect your wallet, then open your passkey to keep your private
+            Connect your wallet, then set up or unlock your passkey to keep your private
             balance and links within reach.
           </p>
           <button className="mp-button" onClick={openConnectModal}>

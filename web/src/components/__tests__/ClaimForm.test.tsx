@@ -30,12 +30,14 @@ describe("ClaimForm", () => {
   describe("when not connected", () => {
     it("should show connect wallet prompt", () => {
       renderClaimForm({ isConnected: false, address: undefined });
-      expect(screen.getByText("Connect wallet to claim")).toBeInTheDocument();
+      expect(screen.getByText("Continue to claim your payment")).toBeInTheDocument();
     });
 
-    it("should show instruction text", () => {
-      renderClaimForm({ isConnected: false, address: undefined });
-      expect(screen.getByText(/at the top right/i)).toBeInTheDocument();
+    it("opens wallet onboarding directly from the claim panel", () => {
+      const onConnect = vi.fn();
+      renderClaimForm({ isConnected: false, address: undefined, onConnect });
+      fireEvent.click(screen.getByRole("button", { name: "Continue to claim" }));
+      expect(onConnect).toHaveBeenCalledOnce();
     });
   });
 

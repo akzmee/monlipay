@@ -1,4 +1,21 @@
 /* Shared product surfaces. Monad palette, Metropolis geometry, ordinary form controls. */
+.mp-account-dialog { width: min(440px, calc(100vw - 32px)); margin: auto; padding: 28px; border: 1px solid var(--mp-line); border-radius: 20px; background: var(--mp-panel); color: var(--mp-ink); max-height: calc(100dvh - 48px); overflow-y: auto; box-shadow: 0 24px 64px rgb(0 0 0 / 24%); }
+.mp-account-dialog::backdrop { background: rgb(0 0 0 / 60%); }
+.mp-account-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
+.mp-account-heading h2 { font-size: 1.5rem; font-weight: 600; }
+.mp-account-address { margin-block: 20px 12px; overflow-wrap: anywhere; font-family: var(--font-geist-mono), monospace; font-size: .875rem; }
+.mp-account-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; margin-block: 28px 16px; }
+.mp-group-activity { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--mp-line); }
+.mp-group-activity ol { list-style: none; padding: 0; margin: 0; }
+.mp-activity-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 20px; border-bottom: 1px solid var(--mp-line); }
+.mp-activity-row > div { min-width: 0; }
+.mp-activity-row p { font-weight: 500; }
+.mp-activity-row small { display: block; margin-top: 6px; color: var(--mp-muted); font-size: .875rem; }
+.mp-activity-row a { flex-shrink: 0; font-variant-numeric: tabular-nums; max-width: 50%; overflow-wrap: anywhere; }
+@media (max-width: 540px) {
+  .mp-activity-row { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .mp-activity-row a { max-width: 100%; }
+}
 :root,
 .light {
   --mp-ground: #f5f4fa;

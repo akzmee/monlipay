@@ -12,7 +12,7 @@ export interface SecurityHeader {
 export const CSP_DIRECTIVES: readonly string[] = [
   "default-src 'self'",
   // Allow Next.js inline runtime + eval (needed for Next.js dev/hmr; safe in prod)
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://challenges.cloudflare.com",
   // Allow Next.js injected styles + Tailwind + style attributes
   "style-src 'self' 'unsafe-inline'",
   // Images: self + data: URIs + trustwallet assets + any https (logos from various CDNs)
@@ -24,7 +24,9 @@ export const CSP_DIRECTIVES: readonly string[] = [
   // user-configured RPC URL. https/wss enforces TLS, which is the
   // main security property we care about.
   "connect-src 'self' https: wss:",
-  // Frames blocked (anti-clickjacking)
+  // Privy isolates wallet operations in its own frame.
+  "frame-src 'self' https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com",
+  // This application cannot be embedded by another site (anti-clickjacking)
   "frame-ancestors 'none'",
   // Forms only submit to self
   "form-action 'self'",

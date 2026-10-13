@@ -1,0 +1,30 @@
+{
+  "chainId": 10143,
+  "walletProvider": "Privy",
+  "signer": "0x97dCE534F860811a7C4c4e661da75561D671a95F",
+  "contract": "0x0e767de29c64e3a283a02c211aabbcd498a3ff86",
+  "packetId": "4",
+  "token": "0xd1f71844ffe9b6852b4e10a6173dfdf8413187d5",
+  "decimals": 6,
+  "total": "20000000",
+  "slots": 2,
+  "share": "10000000",
+  "duplicateClaimRejected": true,
+  "receipts": {
+    "approve": {
+      "hash": "0x85242c4315091f0f856692172795e3a946888d9d196d55d8afaa17976dba491f",
+      "block": 70732115,
+      "status": "success"
+    },
+    "create": {
+      "hash": "0x5559e30c222ad1f609ca55da719c7cdb911d4bd5a5178c05a7ef99c0cda4c8c1",
+      "block": 70732309,
+      "status": "success"
+    },
+    "claim": {
+      "hash": "0xbf57449a203e22e49f5c56522962c3c31db55ff653573c01e0a196d47b841fd3",
+      "block": 70733449,
+      "status": "success"
+    }
+  }
+}

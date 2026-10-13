@@ -8,6 +8,7 @@ import { monadChain, SUPPORTED_TOKENS } from "@/config/chain";
 import { GROUP_VAULTS, groupClaimPath, isEqualGroupVault } from "@/config/group";
 import { luckyVaultAbi } from "@/lib/lucky-abi";
 import { historyAmount, groupStatus } from "@/lib/link-history";
+import { useTokenMetadata } from "@/hooks/useTokenMetadata";
 import { ArrowIcon } from "./ArrowIcon";
 
 function GroupRow({
@@ -29,6 +30,10 @@ function GroupRow({
     chainId: monadChain.id,
     query: { refetchInterval: 15_000 },
   });
+  const knownToken = SUPPORTED_TOKENS.find(
+    (token) => token.address.toLowerCase() === query.data?.token.toLowerCase(),
+  );
+  const { metadata } = useTokenMetadata(knownToken ? null : query.data?.token ?? null);
   if (query.isError)
     return (
       <li className="mp-history-row">
@@ -42,9 +47,7 @@ function GroupRow({
     return <li className="mp-skeleton" aria-label="Loading Group Payment" />;
   const p = query.data;
   if (p.sender.toLowerCase() !== owner.toLowerCase()) return null;
-  const token = SUPPORTED_TOKENS.find(
-    (t) => t.address.toLowerCase() === p.token.toLowerCase(),
-  );
+  const token = knownToken ?? metadata;
   const equal = isEqualGroupVault(vault);
   const status = groupStatus(p, now, equal);
   return (

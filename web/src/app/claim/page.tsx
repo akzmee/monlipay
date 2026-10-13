@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useSyncExternalStore, Suspense } from "react";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { isAddress, type Hex } from "viem";
 import { useDeposit, useClaimLink } from "@/hooks/useLinkVault";
 import { parseClaimUrl } from "@/lib/crypto";
@@ -11,6 +11,7 @@ import { sponsorClaim } from "@/lib/sponsor-client";
 import { useTokenMetadata } from "@/hooks/useTokenMetadata";
 import { historyAmount } from "@/lib/link-history";
 import { ClaimForm } from "@/components/ClaimForm";
+import { useConnectModal } from "@/components/WalletEntryContext";
 
 function subscribeHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
@@ -32,6 +33,9 @@ function ClaimPageContent() {
   }, []);
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
+  const { openConnectModal } = useConnectModal();
+  const { switchChainAsync, isPending: switching } = useSwitchChain();
+  const [switchError, setSwitchError] = useState("");
 
   const parsed = parseClaimUrl(hash ?? "");
   const depositId = parsed?.depositId ?? null;
@@ -298,13 +302,20 @@ function ClaimPageContent() {
         {/* Wrong chain warning */}
         {isWrongChain && (
           <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400">
-            Switch to {monadChain.name} in your wallet to claim.
+            <p>This payment uses {monadChain.name}.</p>
+            <button type="button" className="mp-button mt-3" disabled={switching} onClick={async () => {
+              setSwitchError("");
+              try { await switchChainAsync({ chainId: monadChain.id }); }
+              catch { setSwitchError("Network switch was not completed. Try again when ready."); }
+            }}>{switching ? "Switching…" : `Switch to ${monadChain.name}`}</button>
+            {switchError && <p className="mt-2" role="alert">{switchError}</p>}
           </div>
         )}
 
         {/* Claim form */}
         <ClaimForm
           isConnected={isConnected}
+          onConnect={openConnectModal}
           isBusy={isBusy}
           isWrongChain={isWrongChain}
           error={errorOverall}

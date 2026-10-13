@@ -4,7 +4,7 @@ import { linkVaultAbi } from "./abis/LinkVaultAbi";
 
 const MAINNET_VAULT =
   process.env.PONDER_MONAD_MAINNET_VAULT ||
-  "0xd7846DC6Fd8c159cF59957c532173d828f7B5BBC";
+  "0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9";
 const TESTNET_VAULT =
   process.env.PONDER_MONAD_TESTNET_VAULT || "";
 

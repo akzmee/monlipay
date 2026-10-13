@@ -1,0 +1,21 @@
+{
+  "chainId": 10143,
+  "walletProvider": "Privy",
+  "signer": "0x97dce534f860811a7c4c4e661da75561d671a95f",
+  "contract": "0xeb9a0bc1c7518f839b8f249e407a1afc011e0ab3",
+  "depositId": "14",
+  "token": "0x0000000000000000000000000000000000000000",
+  "amount": "5000000000000000",
+  "receipts": {
+    "create": {
+      "hash": "0x1d345f2843c717b67b2f0765b3b033846504e5b2d2f7e5ffba7de7ee55b57bdc",
+      "block": 70729360,
+      "status": "success"
+    },
+    "claim": {
+      "hash": "0x914b4d95e0730e0f70e1cb8f1dc136795764952ba19451a08a89f89837db23fc",
+      "block": 70730248,
+      "status": "success"
+    }
+  }
+}

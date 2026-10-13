@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { useAccount } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { getAddress, isAddress, zeroAddress } from "viem";
 import { useContacts } from "@/hooks/useContacts";
 import { shortAddress } from "@/lib/lucky";

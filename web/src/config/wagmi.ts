@@ -1,6 +1,8 @@
 "use client";
 
 import { http, createConfig, createStorage } from "wagmi";
+import { createConfig as createPrivyConfig } from "@privy-io/wagmi";
+import { PRIVY_APP_ID } from "./privy";
 import {
   connectorsForWallets,
   getDefaultWallets,
@@ -17,7 +19,7 @@ import { isValidWalletConnectId } from "@/lib/wallet-connect";
 /** Without a valid project ID, offer browser wallets without starting WalletConnect. */
 const RAW_WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "";
 
-if (!isValidWalletConnectId(RAW_WC_PROJECT_ID)) {
+if (!PRIVY_APP_ID && !isValidWalletConnectId(RAW_WC_PROJECT_ID)) {
   if (typeof window !== "undefined") {
     console.warn(
       "[wagmi] NEXT_PUBLIC_WC_PROJECT_ID is missing or invalid. " +
@@ -27,7 +29,7 @@ if (!isValidWalletConnectId(RAW_WC_PROJECT_ID)) {
   }
 }
 
-const connectors = isValidWalletConnectId(RAW_WC_PROJECT_ID)
+const connectors = PRIVY_APP_ID ? [] : isValidWalletConnectId(RAW_WC_PROJECT_ID)
   ? getDefaultWallets({
       appName: "MonliPay",
       projectId: RAW_WC_PROJECT_ID,
@@ -40,7 +42,8 @@ const connectors = isValidWalletConnectId(RAW_WC_PROJECT_ID)
 /** Wagmi config — single-chain per build (NEXT_PUBLIC_NETWORK: "mainnet" or "testnet"). */
 const activeChain = isMainnet ? monadMainnetChain : monadTestnetChain;
 
-export const wagmiConfig = createConfig({
+const makeConfig = PRIVY_APP_ID ? createPrivyConfig : createConfig;
+export const wagmiConfig = makeConfig({
   chains: [activeChain],
   connectors,
   storage: createStorage({

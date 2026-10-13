@@ -14,6 +14,7 @@ interface ClaimFormProps {
   setRecipientOverride: (v: string) => void;
   recipientError: string | null;
   onClaim: () => void;
+  onConnect?: () => void;
 }
 
 /**
@@ -34,6 +35,7 @@ export function ClaimForm({
   setRecipientOverride,
   recipientError,
   onClaim,
+  onConnect,
 }: ClaimFormProps) {
   const canClaim = isConnected && !isWrongChain && !isBusy && !recipientError;
   const [confirmationFor, setConfirmationFor] = useState<string | null>(null);
@@ -80,11 +82,13 @@ export function ClaimForm({
             />
           </svg>
         </div>
-        <h3 className="text-sm font-semibold">Connect wallet to claim</h3>
+        <h3 className="text-sm font-semibold">Continue to claim your payment</h3>
         <p className="mt-1 text-xs text-stone-500">
-          Click <strong>Connect Wallet</strong> at the top right to receive your
-          funds.
+          Choose a wallet to receive this payment.
         </p>
+        <button type="button" className="mp-button mp-button-primary mt-5" onClick={onConnect}>
+          Continue to claim
+        </button>
       </div>
     );
   }

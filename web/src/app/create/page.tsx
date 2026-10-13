@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { useCreateLink } from "@/hooks/useLinkVault";
 import {
   SUPPORTED_TOKENS,
@@ -81,14 +81,14 @@ export default function CreatePage() {
           </div>
           {!isConnected ? (
             <div className="mp-payment-gate">
-              <h3>Connect your wallet to get started</h3>
+              <h3>Get ready to send</h3>
               <p>Choose a token and amount, then create a link to send.</p>
               <button
                 type="button"
                 className="mp-button"
                 onClick={openConnectModal}
               >
-                Connect wallet
+                Get started
               </button>
             </div>
           ) : !isContractDeployed ? (

@@ -1,0 +1,21 @@
+{
+  "chainId": 10143,
+  "contract": "0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3",
+  "depositId": "15",
+  "walletProvider": "Privy",
+  "recordEncryption": "Mera WebAuthn PRF",
+  "signer": "0x97dCE534F860811a7C4c4e661da75561D671a95F",
+  "amount": "1000000000000000",
+  "receipts": {
+    "create": {
+      "hash": "0x77db5933336eafac2078e4aa93298a2406592e1249603375bdc3d09fc454bcc8",
+      "block": 70734827,
+      "status": "success"
+    },
+    "claim": {
+      "hash": "0xa6eeb631f1026d48b3649a85c4797564e22b7e861f2383b15d81d65326d6ea67",
+      "block": 70736213,
+      "status": "success"
+    }
+  }
+}

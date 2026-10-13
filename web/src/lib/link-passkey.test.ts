@@ -161,6 +161,18 @@ describe("passkey-protected saved links", () => {
     ).rejects.toThrow("does not open");
     expect(create).not.toHaveBeenCalled();
   });
+  it("opens a pre-Mera passkey envelope using its original PRF salt", async () => {
+    const recovery = generateRecoveryKey();
+    const original = await createBackupProfile(recovery, scope);
+    const record = await encryptLinkBackup(original.key, scope, original.profile, "8", generateSecretKey());
+    const envelope = await wrapLinkRoot(recovery, output.slice(), scope, original.profile, header, location.origin);
+    const reopened = await openWithLinkPasskey(scope, original.profile, envelope);
+    const extensions = get.mock.calls[0][0].publicKey!.extensions as { prf: { eval: { first: Uint8Array } } };
+    expect(Buffer.from(extensions.prf.eval.first).toString("hex")).toBe(header.salt);
+    expect(create).not.toHaveBeenCalled();
+    expect(await decryptLinkBackup(reopened, scope, original.profile, record, location.origin))
+      .toBe(await decryptLinkBackup(original.key, scope, original.profile, record, location.origin));
+  });
   it("binds wrapped roots to the wallet, chain, vault, site, profile and credential", async () => {
     const recovery = generateRecoveryKey();
     const { profile } = await createBackupProfile(recovery, scope);

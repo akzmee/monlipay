@@ -15,6 +15,8 @@ The checked-in example leaves Group and Lucky addresses at zero. Copy the matchi
 
 Keep `.env` private. The Venice key used to produce the demo is not needed to run the app.
 
+For email onboarding, set `NEXT_PUBLIC_PRIVY_APP_ID`, enable email login in Privy, and allow both app origins in its dashboard. User transactions and wallet export require no server-side Privy secret. Set `ENVIO_API_TOKEN` for Group Payment activity. Both values are optional for self-hosting; without Privy the app uses its existing wallet connectors, and without Envio payments remain usable while activity is unavailable.
+
 ## Build and start
 
 ```sh
@@ -33,6 +35,12 @@ docker compose --env-file .env ps
 The current Compose ports bind to all host interfaces. Use firewall rules or adjust the bindings for your reverse proxy setup. Serve the apps over HTTPS; passkeys require a secure origin. Proxy examples are in `deploy/nginx/` and `deploy/caddy/`.
 
 The apps reach the indexer through `INDEXER_INTERNAL_URL=http://indexer:42069`. The indexer's mainnet RPC configuration requires `ALCHEMY_API_KEY` in this Compose setup.
+
+For Nginx Proxy Manager, add this to the Advanced configuration of the two MonliPay hosts. It prevents Cloudflare from injecting analytics into payment pages and preserves API and asset cache headers. The `headers-more` module is included in Nginx Proxy Manager.
+
+```nginx
+more_set_headers -t "text/html" "Cache-Control: private, no-cache, no-store, must-revalidate, no-transform";
+```
 
 ## Persistent data
 

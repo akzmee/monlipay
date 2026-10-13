@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { useSearchParams } from "next/navigation";
 import { useAccount, useReadContract } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import {
   bytesToHex,
   erc20Abi,
@@ -20,6 +20,7 @@ import { luckyVaultAbi } from "@/lib/lucky-abi";
 import { shortAddress } from "@/lib/lucky";
 import { useLuckyTransaction } from "@/hooks/useLuckyTransaction";
 import { LuckyArtwork } from "@/components/LuckyArtwork";
+import { GroupPaymentActivity } from "@/components/GroupPaymentActivity";
 
 function ClaimGroupLink({ legacy }: { legacy: boolean }) {
   const search = useSearchParams();
@@ -31,6 +32,9 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
   const validId = /^[1-9]\d{0,76}$/.test(rawId);
   const id = validId ? BigInt(rawId) : 0n;
   const correctNetwork = !network || network === String(monadChain.id);
+  const destination = network === "143"
+    ? { origin: "https://monlipay.xyz", label: "Monad mainnet" }
+    : network === "10143" ? { origin: "https://testnet.monlipay.xyz", label: "Monad testnet" } : null;
   const { address } = useAccount();
   const { openConnectModal } = useConnectModal();
   const tx = useLuckyTransaction();
@@ -139,7 +143,9 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
     unavailable =
       "This group payment link is incomplete. Ask the sender for the full link.";
   else if (!correctNetwork)
-    unavailable = `This link belongs to another network. Open it on the matching MonliPay site.`;
+    unavailable = destination
+      ? `This payment is on ${destination.label}. Open the link there to continue.`
+      : "This payment uses an unsupported network. Ask the sender for the correct link.";
   else if (!vault)
     unavailable = "This group payment link uses an unrecognized contract. Ask the sender for the correct link.";
   else if (packetQuery.isError)
@@ -158,6 +164,11 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
         <section className="mp-panel lucky-unavailable">
           <h1>Unable to open link</h1>
           <p>{unavailable}</p>
+          {!correctNetwork && destination && validId && (
+            <a className="mp-button" href={`${destination.origin}/${legacy ? "lucky" : "group"}/claim?${search.toString()}`}>
+              Open on {destination.label}
+            </a>
+          )}
           {packetQuery.isError && (
             <button
               className="mp-button"
@@ -226,6 +237,8 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
                 <p>
                   {requested && timedOut && !ready
                     ? "Your draw could not finish in time. Unallocated funds can be returned to the sender."
+                    : p.closed || expired ? "New claims are closed. Contact the sender if you expected a payment."
+                    : p.requested >= p.slots ? "Every share has already been reserved."
                     : !accessReady ? "Checking who can claim…"
                       : openAccess
                         ? "Open to anyone. The first successful claims fill the available slots. One share per wallet."
@@ -269,8 +282,8 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
                 onClick={openConnectModal}
               >
                 {p.closed || expired || p.requested >= p.slots
-                  ? "Connect wallet to view details"
-                  : "Connect wallet to claim"}
+                  ? "Continue to view details"
+                  : "Continue to claim"}
               </button>
             ) : ready && !withdrawn ? (
               <button
@@ -442,6 +455,9 @@ function ClaimGroupLink({ legacy }: { legacy: boolean }) {
             )}
           </div>
         </section>
+      )}
+      {!unavailable && p && vault && now > 0 && (
+        <GroupPaymentActivity key={`${vault}:${id}`} id={id} vault={vault} decimals={decimals} symbol={symbol} refreshKey={tx.hash} />
       )}
       <p className="lucky-claim-footnote">
         A Group Payment Link from MonliPay. One share per wallet.

@@ -16,18 +16,18 @@ export function DemoVideo() {
         height="900"
         aria-label="MonliPay product demo with English narration and captions"
       >
-        <source src="/demo/monlipay-demo.mp4?v=group-voice-20261013" type="video/mp4" />
+        <source src="/demo/monlipay-demo.mp4?v=email-passkey-20261014" type="video/mp4" />
         <track
           kind="captions"
-          src="/demo/monlipay-en.vtt?v=group-voice-20261013"
+          src="/demo/monlipay-en.vtt?v=email-passkey-20261014"
           srcLang="en"
           label="English"
         />
         Your browser does not support embedded video.{" "}
-        <a href="/demo/monlipay-demo.mp4?v=group-voice-20261013">Download the demo</a>.
+        <a href="/demo/monlipay-demo.mp4?v=email-passkey-20261014">Download the demo</a>.
       </video>
       <div className="mp-demo-actions">
-        <a className="mp-text-link" href="/demo/monlipay-demo.mp4?v=group-voice-20261013" download>
+        <a className="mp-text-link" href="/demo/monlipay-demo.mp4?v=email-passkey-20261014" download>
           Download video
         </a>
       </div>
@@ -59,6 +59,14 @@ export function DemoVideo() {
             Private Payment is available on Monad mainnet. A passkey protects
             saved payment records. AnomaPay shields transfers inside its pool;
             deposits and withdrawals remain public.
+          </li>
+          <li>
+            Recipients can also sign in by email and confirm a payment from their
+            MonliPay wallet. Payment activity shows each claim and its receipt.
+          </li>
+          <li>
+            Unlock saved Payment Links with a passkey. Refreshing locks them
+            again. Email login alone cannot decrypt them.
           </li>
         </ol>
       </details>

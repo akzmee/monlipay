@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@/components/WalletEntryContext";
 import { formatUnits } from "viem";
 import { LuckyArtwork } from "./LuckyArtwork";
 import { PrivatePrivacyNote } from "./PrivatePaymentWorkspace";

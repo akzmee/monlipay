@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { zeroAddress } from "viem";
 import GroupPaymentClaim from "@/components/GroupPaymentClaim";
+// Activity transport is covered separately; these cases exercise settlement actions.
+vi.mock("@/components/GroupPaymentActivity", () => ({ GroupPaymentActivity: () => null }));
 const state=vi.hoisted(()=>({
   equal:"0x1111111111111111111111111111111111111111",random:"0x2222222222222222222222222222222222222222",wallet:"0x3333333333333333333333333333333333333333",
   mode:"equal",eligible:true,open:true,claimed:false,count:3,write:vi.fn(),read:vi.fn(),queries:vi.fn(),refetch:vi.fn(),
