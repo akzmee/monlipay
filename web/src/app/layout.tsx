@@ -22,7 +22,7 @@ const displayFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MonliPay — Send tokens with a link",
+  title: "MonliPay | Send tokens with a link",
   description:
     "Create a payment link and send MON or tokens through any chat. Send to one person, or choose a Lucky Link to share with a group on Monad.",
 };

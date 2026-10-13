@@ -123,7 +123,7 @@ components:
 
 **Creative North Star: "Metropolis: ink, lilac, prismatic geometry"**
 
-MonliPay carries the user-selected Monad Metropolis visual world into a calm payment interface. Near-neutral ink, angular display lettering, a restrained square grid, and an original faceted envelope give the system its identity. Lilac connects the illustration, emphasis, and primary actions; white and muted lavender text keep the hierarchy clear.
+MonliPay carries the user-selected Monad Metropolis visual world into a calm payment interface. Near-neutral ink, angular display lettering, a restrained square grid, an original folded-M app mark, and an original faceted envelope give the system its identity. Lilac connects the illustration, emphasis, and primary actions; white and muted lavender text keep the hierarchy clear.
 
 Large expressive typography belongs to the landing. Working screens use quieter Geist headings, ordinary form controls, generous insets, and thin dividers. The envelope supplies the playful material and the claim reveal; the surrounding interface stays legible and still. The same roles translate to cool paper and white panels in light mode.
 
@@ -157,7 +157,7 @@ The palette is a restrained violet family over near-neutral surfaces; the frontm
 - **Quiet Boundary** (`line-dark`, `line-light`): input outlines, panel edges, summary rules, and the grid.
 - **Notice Violet** (`notice-dark`, `notice-light`) and **Error Rose** (`error-dark`, `error-light`): readable status and error text, always accompanied by words.
 
-The SVG envelope owns its lavender facets, pink edge, and small green and pink shares. These are illustration materials, not extra action or form-status colors. Preserve the supplied Monad mark as an identity asset.
+The SVG envelope owns its lavender facets, pink edge, and small green and pink shares. The original MonliPay mark owns its three violet facets, with a lighter variant on the ink app-icon tile. These asset colors stay local to the artwork and do not extend the action or form-status palette. Preserve the supplied Monad mark for network and MON token identification.
 
 **The Theme Pair Rule.** Switch semantic roles together: ground, panel, field, boundary, ink, muted copy, action, and action-label contrast. Do not transplant a dark-mode action label into light mode.
 
@@ -224,11 +224,11 @@ Network labels are small outlined tags with muted text. Selected recipient tags 
 
 ### Cards / Containers
 
-Working panels are solid, outlined, and unshadowed. The frontmatter panel primitive applies to the form and contact surfaces. Summary and history items use horizontal rules and aligned text instead of separate floating cards. Claim panels contain an illustration compartment and a plain information compartment; the selected theme governs both.
+Working panels are solid, outlined, and unshadowed. The frontmatter panel primitive applies to the form and contact surfaces. The private passkey access panel uses the same panel inset, reducing to the existing panel-mobile inset at the compact breakpoint; its heading, explanation, actions, and help stay inside that boundary. Summary and history items use horizontal rules and aligned text instead of separate floating cards. Claim panels contain an illustration compartment and a plain information compartment; the selected theme governs both.
 
 ### Navigation
 
-The sticky header is compact (`64px`) with a thin bottom border. The MonliPay wordmark and Monad mark anchor the left; navigation occupies the center, wallet and theme controls the right. Desktop links use Geist (`0.875rem`, weight `500`), modest rounding, and a minimum target (`44px`). Active links use a violet tint and text, while inactive links remain muted and gain a tonal hover fill. The current utility-level violet values remain local to navigation rather than introducing a second palette for new surfaces.
+The sticky header is compact (`64px`) with a thin bottom border. The MonliPay wordmark and original folded-M mark (`30px`) anchor the left; navigation occupies the center, wallet and theme controls the right. The footer repeats the mark (`24px`) beside the product name. The shared `MonliPayLogo` renders `web/public/brand/monlipay-mark.svg` as a decorative image with empty alternative text because the adjacent wordmark names the home link. App icons use the same M identity on an ink tile. Monad marks identify the network or token, never the app. Desktop links use Geist (`0.875rem`, weight `500`), modest rounding, and a minimum target (`44px`). Active links use a violet tint and text, while inactive links remain muted and gain a tonal hover fill. The current utility-level violet values remain local to navigation rather than introducing a second palette for new surfaces.
 
 Mobile moves links into a vertical menu below the header, with larger text (`1rem`), wider padding, a close control, network selection, and theme selection. The wallet action stays visible. Preserve route indication, keyboard focus, and the shared SVG icon family.
 
@@ -238,7 +238,7 @@ Creation modes share one heading and a two-column picker capped at (`640px`). Ea
 
 ### Prismatic envelope
 
-Reuse the original `LuckyArtwork` SVG for the landing, preview, success, and claim states. Its facets, pale flap, small seal, floating shares, and quiet cross marks form one recognizable object. The user-approved landing motion adds a brief arrival: the title settles first (`560ms`), followed by the envelope (`760ms`) and its two shares (`720ms` and `800ms`), using `cubic-bezier(0.16, 1, 0.3, 1)`.
+Reuse the original `LuckyArtwork` SVG for the landing, preview, success, and claim states. Its facets, pale flap, small MonliPay M seal, floating shares, and quiet cross marks form one recognizable object. The user-approved landing motion adds a brief arrival: the title settles first (`560ms`), followed by the envelope (`760ms`) and its two shares (`720ms` and `800ms`), using `cubic-bezier(0.16, 1, 0.3, 1)`.
 
 During landing scroll, the envelope, shares, and grid move at different depths while text and actions stay on the page plane. Envelope travel is bounded (`110px` maximum; `30px` at widths up to `640px`). Fine mouse input adds bounded perspective; touch input does not tilt the artwork. Motion updates are event-driven, idle while the hero is offscreen or the document is hidden, and have no continuous animation loop. Reduced motion shows the static hero immediately, and its content and actions remain available without JavaScript.
 
@@ -248,12 +248,13 @@ The claim reveal remains an independent financial state change: when a claim bec
 
 ### Do:
 
-- **Do** preserve the MonliPay wordmark, supplied Monad mark, and shared original envelope.
+- **Do** preserve the MonliPay wordmark, original folded-M app mark, and shared original envelope with its M seal; reserve the supplied Monad mark for network and token meaning.
 - **Do** use paired theme roles so filled actions, fields, and explanatory text remain readable in both modes.
 - **Do** keep functional forms quiet and reserve large angular type for the landing.
 - **Do** retain the restrained square grid where the implemented reference world uses it.
 - **Do** stack narrow fields before their labels or selected values become clipped.
 - **Do** use shared SVG arrows, visible focus, and immediate final states under reduced motion.
+- **Do** use plain punctuation in visible web copy: periods, commas, colons, or a vertical bar in the page title.
 
 ### Don't:
 
@@ -262,3 +263,4 @@ The claim reveal remains an independent financial state change: when a claim bec
 - **Don't** substitute glyph arrows for the shared SVG icons.
 - **Don't** add overlapping artwork captions or let decoration cross readable content.
 - **Don't** promote unreviewed legacy utility styling into new-screen design rules.
+- **Don't** use em dashes in visible web copy.

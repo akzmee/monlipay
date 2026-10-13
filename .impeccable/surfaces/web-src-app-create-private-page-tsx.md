@@ -39,10 +39,18 @@ Describe shielded transfers inside AnomaPay's pool, not complete anonymity. Depo
 
 ## Evidence and system preservation
 
-Compared the workspace, claim, history, picker, passkey access, home, privacy and demo source with `web/src/app/lucky.css`, `DESIGN.md` and `.impeccable/design.json`. The private extension consumes existing theme roles, control shapes, typography and responsive composition; it adds no durable system token. Both design-system files are preserved.
+Compared the workspace, claim, history, picker, passkey access, home, privacy and demo source with `web/src/app/lucky.css`, `DESIGN.md` and `.impeccable/design.json`. The original private extension consumes existing theme roles, control shapes, typography and responsive composition; it added no durable system token and preserved both design-system files at that stage.
 
 The supplied finish review covered 17 private desktop/mobile captures at 1440 × 1000 and 390 × 844 viewports, including light themes, pending activity and locked history. Its single material finding was the failed-record status label; the final verdict accepted “Not completed” with Check activity retained. Documentation independently sampled `private-create-desktop.png`, `private-light-mobile.png`, `private-history-mobile.png` and `private-home-desktop.png` against the source. The final history fixture is unfunded.
 
 Funded evidence is separately recorded in `docs/anoma-private-payment-readiness.json`: the WMON pilot used an isolated harness sharing the web transaction library, not a funded browser recording. Read its deployment fields for release status; interface implementation and review alone do not establish deployment. Other supported tokens have not each received a funded end-to-end test.
 
 The incumbent design record's surface inventory predates passkey/private extensions; that coverage lag is recorded here without rewriting global rules. The detector's existing decorative-grid advisory concerns the explicitly requested Metropolis material and is retained. Neither is promoted into a new token or repaired outside this scope.
+
+## Passkey panel and brand refinement
+
+The private passkey access panel uses the existing panel inset (`28px`), reducing to the existing mobile panel inset (`20px`) at widths up to `640px`. The `mp-private-access` rule in `web/src/app/lucky.css` keeps the heading, explanation, button, and help away from the border. This reuses existing spacing tokens and adds no new layout scale.
+
+The shared header now carries the original folded-M MonliPay app mark; Monad assets remain network and token identifiers. Visible copy uses ordinary punctuation without em dashes. Passkey behavior, encryption, funding, fees, disclosures, and claim behavior are unchanged.
+
+The brand finish review is **ship**, with no material fixes. Its seven captures include the private gate at desktop and mobile sizes and a light mobile variant: `.impeccable/review/brand-private-desktop.png`, `brand-private-mobile.png`, and `brand-private-light-mobile.png`. `docs/brand-release.json` records the checked 28px/20px insets, mobile overflow check, and release status. The brand update reconciles identity prose and the envelope seal in the global design record while preserving all token primitives and extensions.

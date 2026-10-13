@@ -323,7 +323,7 @@ export function ShareLink({ url, txHash, onReset, backup }: ShareLinkProps) {
             </svg>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
-                Save this link now — it won't be shown again.
+                Save this link now. It won't be shown again.
               </p>
               <p className="text-xs text-amber-800 dark:text-amber-200">
                 The secret key inside the URL fragment is generated in your
@@ -344,7 +344,7 @@ export function ShareLink({ url, txHash, onReset, backup }: ShareLinkProps) {
               buttons in the QR tab.
             </li>
             <li>
-              Anyone with this link can claim the funds — share it only with the
+              Anyone with this link can claim the funds. Share it only with the
               intended recipient.
             </li>
           </ul>

@@ -11,7 +11,7 @@ export function DemoVideo() {
         controls
         playsInline
         preload="none"
-        poster="/demo/monlipay-poster.jpg"
+        poster="/demo/monlipay-poster.jpg?v=monlipay-mark"
         width="1440"
         height="900"
         aria-label="MonliPay product demo with English captions"
@@ -26,13 +26,7 @@ export function DemoVideo() {
         Your browser does not support embedded video.{" "}
         <a href="/demo/monlipay-demo.mp4">Download the demo</a>.
       </video>
-      <div className="mp-demo-notes">
-        <p>
-          Payment and Lucky Link transactions were recorded on Monad testnet
-          with automated wallet confirmations. Demo USD has no monetary value.
-          The closing privacy walkthrough shows the interface; its funded
-          mainnet pilot was verified separately.
-        </p>
+      <div className="mp-demo-actions">
         <a className="mp-text-link" href="/demo/monlipay-demo.mp4" download>
           Download video
         </a>
@@ -41,8 +35,7 @@ export function DemoVideo() {
         <summary>Read the walkthrough</summary>
         <ol>
           <li>
-            Create a payment link: choose a token, amount, and expiry. The demo
-            uses a six-decimal test token.
+            Create a payment link: choose a token, amount, and expiry.
           </li>
           <li>
             Fund the link in your wallet, then copy it into a private chat.
@@ -61,14 +54,12 @@ export function DemoVideo() {
             share after it settles. Draw fees and network gas are paid in MON.
           </li>
           <li>
-            My Links brings both link types together. Expired, unallocated funds
+            Find your links in My Links. Expired, unallocated funds
             can be refunded with wallet confirmation.
           </li>
           <li>
-            Open encrypted saved links with a passkey. Optional Private Payment
-            uses AnomaPay on mainnet. Its WMON pilot passed deposit, private
-            transfer, claim and sender recovery. Deposits and withdrawals remain
-            public, and the proving service can see transfer details.
+            Open saved links with your passkey. To send a private payment,
+            choose Private when creating a link on Monad mainnet.
           </li>
         </ol>
       </details>

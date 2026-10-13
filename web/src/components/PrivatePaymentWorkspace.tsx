@@ -101,7 +101,7 @@ export function PrivatePaymentWorkspace() {
           )}
         </section>
       ) : !ready ? (
-        <section className="mp-panel">
+        <section className="mp-panel mp-private-access">
           <h2>Protect your private payments</h2>
           <p className="mp-hint">
             Your passkey opens your encrypted payment records. Set it up before
@@ -571,7 +571,7 @@ function PrivateSession() {
                   className="mp-private-funding"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    void perform("Adding funds — check your wallet…", () =>
+                    void perform("Adding funds. Check your wallet…", () =>
                       fund(),
                     );
                   }}

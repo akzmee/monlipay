@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "./ConnectButton";
 import { ThemeToggle } from "./ThemeToggle";
-import { MonadLogo } from "./MonadLogo";
+import { MonliPayLogo } from "./MonliPayLogo";
 import { NetworkSwitcherModal } from "./NetworkSwitcherModal";
 import { isMainnet } from "@/config/chain";
 
@@ -50,7 +50,7 @@ export function NavBar() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
           {/* Left: Logo */}
           <Link href="/" className="flex min-h-11 items-center gap-2 shrink-0">
-            <MonadLogo variant="mark" size={28} priority />
+            <MonliPayLogo size={30} />
             <span className="text-lg font-bold tracking-tight">
               <span className="logo-mark">Monli</span>
               <span className="text-stone-900 dark:text-stone-100">Pay</span>

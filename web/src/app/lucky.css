@@ -1485,21 +1485,10 @@ select.mp-input {
   border: 1px solid var(--mp-line);
   border-radius: var(--mp-radius);
 }
-.mp-demo-notes {
+.mp-demo-actions {
   display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 24px;
+  justify-content: flex-end;
   margin-top: 16px;
-}
-.mp-demo-notes p {
-  color: var(--mp-muted);
-  font-size: 0.8125rem;
-  max-width: 68ch;
-  line-height: 1.65;
-}
-.mp-demo-notes a {
-  flex-shrink: 0;
 }
 .mp-demo-transcript {
   margin-top: 20px;
@@ -1537,13 +1526,17 @@ select.mp-input {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  .mp-demo-notes {
-    flex-direction: column;
-    gap: 8px;
-  }
 }
 
 /* Private payments extend the existing payment workspace. */
+.mp-private-access {
+  padding: 28px;
+}
+@media (max-width: 640px) {
+  .mp-private-access {
+    padding: 20px;
+  }
+}
 .mp-link-types:has(a:nth-child(3)) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   max-width: 840px;

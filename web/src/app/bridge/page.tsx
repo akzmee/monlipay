@@ -582,7 +582,7 @@ function RouteResults({
         </h3>
         {quoteExpired && (
           <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-            Quote expired — refresh
+            Quote expired. Refresh
           </span>
         )}
       </div>

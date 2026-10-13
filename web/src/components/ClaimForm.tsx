@@ -143,7 +143,7 @@ export function ClaimForm({
             />
           </svg>
           <span>
-            <strong>Gasless claim</strong> — gas fee sponsored by MonliPay.
+            <strong>Gasless claim.</strong> Gas fee sponsored by MonliPay.
           </span>
         </div>
       )}
@@ -185,7 +185,7 @@ export function ClaimForm({
 
       <p className="mp-hint text-center">
         {isGasSponsorAvailable
-          ? "No MON needed — the sponsor covers the gas fee."
+          ? "No MON needed. The sponsor covers the gas fee."
           : "Claiming requires a small gas fee in MON for the transaction."}
       </p>
 
@@ -235,7 +235,7 @@ export function ClaimForm({
             <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
               You are about to claim these funds to a wallet that is not the one
               you are currently connected with. Please verify the address
-              carefully — funds sent to the wrong address cannot be recovered.
+              carefully. Funds sent to the wrong address cannot be recovered.
             </p>
             <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800">
               <div className="text-xs uppercase tracking-wide text-stone-500">

@@ -3,6 +3,7 @@ import { ArrowIcon } from "@/components/ArrowIcon";
 import { LuckyArtwork } from "@/components/LuckyArtwork";
 import { DemoVideo } from "@/components/DemoVideo";
 import { HeroMotion } from "@/components/HeroMotion";
+import { MonliPayLogo } from "@/components/MonliPayLogo";
 
 export default function HomePage() {
   return (
@@ -139,7 +140,7 @@ export default function HomePage() {
         </p>
       </section>
       <footer className="mp-home-footer">
-        <Link href="/">MonliPay</Link>
+        <Link href="/" className="gap-2"><MonliPayLogo size={24} />MonliPay</Link>
         <span>Tokens to go. Just share the link.</span>
         <Link href="/privacy">Privacy</Link>
         <Link href="/bridge">

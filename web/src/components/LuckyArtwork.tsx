@@ -58,7 +58,7 @@ export function LuckyArtwork({ open = false }: { open?: boolean }) {
         />
         <g transform="translate(154 145) rotate(-10)">
           <rect width="28" height="28" rx="5" fill="#332169" />
-          <path d="m14 6 8 8-8 8-8-8Z" stroke="#d8ffac" strokeWidth="2" />
+          <path d="M5 21V7l9 9 9-9v14h-4v-5l-5 5-5-5v5H5Z" fill="#d8ffac" />
         </g>
       </g>
       <g className="lucky-art-share">

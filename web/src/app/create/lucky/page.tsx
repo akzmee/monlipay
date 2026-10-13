@@ -353,7 +353,7 @@ export default function LuckyPage() {
               </div>
               <div>
                 <dt>Recipient slots</dt>
-                <dd>{Number.isFinite(slots) ? slots : "—"}</dd>
+                <dd>{Number.isFinite(slots) ? slots : "Not set"}</dd>
               </div>
               <div>
                 <dt>Distribution</dt>

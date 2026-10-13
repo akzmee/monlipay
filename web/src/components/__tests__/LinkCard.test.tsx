@@ -90,9 +90,9 @@ describe("LinkCard", () => {
     expect(screen.getByText("Claimed")).toBeInTheDocument();
   });
 
-  it("should show 'Expired — refundable' status for expired unclaimed links", () => {
+  it("should show 'Expired, refundable' status for expired unclaimed links", () => {
     renderLinkCard({ isExpired: true, isClaimed: false });
-    expect(screen.getByText("Expired — refundable")).toBeInTheDocument();
+    expect(screen.getByText("Expired, refundable")).toBeInTheDocument();
   });
 
   it("should not show refund button when canRefund is false", () => {

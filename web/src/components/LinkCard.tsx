@@ -43,7 +43,7 @@ export function LinkCard({
   const status: { label: string; color: string } = isClaimed
     ? { label: "Claimed", color: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400" }
     : isExpired
-      ? { label: "Expired — refundable", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" }
+      ? { label: "Expired, refundable", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" }
       : { label: "Active", color: "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300" };
 
   const canShare = !isClaimed && shareableUrl;
@@ -89,7 +89,7 @@ export function LinkCard({
           </div>
           {autoRefundFailed && (
             <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">
-              ⚠ Auto-refund skipped for this link — try a manual refund below.
+              Auto-refund skipped for this link. Try a manual refund below.
             </p>
           )}
 

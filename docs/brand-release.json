@@ -1,0 +1,35 @@
+{
+  "status": "Reviewed and built; deployment pending",
+  "scope": "Original MonliPay app mark and icons, private passkey panel padding, demo copy cleanup and removal of visible em dashes. No financial or encryption logic changes.",
+  "checks": {
+    "componentTests": {
+      "passed": 75,
+      "files": 3
+    },
+    "builds": {
+      "mainnet": "pass",
+      "testnet": "pass"
+    },
+    "privatePanelPadding": {
+      "desktop": "28px",
+      "mobile": "20px"
+    },
+    "mobileHorizontalOverflow": false,
+    "productionTSXEmDashLiterals": 0,
+    "demoInternalParagraphRemoved": true,
+    "lint": "No new findings. Existing 9 errors and 2 warnings in Bridge, LinkCard and ShareLink match HEAD exactly."
+  },
+  "sourceArchive": "https://monlipay.xyz/submission/monlipay-metropolis-source-brand-20261013.zip",
+  "limitations": [
+    "Chromium desktop and mobile emulation, not physical-device certification.",
+    "The historical demo video is unchanged; its poster uses the new MonliPay mark.",
+    "Private Payment remains mainnet beta. Existing funded validation covers WMON. No new funded transaction was run for this visual release."
+  ],
+  "portalSubmitted": false,
+  "review": {
+    "disposition": "ship",
+    "materialFixes": 0,
+    "captures": 7,
+    "scope": "Private panel spacing, original app mark, demo copy and visible punctuation at 1440px/390px, including both themes."
+  }
+}

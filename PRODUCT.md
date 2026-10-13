@@ -33,12 +33,14 @@ MonliPay is a payment-link product: create a link and easily send MON or tokens.
 
 ## Brand Commitments
 
-The user requested consistent design, no generic AI styling, the Impeccable skill, and the Monad Metropolis page as the visual reference. Preserve MonliPay's name and Monad assets. The feature must have an internationally understandable name, not THR. Lucky Link is the working feature name.
+The user requested consistent design, no generic AI styling, the Impeccable skill, and the Monad Metropolis page as the visual reference. Preserve MonliPay's name and its original folded-M app mark. Pair that mark with the MonliPay wordmark in app navigation and the footer; use the M alone in app icons. Use the supplied Monad assets only to identify the network or MON token. The shared envelope carries a MonliPay M seal. The existing palette, typography, and Metropolis geometry remain the visual system.
+
+Visible web copy uses plain punctuation without em dashes. Keep demo instructions concise and focused on the payment task. Validation details belong in evidence records; financial and privacy limits remain in the relevant creation, claim, and privacy surfaces. The feature must have an internationally understandable name, not THR. Lucky Link is the working feature name.
 
 ## Evidence on Hand
 
-Existing code and assets in web/src and web/public/monad. Existing project predates Metropolis; additions must be identified separately in submission materials. Visual reference: https://monad.xyz/developers/hackathons/metropolis.
+Existing code and assets in web/src, web/public/brand, and web/public/monad. `docs/brand-asset-provenance.json` records the original MonliPay vectors and browser-derived app icons and demo poster. Existing project predates Metropolis; additions must be identified separately in submission materials. Visual reference: https://monad.xyz/developers/hackathons/metropolis.
 
 `docs/anoma-private-payment-readiness.json` records a funded Monad mainnet WMON pilot through an isolated harness using the same transaction library as the web app: deposit, separate private bearer transfer, claim, sender remainder withdrawal and unwrap passed. It is not a funded browser recording; other supported assets have not each received a funded end-to-end test. Its readiness and deployment fields are the release-status authority, separate from the implemented surface.
 
-The browser review captures under `.impeccable/review/private-*.png` cover the interface, including pending, locked and failed-record states. The failed history fixture is unfunded. The product demo distinguishes recorded Payment and Lucky transactions on Monad testnet from its private-payment interface walkthrough and separately verified funded mainnet pilot.
+The browser review captures under `.impeccable/review/private-*.png` cover the interface, including pending, locked and failed-record states. The failed history fixture is unfunded. The historical product demo records Payment and Lucky transactions on Monad testnet and a private-payment interface walkthrough. It is unchanged by the brand refinement; its new poster captures the current homepage. The separately verified funded mainnet pilot is documented above. The visible demo walkthrough gives product instructions without an internal validation paragraph.
