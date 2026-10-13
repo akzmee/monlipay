@@ -16,4 +16,6 @@ Testnet: https://testnet.monlipay.xyz/create/group
 Technical evidence: docs/group-payment-release.json
 Track gaps and deliverable status: docs/track-readiness.json
 
-Submission still needs the current public GitHub branch, a technical demo URL on YouTube/Loom/Vimeo and a recorded founder pitch. Do not present this draft as a completed video or claim user traction without evidence.
+Source: https://github.com/akzmee/monlipay/tree/metropolis
+
+Submission still needs a technical demo URL on YouTube/Loom/Vimeo and a recorded founder pitch. Do not present this draft as a completed video or claim user traction without evidence.

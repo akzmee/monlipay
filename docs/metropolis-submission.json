@@ -49,13 +49,13 @@
     "The 80-second transaction demo uses Monad testnet and an automated dedicated wallet; the added 24-second privacy interface walkthrough is explicitly separate from the real funded mainnet pilot.",
     "Group Payment pools have a fixed quota and expiry; they cannot be topped up or reused. The existing demo predates Equal Group Payment. No consumer user-testing results have been provided."
   ],
-  "submission_status": "Not submission-complete. Group Payment deployed on mainnet and testnet with encrypted records preserved. Current public GitHub branch, accepted-platform technical demo URL, founder pitch video and human user-testing evidence remain outstanding. Portal submission has not been sent.",
+  "submission_status": "Not submission-complete. Group Payment is deployed on mainnet and testnet, encrypted records are preserved, and current source is published on the public metropolis GitHub branch. Accepted-platform technical demo URL, founder pitch video and human user-testing evidence remain outstanding. Portal submission has not been sent.",
   "judge_quickstart": [
     "Watch https://monlipay.xyz/demo (1 minute 44 seconds).",
     "Open https://testnet.monlipay.xyz/create/group with a Monad testnet wallet. Both sender and recipient need faucet MON for gas. Select Equal amount for a fixed share, or Random amount for a Pyth draw. Anyone accepts first-come wallets; Selected wallets restricts eligibility.",
     "Open https://monlipay.xyz/my-links, verify your wallet and use a PRF-compatible passkey to open encrypted links. Contacts use the wallet signature session.",
     "Explore https://monlipay.xyz/create/private on mainnet. Connect a wallet and set up a passkey before funding. Review fees and privacy limits. No mainnet spend is necessary to review the already-published pilot receipts.",
-    "Source archive supplements the repository requirement: https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip. Current GitHub publication must still be completed."
+    "Review current source at https://github.com/akzmee/monlipay/tree/metropolis. The versioned archive at https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip is an additional snapshot."
   ],
   "sources": {
     "rules": "https://monad.xyz/developers/hackathons/metropolis",
@@ -71,12 +71,14 @@
   },
   "source_publication": {
     "branch": "metropolis",
-    "status": "Group source archive published and hash verified on both live sites. Current GitHub branch is not published; repository write access remains blocked.",
-    "instruction": "Publish current source to a public GitHub branch before submitting. The ZIP does not fulfill the required GitHub deliverable.",
+    "status": "Current implementation published on the public metropolis branch and accessible without authentication. Group source archive remains published and hash verified on both sites.",
+    "instruction": "Use the metropolis GitHub branch for the required public source deliverable. The versioned ZIP is supplementary.",
     "archive_url": "https://monlipay.xyz/submission/monlipay-metropolis-source-group-20261013.zip",
     "commit": "61f08a4967fd3a47f2286738babbb55a7898cd19",
     "archive_sha256": "970bf5f8a86f23ea57cea677a23e7dd56b984b5a64e7d677896677e72396eb29",
     "manifest_url": "https://monlipay.xyz/submission/source-manifest-group.json",
-    "verified_at": "2026-10-13T12:48:32.530997+00:00"
+    "verified_at": "2026-10-13T12:48:32.530997+00:00",
+    "github_url": "https://github.com/akzmee/monlipay/tree/metropolis",
+    "github_verified_at": "2026-10-13T12:56:06.471746+00:00"
   }
 }

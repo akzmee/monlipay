@@ -1,5 +1,5 @@
 {
-  "assessedAt": "2026-10-13T12:46:55.549398+00:00",
+  "assessedAt": "2026-10-13T12:56:06.471746+00:00",
   "criteriaSource": "Track description supplied by the user in this conversation",
   "track": "Consumer Products & Payments",
   "deadline": "2026-10-14T10:59:00+07:00",
@@ -80,9 +80,11 @@
     },
     {
       "item": "Public GitHub with current implementation",
-      "status": "Blocked by write access",
-      "evidence": "akzmee/monlipay is public, but metropolis branch returned 404. Git push --dry-run rejected authentication as dwlpra. Public ZIP is supplementary and does not replace the required GitHub repository.",
-      "action": "Repository owner or an account with write access must publish the current commit to a public branch."
+      "status": "Complete",
+      "evidence": "Current implementation pushed as akzmee to the public metropolis branch. Branch and current contract/frontend source are accessible without authentication.",
+      "action": "Use the metropolis branch URL in the submission. The source ZIP is supplementary.",
+      "url": "https://github.com/akzmee/monlipay/tree/metropolis",
+      "verifiedAt": "2026-10-13T12:56:06.471746+00:00"
     },
     {
       "item": "Technical demo <=3 min on YouTube/Loom/Vimeo",
@@ -110,7 +112,6 @@
   ],
   "priorityBeforeDeadline": [
     "Group frontend release complete; keep the verified working build stable while completing submission materials.",
-    "Publish the current source to the required public GitHub repository.",
     "Record and upload current technical demo and founder pitch to accepted platforms.",
     "Choose one initial segment and run five real user trials.",
     "Use observed results to state a concrete next-100-users plan."
