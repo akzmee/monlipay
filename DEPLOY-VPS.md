@@ -34,7 +34,7 @@ docker compose --env-file .env ps
 
 The current Compose ports bind to all host interfaces. Use firewall rules or adjust the bindings for your reverse proxy setup. Serve the apps over HTTPS; passkeys require a secure origin. Proxy examples are in `deploy/nginx/` and `deploy/caddy/`.
 
-The apps reach the indexer through `INDEXER_INTERNAL_URL=http://indexer:42069`. The indexer uses `PONDER_RPC_MAINNET` and `PONDER_RPC_TESTNET`, defaulting to the public Monad endpoints. Set a provider URL there to use Alchemy or another RPC. If a provider quota is exhausted, change the URL and recreate only the indexer; keep its data directory and schema.
+The apps reach the indexer through `INDEXER_INTERNAL_URL=http://indexer:42069`. Set `ALCHEMY_API_KEY` to prefer Alchemy for Monad mainnet and testnet indexing and bridge balance scans. Leave `PONDER_RPC_MAINNET` and `PONDER_RPC_TESTNET` blank for this default, or set explicit provider URLs to override it. Both indexer chains and bridge balance scans fall back to their public RPC when the preferred provider fails, with a four-second primary timeout and a one-minute cooldown before retrying it. Keys remain server-side. Changing a key requires recreating the affected containers, not rebuilding images; preserve the data directory and schema.
 
 For Nginx Proxy Manager, add this to the Advanced configuration of the two MonliPay hosts. It prevents Cloudflare from injecting analytics into payment pages and preserves API and asset cache headers. The `headers-more` module is included in Nginx Proxy Manager.
 

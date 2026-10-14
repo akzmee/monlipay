@@ -114,3 +114,38 @@ const PUBLIC_RPCS: Record<number, string> = {
   56: "https://bsc-dataseed.binance.org",
   43114: "https://api.avax.network/ext/bc/C/rpc",
 };
+
+const rpcRetryAfter = new Map<number, number>();
+
+/** Read a native balance without making provider availability a single point of failure. */
+export async function readNativeBalance(chainId: number, address: string): Promise<bigint> {
+  const primary = getAlchemyRpcUrl(chainId);
+  const publicRpc = PUBLIC_RPCS[chainId];
+  if (!primary || !publicRpc) throw new Error("Unsupported balance chain");
+
+  async function read(url: string, timeout: number): Promise<bigint> {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_getBalance", params: [address, "latest"] }),
+      signal: AbortSignal.timeout(timeout),
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Balance provider unavailable");
+    const data = await response.json() as { result?: unknown; error?: unknown };
+    if (data.error || typeof data.result !== "string" || !/^0x[0-9a-f]+$/i.test(data.result)) {
+      throw new Error("Invalid balance response");
+    }
+    return BigInt(data.result);
+  }
+
+  if (primary !== publicRpc && Date.now() >= (rpcRetryAfter.get(chainId) ?? 0)) {
+    try {
+      return await read(primary, 4_000);
+    } catch {
+      // Do not retry an exhausted provider for every balance scan.
+      rpcRetryAfter.set(chainId, Date.now() + 60_000);
+    }
+  }
+  return read(publicRpc, 10_000);
+}

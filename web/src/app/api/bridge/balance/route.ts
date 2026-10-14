@@ -23,9 +23,8 @@
  */
 
 import {
-  isAlchemyConfigured,
   SOURCE_CHAINS,
-  getAlchemyRpcUrl,
+  readNativeBalance,
 } from "@/lib/bridge-server";
 import {
   isValidAddress,
@@ -77,30 +76,7 @@ export async function GET(request: Request): Promise<Response> {
     // Use allSettled so one chain failing doesn't prevent showing other balances.
     const results = await Promise.allSettled(
       chainIds.map(async (chainId) => {
-        const rpcUrl = getAlchemyRpcUrl(chainId);
-        if (!rpcUrl) return [] as TokenBalance[];
-
-        // Fetch native balance
-        const nativeRes = await fetch(rpcUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: 1,
-            method: "eth_getBalance",
-            params: [address, "latest"],
-          }),
-        });
-
-        if (!nativeRes.ok) return [] as TokenBalance[];
-        const nativeData = (await nativeRes.json()) as {
-          result?: string;
-          error?: { message: string };
-        };
-
-        if (nativeData.error || !nativeData.result) return [] as TokenBalance[];
-
-        const nativeBalanceWei = BigInt(nativeData.result);
+        const nativeBalanceWei = await readNativeBalance(chainId, address);
         if (nativeBalanceWei === 0n) return [] as TokenBalance[];
 
         // Get native token symbol based on chain

@@ -1,6 +1,7 @@
 import { createConfig } from "ponder";
-import { http } from "viem";
+import type { Transport } from "viem";
 import { linkVaultAbi } from "./abis/LinkVaultAbi";
+import { rpcWithFallback } from "./rpc";
 
 const MAINNET_VAULT =
   process.env.PONDER_MONAD_MAINNET_VAULT ||
@@ -9,14 +10,20 @@ const TESTNET_VAULT =
   process.env.PONDER_MONAD_TESTNET_VAULT || "";
 
 const MAINNET_RPC =
-  process.env.PONDER_RPC_MAINNET || "https://rpc.monad.xyz";
+  process.env.PONDER_RPC_MAINNET ||
+  (process.env.ALCHEMY_API_KEY?.trim()
+    ? `https://monad-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY.trim()}`
+    : "https://rpc.monad.xyz");
 const TESTNET_RPC =
-  process.env.PONDER_RPC_TESTNET || "https://testnet-rpc.monad.xyz";
+  process.env.PONDER_RPC_TESTNET ||
+  (process.env.ALCHEMY_API_KEY?.trim()
+    ? `https://monad-testnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY.trim()}`
+    : "https://testnet-rpc.monad.xyz");
 
 function buildConfig() {
   const chains: Record<
     string,
-    { id: number; rpc: ReturnType<typeof http>; ethGetLogsBlockRange: number }
+    { id: number; rpc: Transport; ethGetLogsBlockRange: number }
   > = {};
   const chainAddresses: Record<
     string,
@@ -24,13 +31,13 @@ function buildConfig() {
   > = {};
 
   if (MAINNET_VAULT !== "") {
-    chains.monadMainnet = { id: 143, rpc: http(MAINNET_RPC), ethGetLogsBlockRange: 100 };
+    chains.monadMainnet = { id: 143, rpc: rpcWithFallback(MAINNET_RPC, "https://rpc.monad.xyz"), ethGetLogsBlockRange: 100 };
     chainAddresses.monadMainnet = {
       address: MAINNET_VAULT as `0x${string}`,
     };
   }
   if (TESTNET_VAULT !== "") {
-    chains.monadTestnet = { id: 10143, rpc: http(TESTNET_RPC), ethGetLogsBlockRange: 100 };
+    chains.monadTestnet = { id: 10143, rpc: rpcWithFallback(TESTNET_RPC, "https://testnet-rpc.monad.xyz"), ethGetLogsBlockRange: 100 };
     chainAddresses.monadTestnet = {
       address: TESTNET_VAULT as `0x${string}`,
     };

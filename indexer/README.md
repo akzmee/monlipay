@@ -27,11 +27,18 @@ Override via `.env.local` (gitignored):
 PONDER_MONAD_MAINNET_VAULT=0xf7B6aE721d5C851A2269A675Ee43D60c3E34F9c9
 PONDER_MONAD_TESTNET_VAULT=0xEB9a0BC1c7518F839B8F249E407A1AfC011E0aB3
 
-# Optional : override the public RPCs (recommended in prod for rate limits):
-PONDER_RPC_MAINNET=https://rpc.monad.xyz
-PONDER_RPC_TESTNET=https://testnet-rpc.monad.xyz
+# Optional server-only key for Alchemy RPC on both Monad networks:
+ALCHEMY_API_KEY=
+# An explicit RPC URL overrides the Alchemy preference.
+PONDER_RPC_MAINNET=
+PONDER_RPC_TESTNET=
 
 ```
+
+Each chain automatically falls back to its public Monad RPC if the preferred
+provider fails. Primary requests time out after four seconds; failed providers
+are skipped for one minute before retrying. Without a key or override, only the
+public RPC is used.
 
 ## HTTP API
 
