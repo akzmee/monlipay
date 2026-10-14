@@ -19,8 +19,8 @@ services:
       PORT: "42069"
       PONDER_MONAD_MAINNET_VAULT: ${MAINNET_LINK_VAULT_ADDRESS}
       PONDER_MONAD_TESTNET_VAULT: ${TESTNET_LINK_VAULT_ADDRESS:-}
-      PONDER_RPC_MAINNET: https://monad-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
-      PONDER_RPC_TESTNET: https://testnet-rpc.monad.xyz
+      PONDER_RPC_MAINNET: ${PONDER_RPC_MAINNET:-https://rpc.monad.xyz}
+      PONDER_RPC_TESTNET: ${PONDER_RPC_TESTNET:-https://testnet-rpc.monad.xyz}
     volumes:
       - ./indexer/.ponder:/app/.ponder
     healthcheck:

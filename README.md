@@ -40,7 +40,7 @@ Private Payment uses a separate bearer account inside AnomaPay. Anyone holding t
 - **Privy:** email onboarding creates a user-controlled Ethereum wallet. Its signer funds Payment Links and Group Payments, claims funds, and verifies access to saved records through wagmi. Transaction confirmations stay enabled; wallet export is available from the wallet menu.
 - **Mera:** its WebAuthn PRF SDK opens the encryption key for saved claim links and private AnomaPay account records. Existing passkeys retain their original PRF salt and encrypted data. Mera is used for record encryption, not the wallet account layer.
 - **Envio HyperSync:** the Group Payment claim page displays funding, allocation, settlement and refund events with amounts, timestamps and transaction receipts. Both Monad networks use a server-side authenticated query; claim secrets and contacts are excluded.
-- **Alchemy:** the Ponder indexer's mainnet RPC powers Payment Link history. Bridge balance scanning also uses Alchemy RPCs for supported networks.
+- **Alchemy:** supported for the Ponder indexer's mainnet RPC and bridge balance scanning. The current deployment uses public RPCs after its Alchemy quota was exhausted.
 
 Testnet transaction receipts for [Privy payments](contracts/deployments/10143/Privy.payment-smoke.json), [Group Payments](contracts/deployments/10143/Privy.group-smoke.json) and [an encrypted saved link](contracts/deployments/10143/Privy.saved-link-smoke.json) are included in the repository.
 
